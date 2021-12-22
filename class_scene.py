@@ -1,7 +1,7 @@
-from os import path
 import sys
 
 from class_player import Player
+from class_wall import Wall
 
 import pygame
 
@@ -16,14 +16,16 @@ class Scene:
         self.FPS = kwargs.get("FPS", 60)
         self.bg_color = kwargs.get("bg_color", (200, 200, 200))
 
-        self.screen = pygame.display.set_mode(self.size, pygame.SCALED | pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
         pygame.display.set_caption(kwargs.get("title", "New game"))
         self.clock = pygame.time.Clock()
         self.game_run = True
 
         # Игровые объекты
         self.groups_data = {
-            "all_sprites": pygame.sprite.Group()
+            "all_sprites": pygame.sprite.Group(),
+            "players": pygame.sprite.Group(),
+            "walls": pygame.sprite.Group()
         }
 
     # Добавление новой группы спрайтов
@@ -58,5 +60,9 @@ class Scene:
 
 if __name__ == '__main__':
     prototype = Scene(title="Prototype")
-    player = Player(prototype.groups_data["all_sprites"], x=620, y=740)
+    player = Player(prototype.groups_data, x=620, y=340, gravity=6, jump_force=15)
+    for i in range(10):
+        Wall(prototype.groups_data, x=350 + (32 * i), y=400)
+    for i in range(10):
+        Wall(prototype.groups_data, x=450 + (32 * i), y=550)
     prototype.play()

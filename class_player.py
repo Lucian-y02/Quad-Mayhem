@@ -19,15 +19,17 @@ class Player(pygame.sprite.Sprite):
         self.resistance = 0  # Значение реакции опоры
         self.jump_force_count = kwargs.get("jump_force", 10)  # Начальное значение jump_force
         self.jump_force = 0  # Сила прыжка
+        self.save_place = (self.rect.x, self.rect.y)
 
     def update(self):
         key = pygame.key.get_pressed()
         move_x = 0
 
         # Проверка на столкновение
-        if pygame.sprite.spritecollideany(self, self.groups["walls"]):
-            self.resistance = -self.gravity
-        elif not pygame.sprite.spritecollideany(self, self.groups["walls"]):
+        for wall in self.groups["walls"]:
+            if self.rect.colliderect(wall):
+                self.resistance = -self.gravity
+        if not pygame.sprite.spritecollideany(self, self.groups["walls"]):
             self.resistance = 0
 
         # Прыжок
@@ -38,8 +40,11 @@ class Player(pygame.sprite.Sprite):
         # Передвижение вправо и влево
         if key[pygame.K_a]:
             move_x -= self.speed
+            self.save_place = (self.rect.x, self.rect.y)
         if key[pygame.K_d]:
             move_x += self.speed
+            self.save_place = (self.rect.x, self.rect.y)
 
         # Смещение персонажа
-        self.rect.move_ip(move_x, self.resistance + self.gravity - (self.jump_force ** 1.2))
+        self.rect.move_ip(move_x,
+                          self.resistance + self.gravity - (self.jump_force ** 1.2))

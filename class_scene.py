@@ -23,7 +23,6 @@ class Scene:
 
         # Игровые объекты
         self.groups_data = {
-            "all_sprites": pygame.sprite.Group(),
             "players": pygame.sprite.Group(),
             "walls": pygame.sprite.Group()
         }
@@ -60,9 +59,11 @@ class Scene:
 
 if __name__ == '__main__':
     prototype = Scene(title="Prototype")
-    player = Player(prototype.groups_data, x=620, y=340, gravity=6, jump_force=15)
+    player = Player(prototype.groups_data, x=620, y=340, gravity=11, jump_force=19)
     for i in range(10):
-        Wall(prototype.groups_data, x=350 + (32 * i), y=400)
+        Wall(prototype.groups_data["walls"], x=350 + (32 * i), y=400)
     for i in range(10):
-        Wall(prototype.groups_data, x=450 + (32 * i), y=550)
+        Wall(prototype.groups_data["walls"], x=450 + (32 * i), y=550)
+    for i in range(4):
+        Wall(prototype.groups_data["walls"], x=350, y=400 - 32 * (i + 1))
     prototype.play()

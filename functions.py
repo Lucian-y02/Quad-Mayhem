@@ -9,6 +9,6 @@ def create_field(level, groups_data):
             if sim == '#':
                 Wall(groups_data, x=col * 32, y=row * 32)
             elif sim == '@':
-                players_coords[(Player(groups_data,
+                players_coords[(Player(groups_data,  # Создание экземпляра класса Player
                                        x=col * 32, y=row * 32))] = (col, row)
     return players_coords

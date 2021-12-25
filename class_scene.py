@@ -1,7 +1,5 @@
 import sys
 
-from class_wall import Wall
-from class_player import Player
 from functions import create_field, load_level
 
 import pygame

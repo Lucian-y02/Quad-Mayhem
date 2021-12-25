@@ -1,7 +1,8 @@
 import sys
 
-from class_player import Player
 from class_wall import Wall
+from class_player import Player
+from functions import create_field, load_level
 
 import pygame
 
@@ -59,11 +60,6 @@ class Scene:
 
 if __name__ == '__main__':
     prototype = Scene(title="Prototype")
-    player = Player(prototype.groups_data, x=620, y=340, gravity=11, jump_force=19)
-    for i in range(10):
-        Wall(prototype.groups_data["walls"], x=350 + (32 * i), y=400)
-    for i in range(10):
-        Wall(prototype.groups_data["walls"], x=450 + (32 * i), y=550)
-    for i in range(4):
-        Wall(prototype.groups_data["walls"], x=350, y=400 - 32 * (i + 1))
+    players = create_field(load_level('level.txt'), prototype.groups_data)
+    player = players[0]
     prototype.play()

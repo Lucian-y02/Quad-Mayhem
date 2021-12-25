@@ -3,23 +3,19 @@ from class_player import Player
 
 
 def create_field(level, groups_data):
-    players_coords = dict()  # Словарь вида "Игрок: его координаты"
-    for row, lab in enumerate(level):
-        for col, sim in enumerate(lab):
-            if sim == '#':
-                Wall(groups_data, x=col * 32, y=row * 32)
-            elif sim == '@':
-                players_coords[(Player(groups_data,  # Создание экземпляра класса Player
-                                       x=col * 32, y=row * 32))] = (col, row)
-    return players_coords
+    players = list()
+    for col, a in enumerate(level):
+        for row, b in enumerate(a):
+            if b == '@':
+                players.append(Player(groups_data, x=32 * row, y=32 * col, gravity=11, jump_force=19))
+            elif b == '#':
+                Wall(groups_data["walls"], x=row * 32, y=col * 32)
+    return players
 
 
 def load_level(filename):
     with open(filename, 'r', encoding='utf8') as f:
         level = f.readlines()
-        max_len = 0
         for i in range(len(level)):
             level[i] = level[i].strip('\n ')
-            max_len = max(max_len, len(level[i]))
-        level = map(lambda x: x.ljust(max_len, '.'), level)
     return level

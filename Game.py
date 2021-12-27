@@ -14,7 +14,6 @@ class Scene:
         self.size = self.width, self.height = kwargs.get("size", (1280, 800))
         self.FPS = kwargs.get("FPS", 60)
         self.bg_color = kwargs.get("bg_color", (200, 200, 200))
-
         self.screen = pygame.display.set_mode(self.size, pygame.FULLSCREEN)
         pygame.display.set_caption(kwargs.get("title", "New game"))
         self.clock = pygame.time.Clock()
@@ -23,7 +22,8 @@ class Scene:
         # Игровые объекты
         self.groups_data = {
             "players": pygame.sprite.Group(),
-            "walls": pygame.sprite.Group()
+            "walls": pygame.sprite.Group(),
+            "teleports": pygame.sprite.Group()
         }
 
     # Добавление новой группы спрайтов
@@ -41,9 +41,12 @@ class Scene:
     def render(self):
         self.screen.fill(self.bg_color)
         for key in self.groups_data:
-            self.groups_data[key].draw(self.screen)
+            if key != 'teleports':
+                self.groups_data[key].draw(self.screen)
+            elif player.draw_teleport:
+                self.groups_data['teleports'].draw(self.screen)
 
-    # Основная функция сцена
+    # Основная функция сцены
     def play(self):
         while self.game_run:
             self.check_event()

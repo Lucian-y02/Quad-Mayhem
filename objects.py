@@ -14,31 +14,29 @@ class Wall(pygame.sprite.Sprite):
 
 
 class Teleport1(pygame.sprite.Sprite):
-    def __init__(self, group, **kwargs):
-        super(Teleport1, self).__init__(group)
+    def __init__(self, **kwargs):
+        super(Teleport1, self).__init__()
         self.image = pygame.Surface(kwargs.get("teleport_size", (32, 64)))
         self.image.fill('blue')
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
         self.mask = pygame.mask.from_surface(self.image)
-
-    def update(self):
-        pass
+        self.teleports = list()
+        self.timer2 = self.timer = kwargs.get("cooldown", 120)
 
 
 class Teleport2(pygame.sprite.Sprite):
-    def __init__(self, group, **kwargs):
-        super(Teleport2, self).__init__(group)
+    def __init__(self, **kwargs):
+        super(Teleport2, self).__init__()
         self.image = pygame.Surface(kwargs.get("teleport_size", (32, 64)))
         self.image.fill('blue')
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
         self.mask = pygame.mask.from_surface(self.image)
-
-    def update(self):
-        pass
+        self.teleports = list()
+        self.timer2 = self.timer = kwargs.get("cooldown", 120)
 
 
 class Player(pygame.sprite.Sprite):
@@ -55,10 +53,9 @@ class Player(pygame.sprite.Sprite):
         self.jump_force_count = kwargs.get("jump_force", 10)  # Начальное значение jump_force
         self.jump_force = 0  # Сила прыжка
         self.save_place = (self.rect.x, self.rect.y)
-        self.teleport1_mask = None  # Телепорты и их маски
-        self.teleport1 = None
-        self.teleport2_mask = None
-        self.teleport2 = None
+        self.teleports1 = list()
+        self.teleports2 = list()
+        self.teleport1 = self.teleport2 = None
         self.mask = pygame.mask.from_surface(self.image)  # Маска игрока
         self.draw_teleport = True  # Рисовать ли телепорт
 
@@ -71,18 +68,25 @@ class Player(pygame.sprite.Sprite):
                 self.resistance = -self.gravity
         if not pygame.sprite.spritecollideany(self, self.groups["walls"]):
             self.resistance = 0
+
+        self.teleport1 = self.teleports1[0]
+        self.teleport2 = self.teleports2[0]
         if pygame.sprite.collide_mask(self, self.teleport1) and self.draw_teleport:
             self.rect.x = self.teleport2.rect.x  # Провернка на столкновение с
             self.rect.y = self.teleport2.rect.y  # телепортами
             self.draw_teleport = False
-            self.teleport1.kill()
-            self.teleport2.kill()
+            self.teleports1.remove(self.teleport1)
+            self.teleports1.append(self.teleport1)
+            self.teleports2.remove(self.teleport2)
+            self.teleports2.append(self.teleport2)
         elif pygame.sprite.collide_mask(self, self.teleport2) and self.draw_teleport:
             self.rect.x = self.teleport1.rect.x
             self.rect.y = self.teleport1.rect.y
             self.draw_teleport = False
-            self.teleport1.kill()
-            self.teleport2.kill()
+            self.teleports1.remove(self.teleport1)
+            self.teleports1.append(self.teleport1)
+            self.teleports2.remove(self.teleport2)
+            self.teleports2.append(self.teleport2)
         # Прыжок
         self.jump_force -= 1 if self.jump_force > 0 else 0
         if (key[pygame.K_w] or key[pygame.K_UP]) and self.resistance:

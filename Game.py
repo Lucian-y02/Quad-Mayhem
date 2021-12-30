@@ -23,7 +23,6 @@ class Scene:
         self.groups_data = {
             "players": pygame.sprite.Group(),
             "walls": pygame.sprite.Group(),
-            "teleports": pygame.sprite.Group()
         }
 
     # Добавление новой группы спрайтов
@@ -41,10 +40,16 @@ class Scene:
     def render(self):
         self.screen.fill(self.bg_color)
         for key in self.groups_data:
-            if key != 'teleports':
-                self.groups_data[key].draw(self.screen)
-            elif player.draw_teleport:
-                self.groups_data['teleports'].draw(self.screen)
+            self.groups_data[key].draw(self.screen)
+        if player.draw_teleport:
+            group = pygame.sprite.Group()
+            group.add(player.teleport1, player.teleport2)
+            group.draw(self.screen)
+        else:
+            player.teleport1.timer -= 1
+            if player.teleport1.timer == 0:
+                player.teleport1.timer = player.teleport1.timer2
+                player.draw_teleport = True
 
     # Основная функция сцены
     def play(self):

@@ -59,7 +59,7 @@ class Scene:
 
 if __name__ == '__main__':
     prototype = Scene(title="Prototype", FPS=60)
-    player = Player(prototype.groups_data, x=700, y=449)
+    player = Player(prototype.groups_data, x=800, y=400)
 
     for i in range(10):
         class_wall.WallHorizontal(x=550 + (i * 32), y=450,
@@ -81,13 +81,18 @@ if __name__ == '__main__':
     class_wall.WallVertical(x=1070, y=550,
                             group=prototype.groups_data["walls_vertical"])
 
-    class_wall.WallVertical(x=610, y=390,
-                            group=prototype.groups_data["walls_vertical"])
-    class_wall.WallVertical(x=642, y=390,
-                            group=prototype.groups_data["walls_vertical"])
-    class_wall.WallHorizontal(x=610, y=390,
-                              group=prototype.groups_data["walls_horizontal"])
-    class_wall.WallHorizontal(x=610, y=422,
-                              group=prototype.groups_data["walls_horizontal"])
+    # Как надо делать стены
+    class_wall.WallVertical(x=710, y=391,
+                            group=prototype.groups_data["walls_vertical"],
+                            size=(1, 31))
+    class_wall.WallVertical(x=742, y=391,
+                            group=prototype.groups_data["walls_vertical"],
+                            size=(1, 31))
+    class_wall.WallHorizontal(x=716, y=390,
+                              group=prototype.groups_data["walls_horizontal"],
+                              size=(21, 1))
+    class_wall.WallHorizontal(x=716, y=422,
+                              group=prototype.groups_data["walls_horizontal"],
+                              size=(21, 1))
 
     prototype.play()

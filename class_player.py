@@ -13,7 +13,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
 
-        self.speed = kwargs.get("speed", 5)  # Скорость персонажа
+        self.speed = kwargs.get("speed", 4)  # Скорость персонажа
         self.groups = groups  # Словарь групп српайтов
 
         # Столкновение
@@ -35,12 +35,26 @@ class Player(pygame.sprite.Sprite):
         # Столкновения
         for wall in self.groups["walls_horizontal"]:
             if self.rect.colliderect(wall):
-                if self.rect.y < wall.rect.y:
+                # Пол
+                if abs(self.rect.y + self.rect.height - wall.rect.y) < abs(self.rect.y -
+                                                                           wall.rect.y):
                     self.stay = True
                     self.gravity = 0
                     self.gravity_count = 0
                     self.rect.y = wall.rect.y - self.rect.height + 1
                     move_y = 0
+                # Потолок
+                elif self.rect.y - wall.rect.y < 0:
+                    self.gravity = self.gravity_force * 2
+        for wall in self.groups["walls_vertical"]:
+            if self.rect.colliderect(wall):
+                # Левая стена
+                if abs(self.rect.x - wall.rect.x) < abs(self.rect.x +
+                                                        self.rect.width - wall.rect.x):
+                    self.rect.x = wall.rect.x + self.speed
+                # Правая стена
+                else:
+                    self.rect.x = wall.rect.x - self.speed - self.rect.width + 1
 
         # Нажатия
         key = pygame.key.get_pressed()
@@ -60,3 +74,11 @@ class Player(pygame.sprite.Sprite):
         if self.gravity_count % 8 == 0:
             self.gravity += self.gravity_force if self.gravity <= self.gravity * 3 else 0
             self.gravity_count = 0
+
+    # Способность 1
+    def ability_1(self):
+        pass
+
+    # Способность 2
+    def ability_2(self):
+        pass

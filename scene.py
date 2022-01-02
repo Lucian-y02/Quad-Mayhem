@@ -22,6 +22,8 @@ class Scene:
         self.clock = pygame.time.Clock()
         self.game_run = True
 
+        self.grid = False
+
         # Игровые объекты
         self.groups_data = {
             "players": pygame.sprite.Group(),
@@ -40,11 +42,15 @@ class Scene:
             if event.type == pygame.QUIT or \
                     (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 self.game_run = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
+                self.grid = not self.grid
 
     def render(self):
         self.screen.fill(self.bg_color)
         for key in self.groups_data:
             self.groups_data[key].draw(self.screen)
+        if self.grid:
+            self.draw_grid()
 
     # Основная функция сцена
     def play(self):
@@ -56,6 +62,12 @@ class Scene:
             self.clock.tick(self.FPS)
         pygame.quit()
         sys.exit()
+
+    def draw_grid(self):
+        for j in range(self.width // 32 + 3):
+            pygame.draw.line(self.screen, (0, 0, 200), (32 * j, 0), (32 * j, self.height))
+        for g in range(self.height // 32):
+            pygame.draw.line(self.screen, (0, 0, 200), (0, 32 * g), (self.width + 64, 32 * g))
 
 
 if __name__ == '__main__':
@@ -97,5 +109,15 @@ if __name__ == '__main__':
                         size=(21, 1))
 
     box(prototype.groups_data, x=650, y=350)
+
+    platform_top_left(prototype.groups_data, x=32 * 10, y=32 * 8)
+    for i in range(11, 17):
+        floor(prototype.groups_data, x=32 * i, y=32 * 8)
+        ceiling(prototype.groups_data, x=32 * i, y=32 * 10)
+    platform_top_right(prototype.groups_data, x=32 * 17, y=32 * 8)
+    left_wall(prototype.groups_data, x=32 * 10, y=32 * 9)
+    right_wall(prototype.groups_data, x=32 * 17, y=32 * 9)
+    platform_bottom_left(prototype.groups_data, x=32 * 10, y=32 * 10)
+    platform_bottom_right(prototype.groups_data, x=32 * 17, y=32 * 10)
 
     prototype.play()

@@ -115,8 +115,8 @@ if __name__ == '__main__':
         floor(prototype.groups_data, x=32 * i, y=32 * 8)
         ceiling(prototype.groups_data, x=32 * i, y=32 * 10)
     platform_top_right(prototype.groups_data, x=32 * 17, y=32 * 8)
-    left_wall(prototype.groups_data, x=32 * 10, y=32 * 9)
-    right_wall(prototype.groups_data, x=32 * 17, y=32 * 9)
+    right_wall(prototype.groups_data, x=32 * 10, y=32 * 9)
+    left_wall(prototype.groups_data, x=32 * 17, y=32 * 9)
     platform_bottom_left(prototype.groups_data, x=32 * 10, y=32 * 10)
     platform_bottom_right(prototype.groups_data, x=32 * 17, y=32 * 10)
 

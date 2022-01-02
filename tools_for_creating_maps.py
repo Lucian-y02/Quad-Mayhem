@@ -49,11 +49,11 @@ def ceiling(groups, x=0, y=0):
     WallHorizontal(group=groups["walls_horizontal"], x=x, y=y + 31, size=(32, 1))
 
 
-# Левая стена
-def left_wall(groups, x=0, y=0):
+# Правая стена
+def right_wall(groups, x=0, y=0):
     WallVertical(group=groups["walls_vertical"], x=x, y=y, size=(1, 32))
 
 
-# Правая стена
-def right_wall(groups, x=0, y=0):
+# Левая стена
+def left_wall(groups, x=0, y=0):
     WallVertical(group=groups["walls_vertical"], x=x + 31, y=y, size=(1, 32))

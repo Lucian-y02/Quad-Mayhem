@@ -1,7 +1,8 @@
 import sys
 
-from class_player import Player
-import class_wall
+from tools_for_creating_maps import *
+from player import Player
+import wall
 
 import pygame
 
@@ -62,37 +63,39 @@ if __name__ == '__main__':
     player = Player(prototype.groups_data, x=800, y=400)
 
     for i in range(10):
-        class_wall.WallHorizontal(x=550 + (i * 32), y=450,
-                                  group=prototype.groups_data["walls_horizontal"])
-        class_wall.WallHorizontal(x=550 + (i * 32), y=482,
-                                  group=prototype.groups_data["walls_horizontal"])
-    class_wall.WallVertical(x=550, y=450,
-                            group=prototype.groups_data["walls_vertical"])
-    class_wall.WallVertical(x=870, y=450,
-                            group=prototype.groups_data["walls_vertical"])
+        wall.WallHorizontal(x=550 + (i * 32), y=450,
+                            group=prototype.groups_data["walls_horizontal"])
+        wall.WallHorizontal(x=550 + (i * 32), y=482,
+                            group=prototype.groups_data["walls_horizontal"])
+    wall.WallVertical(x=550, y=450,
+                      group=prototype.groups_data["walls_vertical"])
+    wall.WallVertical(x=870, y=450,
+                      group=prototype.groups_data["walls_vertical"])
 
     for i in range(10):
-        class_wall.WallHorizontal(x=750 + (i * 32), y=550,
-                                  group=prototype.groups_data["walls_horizontal"])
-        class_wall.WallHorizontal(x=750 + (i * 32), y=582,
-                                  group=prototype.groups_data["walls_horizontal"])
-    class_wall.WallVertical(x=750, y=550,
-                            group=prototype.groups_data["walls_vertical"])
-    class_wall.WallVertical(x=1070, y=550,
-                            group=prototype.groups_data["walls_vertical"])
+        wall.WallHorizontal(x=750 + (i * 32), y=550,
+                            group=prototype.groups_data["walls_horizontal"])
+        wall.WallHorizontal(x=750 + (i * 32), y=582,
+                            group=prototype.groups_data["walls_horizontal"])
+    wall.WallVertical(x=750, y=550,
+                      group=prototype.groups_data["walls_vertical"])
+    wall.WallVertical(x=1070, y=550,
+                      group=prototype.groups_data["walls_vertical"])
 
     # Как надо делать стены
-    class_wall.WallVertical(x=710, y=391,
-                            group=prototype.groups_data["walls_vertical"],
-                            size=(1, 31))
-    class_wall.WallVertical(x=742, y=391,
-                            group=prototype.groups_data["walls_vertical"],
-                            size=(1, 31))
-    class_wall.WallHorizontal(x=716, y=390,
-                              group=prototype.groups_data["walls_horizontal"],
-                              size=(21, 1))
-    class_wall.WallHorizontal(x=716, y=422,
-                              group=prototype.groups_data["walls_horizontal"],
-                              size=(21, 1))
+    wall.WallVertical(x=710, y=391,
+                      group=prototype.groups_data["walls_vertical"],
+                      size=(1, 31))
+    wall.WallVertical(x=742, y=391,
+                      group=prototype.groups_data["walls_vertical"],
+                      size=(1, 31))
+    wall.WallHorizontal(x=716, y=390,
+                        group=prototype.groups_data["walls_horizontal"],
+                        size=(21, 1))
+    wall.WallHorizontal(x=716, y=422,
+                        group=prototype.groups_data["walls_horizontal"],
+                        size=(21, 1))
+
+    box(prototype.groups_data, x=650, y=350)
 
     prototype.play()

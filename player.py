@@ -46,6 +46,7 @@ class Player(pygame.sprite.Sprite):
                 # Потолок
                 elif self.rect.y - wall.rect.y < 0:
                     self.gravity = self.gravity_force * 2
+                    self.rect.y = wall.rect.y + 1
         for wall in self.groups["walls_vertical"]:
             if self.rect.colliderect(wall):
                 # Левая стена
@@ -72,7 +73,7 @@ class Player(pygame.sprite.Sprite):
         # Влияния ускорения свободного падения
         self.gravity_count += 1
         if self.gravity_count % 8 == 0:
-            self.gravity += self.gravity_force if self.gravity <= self.gravity * 3 else 0
+            self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 3 else 0
             self.gravity_count = 0
 
     # Способность 1

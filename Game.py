@@ -18,6 +18,13 @@ class Scene:
         pygame.display.set_caption(kwargs.get("title", "New game"))
         self.clock = pygame.time.Clock()
         self.game_run = True
+        self.teleports1 = list()
+        self.teleports2 = list()
+        self.teleport1 = None
+        self.teleport2 = None
+        self.draw_teleport = True  # Рисовать ли телепорт
+        self.players = None
+        self.teleport_timer2 = self.teleport_timer = kwargs.get("teleport_cooldown", 120)
 
         # Игровые объекты
         self.groups_data = {
@@ -25,9 +32,33 @@ class Scene:
             "walls": pygame.sprite.Group(),
         }
 
+    def update(self):
+        self.teleport1 = self.teleports1[0]
+        self.teleport2 = self.teleports2[0]
+        for gamer in self.players:
+            if pygame.sprite.collide_mask(gamer, self.teleport1) and self.draw_teleport:
+                gamer.rect.x = self.teleport2.rect.x  # Провернка на столкновение с
+                gamer.rect.y = self.teleport2.rect.y  # телепортами
+                self.draw_teleport = False
+                self.teleports1.remove(self.teleport1)
+                self.teleports1.append(self.teleport1)
+                self.teleports2.remove(self.teleport2)
+                self.teleports2.append(self.teleport2)
+            elif pygame.sprite.collide_mask(gamer, self.teleport2) and self.draw_teleport:
+                gamer.rect.x = self.teleport1.rect.x
+                gamer.rect.y = self.teleport1.rect.y
+                self.draw_teleport = False
+                self.teleports1.remove(self.teleport1)
+                self.teleports1.append(self.teleport1)
+                self.teleports2.remove(self.teleport2)
+                self.teleports2.append(self.teleport2)
+
     # Добавление новой группы спрайтов
     def add_group(self, name):
         self.groups_data[name] = pygame.sprite.Group()
+
+    def add_players(self, players):
+        self.players = players
 
     def check_event(self):
         for key in self.groups_data:
@@ -41,22 +72,24 @@ class Scene:
         self.screen.fill(self.bg_color)
         for key in self.groups_data:
             self.groups_data[key].draw(self.screen)
-        if player.draw_teleport:
-            group = pygame.sprite.Group()
-            group.add(player.teleport1, player.teleport2)
-            group.draw(self.screen)
+        if self.draw_teleport:
+            if self.teleport1 and self.teleport2:
+                group = pygame.sprite.Group()
+                group.add(self.teleport1, self.teleport2)
+                group.draw(self.screen)
         else:
-            player.teleport1.timer -= 1
-            if player.teleport1.timer == 0:
-                player.teleport1.timer = player.teleport1.timer2
-                player.draw_teleport = True
+            self.teleport_timer -= 1
+            if self.teleport_timer == 0:
+                self.teleport_timer = self.teleport_timer2
+                self.draw_teleport = True
 
     # Основная функция сцены
     def play(self):
         while self.game_run:
             self.check_event()
             self.render()
-
+            if self.players:
+                self.update()
             pygame.display.flip()
             self.clock.tick(self.FPS)
 
@@ -66,6 +99,7 @@ class Scene:
 
 if __name__ == '__main__':
     prototype = Scene(title="Prototype")
-    players = create_field(load_level('level.txt'), prototype.groups_data)
-    player = players[0]
+    list_of_players = create_field(load_level('level.txt'), prototype)
+    player = list_of_players[0]
+    prototype.add_players(list_of_players)
     prototype.play()

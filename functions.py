@@ -1,16 +1,18 @@
-from objects import Wall, Teleport1, Teleport2, Player
+from objects import Wall, Teleport1, Teleport2, Player, Player2
 
 
-def create_field(level, groups_data):
+def create_field(level, prototype):
     players = list()
     teleports1 = list()
     teleports2 = list()
     for col, a in enumerate(level):
         for row, b in enumerate(a):
             if b == '@':
-                players.append(Player(groups_data, x=32 * row, y=32 * col, gravity=11, jump_force=19))
+                players.append(Player(prototype.groups_data, x=32 * row, y=32 * col, gravity=11, jump_force=19))
+            elif b == '!':
+                players.append(Player2(prototype.groups_data, x=32 * row, y=32 * col, gravity=11, jump_force=19))
             elif b == '#':
-                Wall(groups_data["walls"], x=row * 32, y=col * 32)
+                Wall(prototype.groups_data["walls"], x=row * 32, y=col * 32)
             elif b == 'a':
                 teleports1.append(Teleport1(x=row * 32, y=col * 32))
             elif b == 'A':
@@ -31,9 +33,8 @@ def create_field(level, groups_data):
                 teleports1.append(Teleport1(x=row * 32, y=col * 32))
             elif b == 'D':
                 teleports2.append(Teleport2(x=row * 32, y=col * 32))
-    for player in players:
-        player.teleports1 = teleports1
-        player.teleports2 = teleports2
+    prototype.teleports1 = teleports1
+    prototype.teleports2 = teleports2
     return players
 
 

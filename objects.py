@@ -53,11 +53,7 @@ class Player(pygame.sprite.Sprite):
         self.jump_force_count = kwargs.get("jump_force", 10)  # Начальное значение jump_force
         self.jump_force = 0  # Сила прыжка
         self.save_place = (self.rect.x, self.rect.y)
-        self.teleports1 = list()
-        self.teleports2 = list()
-        self.teleport1 = self.teleport2 = None
         self.mask = pygame.mask.from_surface(self.image)  # Маска игрока
-        self.draw_teleport = True  # Рисовать ли телепорт
 
     def update(self):
         key = pygame.key.get_pressed()
@@ -68,34 +64,56 @@ class Player(pygame.sprite.Sprite):
                 self.resistance = -self.gravity
         if not pygame.sprite.spritecollideany(self, self.groups["walls"]):
             self.resistance = 0
-
-        self.teleport1 = self.teleports1[0]
-        self.teleport2 = self.teleports2[0]
-        if pygame.sprite.collide_mask(self, self.teleport1) and self.draw_teleport:
-            self.rect.x = self.teleport2.rect.x  # Провернка на столкновение с
-            self.rect.y = self.teleport2.rect.y  # телепортами
-            self.draw_teleport = False
-            self.teleports1.remove(self.teleport1)
-            self.teleports1.append(self.teleport1)
-            self.teleports2.remove(self.teleport2)
-            self.teleports2.append(self.teleport2)
-        elif pygame.sprite.collide_mask(self, self.teleport2) and self.draw_teleport:
-            self.rect.x = self.teleport1.rect.x
-            self.rect.y = self.teleport1.rect.y
-            self.draw_teleport = False
-            self.teleports1.remove(self.teleport1)
-            self.teleports1.append(self.teleport1)
-            self.teleports2.remove(self.teleport2)
-            self.teleports2.append(self.teleport2)
         # Прыжок
         self.jump_force -= 1 if self.jump_force > 0 else 0
-        if (key[pygame.K_w] or key[pygame.K_UP]) and self.resistance:
+        if key[pygame.K_w] and self.resistance:
             self.jump_force = self.jump_force_count
         # Передвижение вправо и влево
-        if key[pygame.K_a] or key[pygame.K_LEFT]:
+        if key[pygame.K_a]:
             move_x -= self.speed
             self.save_place = (self.rect.x, self.rect.y)
-        if key[pygame.K_d] or key[pygame.K_RIGHT]:
+        if key[pygame.K_d]:
+            move_x += self.speed
+            self.save_place = (self.rect.x, self.rect.y)
+        # Смещение персонажа
+        self.rect.move_ip(move_x,
+                          self.resistance + self.gravity - (self.jump_force ** 1.2))
+
+
+class Player2(pygame.sprite.Sprite):
+    def __init__(self, groups: dict, **kwargs):
+        super(Player2, self).__init__(groups["players"])
+        self.image = pygame.Surface((40, 60))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)
+        self.groups = groups
+        self.speed = kwargs.get("speed", 5)  # Скорость персонажа
+        self.gravity = kwargs.get("gravity", 10)  # Значение гравитации
+        self.resistance = 0  # Значение реакции опоры
+        self.jump_force_count = kwargs.get("jump_force", 10)  # Начальное значение jump_force
+        self.jump_force = 0  # Сила прыжка
+        self.save_place = (self.rect.x, self.rect.y)
+        self.mask = pygame.mask.from_surface(self.image)  # Маска игрока
+
+    def update(self):
+        key = pygame.key.get_pressed()
+        move_x = 0
+        # Проверка на столкновение
+        for wall in self.groups["walls"]:
+            if self.rect.colliderect(wall):
+                self.resistance = -self.gravity
+        if not pygame.sprite.spritecollideany(self, self.groups["walls"]):
+            self.resistance = 0
+        # Прыжок
+        self.jump_force -= 1 if self.jump_force > 0 else 0
+        if key[pygame.K_UP] and self.resistance:
+            self.jump_force = self.jump_force_count
+        # Передвижение вправо и влево
+        if key[pygame.K_LEFT]:
+            move_x -= self.speed
+            self.save_place = (self.rect.x, self.rect.y)
+        if key[pygame.K_RIGHT]:
             move_x += self.speed
             self.save_place = (self.rect.x, self.rect.y)
         # Смещение персонажа

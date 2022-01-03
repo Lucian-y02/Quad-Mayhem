@@ -2,16 +2,25 @@ import pygame
 
 
 pygame.init()
+pygame.joystick.init()
 
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(Player, self).__init__(groups["players"])
         self.image = pygame.Surface((40, 60))
-        self.image.fill((50, 50, 50))
+        self.image.fill(kwargs.get("color", (50, 50, 50)))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
+
+        # Определение, чем урпавляется пересонаж
+        self.control_function = self.keyboard_1_check_pressing
+        if kwargs.get("controller", "keyboard_1") == "joystick":
+            self.joystick = pygame.joystick.Joystick(0)
+            self.control_function = self.joystick_check_pressing
+        elif kwargs.get("controller", "keyboard_1") == "keyboard_2":
+            self.control_function = self.keyboard_2_check_pressing
 
         self.speed = kwargs.get("speed", 4)  # Скорость персонажа
         self.groups = groups  # Словарь групп српайтов
@@ -58,6 +67,26 @@ class Player(pygame.sprite.Sprite):
                     self.rect.x = wall.rect.x - self.speed - self.rect.width + 1
 
         # Нажатия
+        move_x, move_y = self.control_function(move_x, move_y)
+
+        # Смещение персонажа
+        self.rect.move_ip(move_x, move_y)
+
+        # Влияния ускорения свободного падения
+        self.gravity_count += 1
+        if self.gravity_count % 8 == 0:
+            self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 2 else 0
+            self.gravity_count = 0
+
+    def joystick_check_pressing(self, move_x, move_y):
+        if abs(self.joystick.get_axis(0)) > 0.1:
+            move_x += self.speed * self.joystick.get_axis(0)
+        if self.joystick.get_button(0) and self.stay:
+            move_y -= self.jump_force
+            self.stay = False
+        return move_x, move_y
+
+    def keyboard_1_check_pressing(self, move_x, move_y):
         key = pygame.key.get_pressed()
         if key[pygame.K_a]:
             move_x -= self.speed
@@ -66,15 +95,18 @@ class Player(pygame.sprite.Sprite):
         if key[pygame.K_SPACE] and self.stay:
             move_y -= self.jump_force
             self.stay = False
+        return move_x, move_y
 
-        # Смещение персонажа
-        self.rect.move_ip(move_x, move_y)
-
-        # Влияния ускорения свободного падения
-        self.gravity_count += 1
-        if self.gravity_count % 8 == 0:
-            self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 3 else 0
-            self.gravity_count = 0
+    def keyboard_2_check_pressing(self, move_x, move_y):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_LEFT]:
+            move_x -= self.speed
+        if key[pygame.K_RIGHT]:
+            move_x += self.speed
+        if key[pygame.K_UP] and self.stay:
+            move_y -= self.jump_force
+            self.stay = False
+        return move_x, move_y
 
     # Способность 1
     def ability_1(self):

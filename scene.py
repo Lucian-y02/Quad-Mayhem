@@ -72,7 +72,9 @@ class Scene:
 
 if __name__ == '__main__':
     prototype = Scene(title="Prototype", FPS=60)
-    player = Player(prototype.groups_data, x=800, y=400)
+    player1 = Player(prototype.groups_data, x=800, y=400, controller="keyboard_2", color="green")
+    player2 = Player(prototype.groups_data, x=550, y=150, controller="joystick", color="blue")
+    player3 = Player(prototype.groups_data, x=200, y=100, controller="keyboard_1", color="red")
 
     for i in range(10):
         wall.WallHorizontal(x=550 + (i * 32), y=450,
@@ -119,5 +121,6 @@ if __name__ == '__main__':
     left_wall(prototype.groups_data, x=32 * 17, y=32 * 9)
     platform_bottom_left(prototype.groups_data, x=32 * 10, y=32 * 10)
     platform_bottom_right(prototype.groups_data, x=32 * 17, y=32 * 10)
+    box(prototype.groups_data, x=32 * 6, y=32 * 6)
 
     prototype.play()

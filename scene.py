@@ -22,7 +22,7 @@ class Scene:
         self.grid = False
 
         self.game_run = True
-        self.teleports1 = list()
+        self.teleports1 = list()  # Хранение данных о телепортах
         self.teleports2 = list()
         self.teleport1 = None
         self.teleport2 = None

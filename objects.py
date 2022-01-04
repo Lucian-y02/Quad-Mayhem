@@ -26,7 +26,6 @@ class WallVertical(Wall):
         self.image = pygame.Surface(kwargs.get("size", (1, 32)))
 
 
-
 class Teleport1(pygame.sprite.Sprite):
     def __init__(self, **kwargs):
         super(Teleport1, self).__init__()

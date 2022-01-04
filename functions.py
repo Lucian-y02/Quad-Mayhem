@@ -2,7 +2,7 @@ from objects import Player, Teleport1, Teleport2
 import tools_for_creating_maps as t
 
 
-def create_field(level, prototype):
+def create_field(level, prototype):  # Создание поля
     players = list()
     teleports1 = list()
     teleports2 = list()

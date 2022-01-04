@@ -76,41 +76,19 @@ if __name__ == '__main__':
     player2 = Player(prototype.groups_data, x=550, y=150, controller="joystick", color="blue")
     player3 = Player(prototype.groups_data, x=200, y=100, controller="keyboard_1", color="red")
 
-    for i in range(10):
-        wall.WallHorizontal(x=550 + (i * 32), y=450,
-                            group=prototype.groups_data["walls_horizontal"])
-        wall.WallHorizontal(x=550 + (i * 32), y=482,
-                            group=prototype.groups_data["walls_horizontal"])
-    wall.WallVertical(x=550, y=450,
-                      group=prototype.groups_data["walls_vertical"])
-    wall.WallVertical(x=870, y=450,
-                      group=prototype.groups_data["walls_vertical"])
+    platform_left(prototype.groups_data, x=32 * 17, y=32 * 15)
+    for i in range(18, 27):
+        platform(prototype.groups_data, x=32 * i, y=32 * 15)
+    platform_right(prototype.groups_data, x=32 * 27, y=32 * 15)
 
-    for i in range(10):
-        wall.WallHorizontal(x=750 + (i * 32), y=550,
-                            group=prototype.groups_data["walls_horizontal"])
-        wall.WallHorizontal(x=750 + (i * 32), y=582,
-                            group=prototype.groups_data["walls_horizontal"])
-    wall.WallVertical(x=750, y=550,
-                      group=prototype.groups_data["walls_vertical"])
-    wall.WallVertical(x=1070, y=550,
-                      group=prototype.groups_data["walls_vertical"])
+    box(prototype.groups_data, x=640, y=352)
+    box(prototype.groups_data, x=608, y=320)
+    box(prototype.groups_data, x=672, y=384)
 
-    # Как надо делать стены
-    wall.WallVertical(x=710, y=391,
-                      group=prototype.groups_data["walls_vertical"],
-                      size=(1, 31))
-    wall.WallVertical(x=742, y=391,
-                      group=prototype.groups_data["walls_vertical"],
-                      size=(1, 31))
-    wall.WallHorizontal(x=716, y=390,
-                        group=prototype.groups_data["walls_horizontal"],
-                        size=(21, 1))
-    wall.WallHorizontal(x=716, y=422,
-                        group=prototype.groups_data["walls_horizontal"],
-                        size=(21, 1))
-
-    box(prototype.groups_data, x=650, y=350)
+    platform_left(prototype.groups_data, x=32 * 20, y=32 * 19)
+    for i in range(21, 30):
+        platform(prototype.groups_data, x=32 * i, y=32 * 19)
+    platform_right(prototype.groups_data, x=32 * 30, y=32 * 19)
 
     platform_top_left(prototype.groups_data, x=32 * 10, y=32 * 8)
     for i in range(11, 17):

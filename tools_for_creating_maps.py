@@ -57,3 +57,52 @@ def right_wall(groups, x=0, y=0):
 # Левая стена
 def left_wall(groups, x=0, y=0):
     WallVertical(group=groups["walls_vertical"], x=x + 31, y=y, size=(1, 32))
+
+
+def floor_left(groups, x=0, y=0):
+    WallHorizontal(group=groups["walls_horizontal"], x=x + 4, y=y, size=(28, 1))
+
+
+def floor_right(groups, x=0, y=0):
+    WallHorizontal(group=groups["walls_horizontal"], x=x, y=y, size=(28, 1))
+
+
+def ceiling_left(groups, x=0, y=0):
+    WallHorizontal(group=groups["walls_horizontal"], x=x + 4, y=y + 31, size=(28, 1))
+
+
+def ceiling_right(groups, x=0, y=0):
+    WallHorizontal(group=groups["walls_horizontal"], x=x, y=y + 31, size=(28, 1))
+
+
+def left_wall_bottom(groups, x=0, y=0):
+    WallVertical(group=groups["walls_vertical"], x=x + 31, y=y, size=(1, 31))
+
+
+def left_wall_top(groups, x=0, y=0):
+    WallVertical(group=groups["walls_vertical"], x=x + 31, y=y + 1, size=(1, 31))
+
+
+def right_wall_bottom(groups, x=0, y=0):
+    WallVertical(group=groups["walls_vertical"], x=x, y=y, size=(1, 31))
+
+
+def right_wall_top(groups, x=0, y=0):
+    WallVertical(group=groups["walls_vertical"], x=x, y=y + 1, size=(1, 31))
+
+
+def platform(groups, x=0, y=0):
+    WallHorizontal(group=groups["walls_horizontal"], x=x, y=y, size=(32, 1))
+    WallHorizontal(group=groups["walls_horizontal"], x=x, y=y + 31, size=(32, 1))
+
+
+def platform_left(groups, x=0, y=0):
+    WallHorizontal(group=groups["walls_horizontal"], x=x + 4, y=y, size=(28, 1))
+    WallVertical(group=groups["walls_vertical"], x=x, y=y + 1, size=(1, 30))
+    WallHorizontal(group=groups["walls_horizontal"], x=x + 4, y=y + 31, size=(28, 1))
+
+
+def platform_right(groups, x=0, y=0):
+    WallHorizontal(group=groups["walls_horizontal"], x=x, y=y, size=(28, 1))
+    WallVertical(group=groups["walls_vertical"], x=x + 31, y=y + 1, size=(1, 30))
+    WallHorizontal(group=groups["walls_horizontal"], x=x, y=y + 31, size=(28, 1))

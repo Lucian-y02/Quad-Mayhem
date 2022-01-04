@@ -1,0 +1,68 @@
+from objects import Player, Teleport1, Teleport2
+import tools_for_creating_maps as t
+
+
+def create_field(level, prototype):
+    players = list()
+    teleports1 = list()
+    teleports2 = list()
+    for col, a in enumerate(level):
+        for row, b in enumerate(a):
+            if b == '@':
+                players.append(Player(prototype.groups_data, x=32 * row, y=32 * col,
+                                      gravity=11, jump_force=19, controller="keyboard_1", color="red"))
+            elif b == '!':
+                players.append(Player(prototype.groups_data, x=32 * row, y=32 * col,
+                                      gravity=11, jump_force=19, controller="joystick", color="blue"))
+            elif b == '$':
+                players.append(Player(prototype.groups_data, x=32 * row, y=32 * col,
+                                      gravity=11, jump_force=19, controller="keyboard_2", color="green"))
+            elif b == 'a':
+                teleports1.append(Teleport1(x=row * 32, y=col * 32))
+            elif b == 'A':
+                teleports2.append(Teleport2(x=row * 32, y=col * 32))
+            elif b == 'b':
+                teleports1.append(Teleport1(x=row * 32, y=col * 32))
+            elif b == 'B':
+                teleports2.append(Teleport2(x=row * 32, y=col * 32))
+            elif b == 'b':
+                teleports1.append(Teleport1(x=row * 32, y=col * 32))
+            elif b == 'B':
+                teleports2.append(Teleport2(x=row * 32, y=col * 32))
+            elif b == 'c':
+                teleports1.append(Teleport1(x=row * 32, y=col * 32))
+            elif b == 'C':
+                teleports2.append(Teleport2(x=row * 32, y=col * 32))
+            elif b == 'd':
+                teleports1.append(Teleport1(x=row * 32, y=col * 32))
+            elif b == 'D':
+                teleports2.append(Teleport2(x=row * 32, y=col * 32))
+            elif b == '1':
+                t.box(prototype.groups_data, x=row * 32, y=col * 32)
+            elif b == '2':
+                t.platform_top_left(prototype.groups_data, x=row * 32, y=col * 32)
+            elif b == '3':
+                t.platform_bottom_left(prototype.groups_data, x=row * 32, y=col * 32)
+            elif b == '4':
+                t.platform_top_right(prototype.groups_data, x=row * 32, y=col * 32)
+            elif b == '5':
+                t.platform_bottom_right(prototype.groups_data, x=row * 32, y=col * 32)
+            elif b == '6':
+                t.floor(prototype.groups_data, x=row * 32, y=col * 32)
+            elif b == '7':
+                t.ceiling(prototype.groups_data, x=row * 32, y=col * 32)
+            elif b == '8':
+                t.right_wall(prototype.groups_data, x=row * 32, y=col * 32)
+            elif b == '9':
+                t.left_wall(prototype.groups_data, x=row * 32, y=col * 32)
+    prototype.teleports1 = teleports1
+    prototype.teleports2 = teleports2
+    return players
+
+
+def load_level(filename):
+    with open(filename, 'r', encoding='utf8') as f:
+        level = f.readlines()
+        for i in range(len(level)):
+            level[i] = level[i].strip('\n ')
+    return level

@@ -5,6 +5,54 @@ pygame.init()
 pygame.joystick.init()
 
 
+class Wall(pygame.sprite.Sprite):
+    def __init__(self, group, **kwargs):
+        super(Wall, self).__init__(group)
+        self.image = pygame.Surface(kwargs.get("size", (32, 32)))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)
+
+
+class WallHorizontal(Wall):
+    def __init__(self, group, **kwargs):
+        super(WallHorizontal, self).__init__(group, **kwargs)
+        self.image = pygame.Surface(kwargs.get("size", (32, 1)))
+
+
+class WallVertical(Wall):
+    def __init__(self, group, **kwargs):
+        super(WallVertical, self).__init__(group, **kwargs)
+        self.image = pygame.Surface(kwargs.get("size", (1, 32)))
+
+
+
+class Teleport1(pygame.sprite.Sprite):
+    def __init__(self, **kwargs):
+        super(Teleport1, self).__init__()
+        self.image = pygame.Surface(kwargs.get("teleport_size", (32, 64)))
+        self.image.fill('blue')
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.teleports = list()
+        self.timer2 = self.timer = kwargs.get("cooldown", 120)
+
+
+class Teleport2(pygame.sprite.Sprite):
+    def __init__(self, **kwargs):
+        super(Teleport2, self).__init__()
+        self.image = pygame.Surface(kwargs.get("teleport_size", (32, 64)))
+        self.image.fill('blue')
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.teleports = list()
+        self.timer2 = self.timer = kwargs.get("cooldown", 120)
+
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(Player, self).__init__(groups["players"])

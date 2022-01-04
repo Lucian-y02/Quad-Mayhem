@@ -1,0 +1,14 @@
+! - игрок 1
+@ - игрок 2 (вальковский)
+$ - игрок 3
+a, b, c, d - Первые телепорты
+A, B, C, D - Вторые телепорты
+1 - box
+2 - platform_top_left
+3 - platform_bottom_left
+4 - platform_top_right
+5 - platform_bottom_right
+6 - floor
+7 - ceiling
+8 - right_wall
+9 - left_wall

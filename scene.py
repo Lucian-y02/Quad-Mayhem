@@ -1,9 +1,6 @@
 import sys
 
-from tools_for_creating_maps import *
-from player import Player
-import wall
-
+from functions import create_field, load_level
 import pygame
 
 
@@ -24,12 +21,24 @@ class Scene:
 
         self.grid = False
 
+        self.game_run = True
+        self.teleports1 = list()
+        self.teleports2 = list()
+        self.teleport1 = None
+        self.teleport2 = None
+        self.draw_teleport = True  # Рисовать ли телепорт
+        self.players = None
+
+        self.teleport_timer2 = self.teleport_timer = kwargs.get("teleport_cooldown", 120)
         # Игровые объекты
         self.groups_data = {
             "players": pygame.sprite.Group(),
             "walls_horizontal": pygame.sprite.Group(),
             "walls_vertical": pygame.sprite.Group()
         }
+
+    def add_players(self, players):
+        self.players = players
 
     # Добавление новой группы спрайтов
     def add_group(self, name):
@@ -45,10 +54,41 @@ class Scene:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
                 self.grid = not self.grid
 
+    def update(self):
+        self.teleport1 = self.teleports1[0]
+        self.teleport2 = self.teleports2[0]
+        for gamer in self.players:
+            if pygame.sprite.collide_mask(gamer, self.teleport1) and self.draw_teleport:
+                gamer.rect.x = self.teleport2.rect.x  # Провернка на столкновение с
+                gamer.rect.y = self.teleport2.rect.y  # телепортами
+                self.draw_teleport = False
+                self.teleports1.remove(self.teleport1)
+                self.teleports1.append(self.teleport1)
+                self.teleports2.remove(self.teleport2)
+                self.teleports2.append(self.teleport2)
+            elif pygame.sprite.collide_mask(gamer, self.teleport2) and self.draw_teleport:
+                gamer.rect.x = self.teleport1.rect.x
+                gamer.rect.y = self.teleport1.rect.y
+                self.draw_teleport = False
+                self.teleports1.remove(self.teleport1)
+                self.teleports1.append(self.teleport1)
+                self.teleports2.remove(self.teleport2)
+                self.teleports2.append(self.teleport2)
+
     def render(self):
         self.screen.fill(self.bg_color)
         for key in self.groups_data:
             self.groups_data[key].draw(self.screen)
+        if self.draw_teleport:
+            if self.teleport1 and self.teleport2:
+                group = pygame.sprite.Group()
+                group.add(self.teleport1, self.teleport2)
+                group.draw(self.screen)
+        else:
+            self.teleport_timer -= 1
+            if self.teleport_timer == 0:
+                self.teleport_timer = self.teleport_timer2
+                self.draw_teleport = True
         if self.grid:
             self.draw_grid()
 
@@ -57,7 +97,8 @@ class Scene:
         while self.game_run:
             self.check_event()
             self.render()
-
+            if self.teleports1 and self.teleports2:
+                self.update()
             pygame.display.flip()
             self.clock.tick(self.FPS)
         pygame.quit()
@@ -71,56 +112,7 @@ class Scene:
 
 
 if __name__ == '__main__':
-    prototype = Scene(title="Prototype", FPS=60)
-    player1 = Player(prototype.groups_data, x=800, y=400, controller="keyboard_2", color="green")
-    player2 = Player(prototype.groups_data, x=550, y=150, controller="joystick", color="blue")
-    player3 = Player(prototype.groups_data, x=200, y=100, controller="keyboard_1", color="red")
-
-    for i in range(10):
-        wall.WallHorizontal(x=550 + (i * 32), y=450,
-                            group=prototype.groups_data["walls_horizontal"])
-        wall.WallHorizontal(x=550 + (i * 32), y=482,
-                            group=prototype.groups_data["walls_horizontal"])
-    wall.WallVertical(x=550, y=450,
-                      group=prototype.groups_data["walls_vertical"])
-    wall.WallVertical(x=870, y=450,
-                      group=prototype.groups_data["walls_vertical"])
-
-    for i in range(10):
-        wall.WallHorizontal(x=750 + (i * 32), y=550,
-                            group=prototype.groups_data["walls_horizontal"])
-        wall.WallHorizontal(x=750 + (i * 32), y=582,
-                            group=prototype.groups_data["walls_horizontal"])
-    wall.WallVertical(x=750, y=550,
-                      group=prototype.groups_data["walls_vertical"])
-    wall.WallVertical(x=1070, y=550,
-                      group=prototype.groups_data["walls_vertical"])
-
-    # Как надо делать стены
-    wall.WallVertical(x=710, y=391,
-                      group=prototype.groups_data["walls_vertical"],
-                      size=(1, 31))
-    wall.WallVertical(x=742, y=391,
-                      group=prototype.groups_data["walls_vertical"],
-                      size=(1, 31))
-    wall.WallHorizontal(x=716, y=390,
-                        group=prototype.groups_data["walls_horizontal"],
-                        size=(21, 1))
-    wall.WallHorizontal(x=716, y=422,
-                        group=prototype.groups_data["walls_horizontal"],
-                        size=(21, 1))
-
-    box(prototype.groups_data, x=650, y=350)
-
-    platform_top_left(prototype.groups_data, x=32 * 10, y=32 * 8)
-    for i in range(11, 17):
-        floor(prototype.groups_data, x=32 * i, y=32 * 8)
-        ceiling(prototype.groups_data, x=32 * i, y=32 * 10)
-    platform_top_right(prototype.groups_data, x=32 * 17, y=32 * 8)
-    right_wall(prototype.groups_data, x=32 * 10, y=32 * 9)
-    left_wall(prototype.groups_data, x=32 * 17, y=32 * 9)
-    platform_bottom_left(prototype.groups_data, x=32 * 10, y=32 * 10)
-    platform_bottom_right(prototype.groups_data, x=32 * 17, y=32 * 10)
-    box(prototype.groups_data, x=32 * 6, y=32 * 6)
-
+    prototype = Scene(title="Prototype", FPS=60, size=(1920, 1080))
+    list_of_players = create_field(load_level('level.txt'), prototype)
+    prototype.add_players(list_of_players)
     prototype.play()

@@ -34,7 +34,7 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 0  # Скорость падения
 
         # Прыжок
-        self.jump_force = kwargs.get("jump", 12)
+        self.jump_force = kwargs.get("jump", 16)
 
     def update(self):
         # Показатели смещения
@@ -74,8 +74,8 @@ class Player(pygame.sprite.Sprite):
 
         # Влияния ускорения свободного падения
         self.gravity_count += 1
-        if self.gravity_count % 8 == 0:
-            self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 2 else 0
+        if self.gravity_count % 6 == 0:
+            self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 3 else 0
             self.gravity_count = 0
 
     def joystick_check_pressing(self, move_x, move_y):

@@ -2,7 +2,6 @@ import sys
 
 from tools_for_creating_maps import *
 from player import Player
-import wall
 
 import pygame
 

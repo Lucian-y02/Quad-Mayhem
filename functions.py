@@ -1,3 +1,5 @@
+from random import shuffle
+
 from objects import Player, Teleport1, Teleport2
 import tools_for_creating_maps as t
 
@@ -6,17 +8,17 @@ def create_field(level, prototype):  # Создание поля
     players = list()
     teleports1 = list()
     teleports2 = list()
+    spots = list()
     for col, a in enumerate(level):
         for row, b in enumerate(a):
             if b == '@':
-                players.append(Player(prototype.groups_data, x=32 * row, y=32 * col,
-                                      gravity=11, jump_force=19, controller="keyboard_1", color="red"))
-            elif b == '!':
-                players.append(Player(prototype.groups_data, x=32 * row, y=32 * col,
-                                      gravity=11, jump_force=19, controller="joystick", color="blue"))
-            elif b == '$':
-                players.append(Player(prototype.groups_data, x=32 * row, y=32 * col,
-                                      gravity=11, jump_force=19, controller="keyboard_2", color="green"))
+                spots.append((32 * row, 32 * col))
+            # elif b == '!':
+            #     players.append(Player(prototype.groups_data, x=32 * row, y=32 * col,
+            #                           gravity=11, jump_force=19, controller="joystick", color="blue"))
+            # elif b == '$':
+            #     players.append(Player(prototype.groups_data, x=32 * row, y=32 * col,
+            #                           gravity=11, jump_force=19, controller="keyboard_2", color="green"))
             elif b == 'a':
                 teleports1.append(Teleport1(x=row * 32, y=col * 32))
             elif b == 'A':
@@ -41,13 +43,13 @@ def create_field(level, prototype):  # Создание поля
                 t.box(prototype.groups_data, x=row * 32, y=col * 32)
             elif b == '2':
                 t.platform_top_left(prototype.groups_data, x=row * 32, y=col * 32)
-            elif b == '3':
-                t.platform_bottom_left(prototype.groups_data, x=row * 32, y=col * 32)
-            elif b == '4':
-                t.platform_top_right(prototype.groups_data, x=row * 32, y=col * 32)
             elif b == '5':
-                t.platform_bottom_right(prototype.groups_data, x=row * 32, y=col * 32)
+                t.platform_bottom_left(prototype.groups_data, x=row * 32, y=col * 32)
+            elif b == '3':
+                t.platform_top_right(prototype.groups_data, x=row * 32, y=col * 32)
             elif b == '6':
+                t.platform_bottom_right(prototype.groups_data, x=row * 32, y=col * 32)
+            elif b == '4':
                 t.floor(prototype.groups_data, x=row * 32, y=col * 32)
             elif b == '7':
                 t.ceiling(prototype.groups_data, x=row * 32, y=col * 32)
@@ -57,6 +59,11 @@ def create_field(level, prototype):  # Создание поля
                 t.left_wall(prototype.groups_data, x=row * 32, y=col * 32)
     prototype.teleports1 = teleports1
     prototype.teleports2 = teleports2
+    shuffle(spots)
+    players.append(Player(prototype.groups_data, x=spots[0][0], y=spots[0][1],
+                   gravity=11, jump_force=19, controller="keyboard_1", color="blue"))
+    players.append(Player(prototype.groups_data, x=spots[1][0], y=spots[1][1],
+                          gravity=11, jump_force=19, controller="keyboard_2", color="green"))
     return players
 
 

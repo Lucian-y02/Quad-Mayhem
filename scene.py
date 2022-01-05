@@ -37,7 +37,7 @@ class Scene:
             "walls_vertical": pygame.sprite.Group()
         }
 
-    def add_players(self, players):
+    def add_players(self, players):  # Создание списка игроков
         self.players = players
 
     # Добавление новой группы спрайтов

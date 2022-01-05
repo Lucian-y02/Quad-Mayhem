@@ -18,12 +18,14 @@ class WallHorizontal(Wall):
     def __init__(self, group, **kwargs):
         super(WallHorizontal, self).__init__(group, **kwargs)
         self.image = pygame.Surface(kwargs.get("size", (32, 1)))
+        self.mask = pygame.mask.from_surface(self.image)
 
 
 class WallVertical(Wall):
     def __init__(self, group, **kwargs):
         super(WallVertical, self).__init__(group, **kwargs)
         self.image = pygame.Surface(kwargs.get("size", (1, 32)))
+        self.mask = pygame.mask.from_surface(self.image)
 
 
 class Teleport1(pygame.sprite.Sprite):
@@ -90,7 +92,7 @@ class Player(pygame.sprite.Sprite):
 
         # Столкновения
         for wall in self.groups["walls_horizontal"]:
-            if self.rect.colliderect(wall):
+            if pygame.sprite.collide_mask(self, wall):
                 # Пол
                 if abs(self.rect.y + self.rect.height - wall.rect.y) < abs(self.rect.y -
                                                                            wall.rect.y):
@@ -104,7 +106,7 @@ class Player(pygame.sprite.Sprite):
                     self.gravity = self.gravity_force * 2
                     self.rect.y = wall.rect.y + 1
         for wall in self.groups["walls_vertical"]:
-            if self.rect.colliderect(wall):
+            if pygame.sprite.collide_mask(self, wall):
                 # Левая стена
                 if abs(self.rect.x - wall.rect.x) < abs(self.rect.x +
                                                         self.rect.width - wall.rect.x):
@@ -162,3 +164,40 @@ class Player(pygame.sprite.Sprite):
     # Способность 2
     def ability_2(self):
         pass
+
+
+class Barrel(pygame.sprite.Sprite):
+    def __init__(self, groups: dict, **kwargs):
+        super(Barrel, self).__init__(groups['barrels'])
+        self.size = kwargs.get("size", (16, 32))
+        self.image = pygame.Surface(self.size)
+        self.image.fill((150, 75, 0))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)
+
+
+class ToxicBarrel(pygame.sprite.Sprite):
+    def __init__(self, groups: dict, **kwargs):
+        super(ToxicBarrel, self).__init__(groups['toxic_barrels'])
+        self.size = kwargs.get("size", (16, 32))
+        self.image = pygame.Surface(self.size)
+        self.image.fill((0, 200, 0))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)
+
+
+class Gas(pygame.sprite.Sprite):
+    def __init__(self, group, mode, **kwargs):
+        super(Gas, self).__init__(group)
+        self.size = kwargs.get("size", (108, 108))
+        self.image = pygame.Surface(self.size)
+        if mode == 'normal':
+            self.image.fill((150, 75, 0))
+        elif mode == 'toxic':
+            self.image.fill((0, 200, 0))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)
+        self.duration = kwargs.get("duration", 120)

@@ -1,5 +1,6 @@
 import sys
 
+from objects import Gas
 from functions import create_field, load_level
 import pygame
 
@@ -18,6 +19,7 @@ class Scene:
         pygame.display.set_caption(kwargs.get("title", "New game"))
         self.clock = pygame.time.Clock()
         self.game_run = True
+        self.gas = list()
 
         self.grid = False
 
@@ -34,7 +36,10 @@ class Scene:
         self.groups_data = {
             "players": pygame.sprite.Group(),
             "walls_horizontal": pygame.sprite.Group(),
-            "walls_vertical": pygame.sprite.Group()
+            "walls_vertical": pygame.sprite.Group(),
+            "barrels": pygame.sprite.Group(),
+            "toxic_barrels": pygame.sprite.Group(),
+            "gas": pygame.sprite.Group()
         }
 
     def add_players(self, players):  # Создание списка игроков
@@ -74,6 +79,18 @@ class Scene:
                 self.teleports1.append(self.teleport1)
                 self.teleports2.remove(self.teleport2)
                 self.teleports2.append(self.teleport2)
+        for gamer in self.players:
+            for barrel in self.groups_data['barrels']:
+                if pygame.sprite.collide_mask(gamer, barrel):
+                    self.gas.append(Gas(self.groups_data['gas'], 'normal',
+                                        x=barrel.rect.x - 46, y=barrel.rect.y - 38, duration=30))
+                    barrel.kill()
+        for gamer in self.players:
+            for barrel in self.groups_data['toxic_barrels']:
+                if pygame.sprite.collide_mask(gamer, barrel):
+                    self.gas.append(Gas(self.groups_data['gas'], 'toxic',
+                                        x=barrel.rect.x - 46, y=barrel.rect.y - 38, duration=120))
+                    barrel.kill()
 
     def render(self):
         self.screen.fill(self.bg_color)
@@ -91,6 +108,10 @@ class Scene:
                 self.draw_teleport = True
         if self.grid:
             self.draw_grid()
+        for gas in self.gas:
+            gas.duration -= 1
+            if gas.duration == 0:
+                gas.kill()
 
     # Основная функция сцена
     def play(self):

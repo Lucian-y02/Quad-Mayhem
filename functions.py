@@ -1,6 +1,6 @@
 from random import shuffle
 
-from objects import Player, Teleport1, Teleport2
+from objects import Player, Teleport1, Teleport2, Barrel, ToxicBarrel
 import tools_for_creating_maps as t
 
 
@@ -57,6 +57,10 @@ def create_field(level, prototype):  # Создание поля
                 t.right_wall(prototype.groups_data, x=row * 32, y=col * 32)
             elif b == '9':
                 t.left_wall(prototype.groups_data, x=row * 32, y=col * 32)
+            elif b == '+':
+                Barrel(prototype.groups_data, x=row * 32, y=col * 32)
+            elif b == '-':
+                ToxicBarrel(prototype.groups_data, x=row * 32, y=col * 32)
     prototype.teleports1 = teleports1
     prototype.teleports2 = teleports2
     shuffle(spots)

@@ -28,7 +28,11 @@ class Player(pygame.sprite.Sprite):
         # Столкновение
         self.stay = False  # Определяет находится ли игрок на какой-либо опоре
 
-        # Падение
+        # Оружие
+        self.weapon = None  # Используемое игроком оружие
+        self.grab_timer = 0
+
+        # Гравитация
         self.gravity_force = kwargs.get("gravity", 8)  # Ускорение свободного падения
         self.gravity_count = 0
         self.gravity = 0  # Скорость падения
@@ -54,7 +58,8 @@ class Player(pygame.sprite.Sprite):
                     move_y = 0
                 # Потолок
                 elif self.rect.y - wall.rect.y < 0:
-                    self.gravity = self.gravity_force * 2
+                    self.gravity += self.gravity_force
+                    self.gravity_count = 1
                     self.rect.y = wall.rect.y + 1
         for wall in self.groups["walls_vertical"]:
             if self.rect.colliderect(wall):
@@ -66,7 +71,7 @@ class Player(pygame.sprite.Sprite):
                 else:
                     self.rect.x = wall.rect.x - self.speed - self.rect.width + 1
 
-        # Нажатия
+        # Отслеживание нажатий
         move_x, move_y = self.control_function(move_x, move_y)
 
         # Смещение персонажа
@@ -78,12 +83,25 @@ class Player(pygame.sprite.Sprite):
             self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 3 else 0
             self.gravity_count = 0
 
+        # Таймеры
+        self.grab_timer -= 1 if self.grab_timer > 0 else 0
+
     def joystick_check_pressing(self, move_x, move_y):
         if abs(self.joystick.get_axis(0)) > 0.1:
             move_x += self.speed * self.joystick.get_axis(0)
         if self.joystick.get_button(0) and self.stay:
             move_y -= self.jump_force
             self.stay = False
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and self.joystick.get_button(4) and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                self.grab_timer = 20
         return move_x, move_y
 
     def keyboard_1_check_pressing(self, move_x, move_y):
@@ -92,9 +110,19 @@ class Player(pygame.sprite.Sprite):
             move_x -= self.speed
         if key[pygame.K_d]:
             move_x += self.speed
-        if key[pygame.K_SPACE] and self.stay:
+        if key[pygame.K_w] and self.stay:
             move_y -= self.jump_force
             self.stay = False
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and key[pygame.K_c] and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                self.grab_timer = 20
         return move_x, move_y
 
     def keyboard_2_check_pressing(self, move_x, move_y):
@@ -106,6 +134,16 @@ class Player(pygame.sprite.Sprite):
         if key[pygame.K_UP] and self.stay:
             move_y -= self.jump_force
             self.stay = False
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and key[pygame.K_KP2] and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                self.grab_timer = 20
         return move_x, move_y
 
     # Способность 1

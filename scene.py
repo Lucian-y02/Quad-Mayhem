@@ -2,6 +2,7 @@ import sys
 
 from tools_for_creating_maps import *
 from player import Player
+from game_stuff import *
 
 import pygame
 
@@ -11,7 +12,6 @@ pygame.init()
 
 class Scene:
     def __init__(self, **kwargs):
-        # Входные параметры
         self.size = self.width, self.height = kwargs.get("size", (1280, 800))
         self.FPS = kwargs.get("FPS", 60)
         self.bg_color = kwargs.get("bg_color", (200, 200, 200))
@@ -27,7 +27,9 @@ class Scene:
         self.groups_data = {
             "players": pygame.sprite.Group(),
             "walls_horizontal": pygame.sprite.Group(),
-            "walls_vertical": pygame.sprite.Group()
+            "walls_vertical": pygame.sprite.Group(),
+            "weapons": pygame.sprite.Group(),
+            "bullets": pygame.sprite.Group()
         }
 
     # Добавление новой группы спрайтов
@@ -41,8 +43,13 @@ class Scene:
             if event.type == pygame.QUIT or \
                     (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 self.game_run = False
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
-                self.grid = not self.grid
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_g:
+                    self.grid = not self.grid
+                elif event.key == pygame.K_h:
+                    for weapon in self.groups_data["weapons"]:
+                        print(weapon.user)
+                    print()
 
     def render(self):
         self.screen.fill(self.bg_color)
@@ -99,5 +106,9 @@ if __name__ == '__main__':
     platform_bottom_left(prototype.groups_data, x=32 * 10, y=32 * 10)
     platform_bottom_right(prototype.groups_data, x=32 * 17, y=32 * 10)
     box(prototype.groups_data, x=32 * 6, y=32 * 6)
+
+    Weapon(prototype.groups_data, x=32 * 13, y=32 * 5)
+    Weapon(prototype.groups_data, x=32 * 18, y=32 * 5, size=(50, 10))
+    Weapon(prototype.groups_data, x=32 * 23, y=32 * 5)
 
     prototype.play()

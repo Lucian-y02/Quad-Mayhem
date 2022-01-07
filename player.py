@@ -13,6 +13,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
+        self.mirror = kwargs.get("mirror", False)
 
         # Определение, чем урпавляется пересонаж
         self.control_function = self.keyboard_1_check_pressing
@@ -71,8 +72,26 @@ class Player(pygame.sprite.Sprite):
                 else:
                     self.rect.x = wall.rect.x - self.speed - self.rect.width + 1
 
+        # Столкновение с пулями
+        if pygame.sprite.spritecollideany(self, self.groups["bullets"]):
+            try:
+                self.weapon.user = None
+            except AttributeError:
+                pass
+            self.kill()
+
         # Отслеживание нажатий
         move_x, move_y = self.control_function(move_x, move_y)
+
+        if move_x > 0:
+            self.mirror = False
+        elif move_x < 0:
+            self.mirror = True
+
+        try:
+            self.weapon.mirror = self.mirror
+        except AttributeError:
+            pass
 
         # Смещение персонажа
         self.rect.move_ip(move_x, move_y)
@@ -92,6 +111,8 @@ class Player(pygame.sprite.Sprite):
         if self.joystick.get_button(0) and self.stay:
             move_y -= self.jump_force
             self.stay = False
+        if self.joystick.get_button(5) and self.weapon:
+            self.weapon.shot()
         for gun in self.groups["weapons"]:
             if (self.rect.colliderect(gun.rect) and self.joystick.get_button(4) and
                     not gun.user and self.grab_timer == 0):
@@ -113,6 +134,8 @@ class Player(pygame.sprite.Sprite):
         if key[pygame.K_w] and self.stay:
             move_y -= self.jump_force
             self.stay = False
+        if key[pygame.K_v] and self.weapon:
+            self.weapon.shot()
         for gun in self.groups["weapons"]:
             if (self.rect.colliderect(gun.rect) and key[pygame.K_c] and
                     not gun.user and self.grab_timer == 0):
@@ -134,6 +157,8 @@ class Player(pygame.sprite.Sprite):
         if key[pygame.K_UP] and self.stay:
             move_y -= self.jump_force
             self.stay = False
+        if key[pygame.K_KP3] and self.weapon:
+            self.weapon.shot()
         for gun in self.groups["weapons"]:
             if (self.rect.colliderect(gun.rect) and key[pygame.K_KP2] and
                     not gun.user and self.grab_timer == 0):

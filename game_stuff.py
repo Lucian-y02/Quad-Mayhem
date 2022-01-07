@@ -15,6 +15,7 @@ class Weapon(pygame.sprite.Sprite):
         self.mirror = kwargs.get("mirror", False)
 
         self.walls = groups["walls_horizontal"]
+        self.bullet_group = groups["bullets"]
 
         # Кем используется
         self.user = kwargs.get("user", None)
@@ -46,13 +47,31 @@ class Weapon(pygame.sprite.Sprite):
                 self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 3 else 0
                 self.gravity_count = 0
         else:
-            self.rect.x = self.user.rect.x - 7
+            if not self.mirror:
+                self.rect.x = self.user.rect.x - 7
+            else:
+                self.rect.x = self.user.rect.x - (self.rect.width - 7 - self.user.rect.width)
             self.rect.y = self.user.rect.y + 20
 
     def shot(self):
-        pass
+        if not self.mirror:
+            Bullet(self.bullet_group, x=self.rect.x + self.rect.width,
+                   y=self.rect.y + self.rect.height // 2, mirror=False)
+        else:
+            Bullet(self.bullet_group, x=self.rect.x,
+                   y=self.rect.y + self.rect.height // 2, mirror=True)
 
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self):
-        super(Bullet, self).__init__()
+    def __init__(self, group, **kwargs):
+        super(Bullet, self).__init__(group)
+        self.image = pygame.Surface((4, 2))
+        self.image.fill((150, 150, 150))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)
+
+        self.speed = kwargs.get("speed", 12) * (-1 if kwargs.get("mirror", False) else 1)
+
+    def update(self):
+        self.rect.move_ip(self.speed, 0)

@@ -46,10 +46,6 @@ class Scene:
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_g:
                     self.grid = not self.grid
-                elif event.key == pygame.K_h:
-                    for weapon in self.groups_data["weapons"]:
-                        print(weapon.user)
-                    print()
 
     def render(self):
         self.screen.fill(self.bg_color)
@@ -108,7 +104,7 @@ if __name__ == '__main__':
     box(prototype.groups_data, x=32 * 6, y=32 * 6)
 
     Weapon(prototype.groups_data, x=32 * 13, y=32 * 5)
-    Weapon(prototype.groups_data, x=32 * 18, y=32 * 5, size=(50, 10))
     Weapon(prototype.groups_data, x=32 * 23, y=32 * 5)
+    Weapon(prototype.groups_data, x=32 * 26, y=32 * 5)
 
     prototype.play()

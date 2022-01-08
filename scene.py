@@ -1,7 +1,9 @@
 import sys
 
-from objects import Gas, VerticalPlatform, HorizontalPlatform
+from database import DBase, Table
+from objects import VerticalPlatform, HorizontalPlatform, Weapon
 from functions import create_field, load_level
+
 import pygame
 
 
@@ -40,8 +42,17 @@ class Scene:
             "barrels": pygame.sprite.Group(),
             "toxic_barrels": pygame.sprite.Group(),
             "gas": pygame.sprite.Group(),
-            "platforms": pygame.sprite.Group()
+            "platforms": pygame.sprite.Group(),
+            "weapons": pygame.sprite.Group(),
+            "bullets": pygame.sprite.Group()
         }
+
+        DBase('images.db')
+        self.normal_gas = Table('images').get_image(1)[1].convert()
+        self.toxic_gas = Table('images').get_image(2)[2].convert()
+        self.normal_gas.set_colorkey('white')
+        self.toxic_gas.set_colorkey('white')
+        self.images = [self.normal_gas, self.toxic_gas]
 
     def add_players(self, players):  # Создание списка игроков
         self.players = players
@@ -82,18 +93,6 @@ class Scene:
                 self.teleports1.append(self.teleport1)
                 self.teleports2.remove(self.teleport2)
                 self.teleports2.append(self.teleport2)
-        for gamer in self.players:
-            for barrel in self.groups_data['barrels']:
-                if pygame.sprite.collide_mask(gamer, barrel):
-                    self.gas.append(Gas(self.groups_data['gas'], 'normal',
-                                        x=barrel.rect.x - 46, y=barrel.rect.y - 38, duration=30))
-                    barrel.kill()
-        for gamer in self.players:
-            for barrel in self.groups_data['toxic_barrels']:
-                if pygame.sprite.collide_mask(gamer, barrel):
-                    self.gas.append(Gas(self.groups_data['gas'], 'toxic',
-                                        x=barrel.rect.x - 46, y=barrel.rect.y - 38, duration=120))
-                    barrel.kill()
 
     def render(self):
         self.screen.fill(self.bg_color)
@@ -142,4 +141,7 @@ if __name__ == '__main__':
     prototype.add_players(list_of_players)
     VerticalPlatform(prototype.groups_data, prototype.screen, x=250, y=200, y2=400, speed=1)
     HorizontalPlatform(prototype.groups_data, prototype.screen, x=1020, y=230, x2=1210, speed=1)
+    Weapon(prototype.groups_data, x=32 * 13, y=32 * 5)
+    Weapon(prototype.groups_data, x=32 * 23, y=32 * 5)
+    Weapon(prototype.groups_data, x=32 * 26, y=32 * 5)
     prototype.play()

@@ -62,6 +62,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
+        self.mirror = kwargs.get("mirror", False)
 
         # Определение, чем урпавляется пересонаж
         self.control_function = self.keyboard_1_check_pressing
@@ -71,19 +72,23 @@ class Player(pygame.sprite.Sprite):
         elif kwargs.get("controller", "keyboard_1") == "keyboard_2":
             self.control_function = self.keyboard_2_check_pressing
 
-        self.speed = kwargs.get("speed", 4)  # Скорость персонажа
+        self.speed = kwargs.get("speed", 5)  # Скорость персонажа
         self.groups = groups  # Словарь групп српайтов
 
         # Столкновение
         self.stay = False  # Определяет находится ли игрок на какой-либо опоре
 
-        # Падение
+        # Оружие
+        self.weapon = None  # Используемое игроком оружие
+        self.grab_timer = 0
+
+        # Гравитация
         self.gravity_force = kwargs.get("gravity", 8)  # Ускорение свободного падения
         self.gravity_count = 0
         self.gravity = 0  # Скорость падения
 
         # Прыжок
-        self.jump_force = kwargs.get("jump", 12)
+        self.jump_force = kwargs.get("jump", 16)
 
     def update(self):
         # Показатели смещения
@@ -92,7 +97,7 @@ class Player(pygame.sprite.Sprite):
 
         # Столкновения
         for wall in self.groups["walls_horizontal"]:
-            if pygame.sprite.collide_mask(self, wall):
+            if self.rect.colliderect(wall):
                 # Пол
                 if abs(self.rect.y + self.rect.height - wall.rect.y) < abs(self.rect.y -
                                                                            wall.rect.y):
@@ -103,10 +108,11 @@ class Player(pygame.sprite.Sprite):
                     move_y = 0
                 # Потолок
                 elif self.rect.y - wall.rect.y < 0:
-                    self.gravity = self.gravity_force * 2
+                    self.gravity += self.gravity_force
+                    self.gravity_count = 1
                     self.rect.y = wall.rect.y + 1
         for wall in self.groups["walls_vertical"]:
-            if pygame.sprite.collide_mask(self, wall):
+            if self.rect.colliderect(wall):
                 # Левая стена
                 if abs(self.rect.x - wall.rect.x) < abs(self.rect.x +
                                                         self.rect.width - wall.rect.x):
@@ -115,17 +121,38 @@ class Player(pygame.sprite.Sprite):
                 else:
                     self.rect.x = wall.rect.x - self.speed - self.rect.width + 1
 
-        # Нажатия
+        # Столкновение с пулями
+        if pygame.sprite.spritecollideany(self, self.groups["bullets"]):
+            try:
+                self.weapon.user = None
+            except AttributeError:
+                pass
+            self.kill()
+
+        # Отслеживание нажатий
         move_x, move_y = self.control_function(move_x, move_y)
+
+        if move_x > 0:
+            self.mirror = False
+        elif move_x < 0:
+            self.mirror = True
+
+        try:
+            self.weapon.mirror = self.mirror
+        except AttributeError:
+            pass
 
         # Смещение персонажа
         self.rect.move_ip(move_x, move_y)
 
         # Влияния ускорения свободного падения
         self.gravity_count += 1
-        if self.gravity_count % 8 == 0:
-            self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 2 else 0
+        if self.gravity_count % 6 == 0:
+            self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 3 else 0
             self.gravity_count = 0
+
+        # Таймеры
+        self.grab_timer -= 1 if self.grab_timer > 0 else 0
 
     def joystick_check_pressing(self, move_x, move_y):
         if abs(self.joystick.get_axis(0)) > 0.1:
@@ -133,6 +160,18 @@ class Player(pygame.sprite.Sprite):
         if self.joystick.get_button(0) and self.stay:
             move_y -= self.jump_force
             self.stay = False
+        if self.joystick.get_button(5) and self.weapon:
+            self.weapon.shot()
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and self.joystick.get_button(4) and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                self.grab_timer = 20
         return move_x, move_y
 
     def keyboard_1_check_pressing(self, move_x, move_y):
@@ -141,9 +180,21 @@ class Player(pygame.sprite.Sprite):
             move_x -= self.speed
         if key[pygame.K_d]:
             move_x += self.speed
-        if key[pygame.K_SPACE] and self.stay:
+        if key[pygame.K_w] and self.stay:
             move_y -= self.jump_force
             self.stay = False
+        if key[pygame.K_v] and self.weapon:
+            self.weapon.shot()
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and key[pygame.K_c] and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                self.grab_timer = 20
         return move_x, move_y
 
     def keyboard_2_check_pressing(self, move_x, move_y):
@@ -155,6 +206,18 @@ class Player(pygame.sprite.Sprite):
         if key[pygame.K_UP] and self.stay:
             move_y -= self.jump_force
             self.stay = False
+        if key[pygame.K_KP3] and self.weapon:
+            self.weapon.shot()
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and key[pygame.K_KP2] and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                self.grab_timer = 20
         return move_x, move_y
 
     # Способность 1
@@ -166,41 +229,141 @@ class Player(pygame.sprite.Sprite):
         pass
 
 
-class Barrel(pygame.sprite.Sprite):
+class Weapon(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
-        super(Barrel, self).__init__(groups['barrels'])
+        super(Weapon, self).__init__(groups["weapons"])
+        self.image = pygame.Surface(kwargs.get("size", (65, 16)))
+        self.image.fill((150, 150, 150))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)
+        self.mirror = kwargs.get("mirror", False)
+
+        self.walls = groups["walls_horizontal"]
+        self.bullet_group = groups["bullets"]
+
+        # Кем используется
+        self.user = kwargs.get("user", None)
+
+        # Гравитация
+        self.gravity_force = kwargs.get("gravity", 8)  # Ускорение свободного падения
+        self.gravity_count = 0
+        self.gravity = 0  # Скорость падения
+
+        self.shot_timer = 0
+
+    def update(self):
+        if not self.user:
+            self.shot_timer = 0
+            move_y = self.gravity
+
+            # Столкновение
+            for wall in self.walls:
+                if self.rect.colliderect(wall.rect):
+                    self.gravity = 0
+                    self.gravity_count = 0
+                    self.rect.y = wall.rect.y - self.rect.height + 1
+                    move_y = 0
+
+            # Смещение
+            self.rect.move_ip(0, move_y)
+
+            # Влияния ускорения свободного падения
+            self.gravity_count += 1
+            if self.gravity_count % 6 == 0:
+                self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 3 else 0
+                self.gravity_count = 0
+        else:
+            self.shot_timer -= 1 if self.shot_timer > 0 else 0
+            if not self.mirror:
+                self.rect.x = self.user.rect.x - 7
+            else:
+                self.rect.x = self.user.rect.x - (self.rect.width - 7 - self.user.rect.width)
+            self.rect.y = self.user.rect.y + 20
+
+    def shot(self):
+        if self.shot_timer == 0:
+            if not self.mirror:
+                Bullet(self.bullet_group, x=self.rect.x + self.rect.width,
+                       y=self.rect.y + self.rect.height // 2, mirror=False)
+            else:
+                Bullet(self.bullet_group, x=self.rect.x - 32,
+                       y=self.rect.y + self.rect.height // 2, mirror=True)
+            self.shot_timer = 20
+
+
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, group, **kwargs):
+        super(Bullet, self).__init__(group)
+        self.image = pygame.Surface(kwargs.get("size", (32, 2)))
+        self.image.fill((150, 150, 150))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)
+
+        self.speed = kwargs.get("speed", 32) * (-1 if kwargs.get("mirror", False) else 1)
+
+    def update(self):
+        self.rect.move_ip(self.speed, 0)
+
+
+class Barrel(pygame.sprite.Sprite):
+    def __init__(self, prototype, **kwargs):
+        super(Barrel, self).__init__(prototype.groups_data['barrels'])
         self.size = kwargs.get("size", (16, 32))
         self.image = pygame.Surface(self.size)
         self.image.fill((150, 75, 0))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
+        self.prototype = prototype
+
+    def update(self):
+        collision = pygame.sprite.spritecollideany(self, self.prototype.groups_data['bullets'])
+        if collision:
+            self.prototype.gas.append(Gas(self.prototype.groups_data['gas'], 'normal',
+                                          self.prototype.images, x=self.rect.x - 46,
+                                          y=self.rect.y - 38, duration=30))
+            self.kill()
+            collision.kill()
 
 
 class ToxicBarrel(pygame.sprite.Sprite):
-    def __init__(self, groups: dict, **kwargs):
-        super(ToxicBarrel, self).__init__(groups['toxic_barrels'])
+    def __init__(self, prototype, **kwargs):
+        super(ToxicBarrel, self).__init__(prototype.groups_data['toxic_barrels'])
         self.size = kwargs.get("size", (16, 32))
         self.image = pygame.Surface(self.size)
         self.image.fill((0, 120, 0))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
+        self.prototype = prototype
+
+    def update(self):
+        collision = pygame.sprite.spritecollideany(self, self.prototype.groups_data['bullets'])
+        if collision:
+            self.prototype.gas.append(Gas(self.prototype.groups_data['gas'], 'toxic',
+                                          self.prototype.images, x=self.rect.x - 46,
+                                          y=self.rect.y - 38, duration=120))
+            self.kill()
+            collision.kill()
 
 
 class Gas(pygame.sprite.Sprite):
-    def __init__(self, group, mode, **kwargs):
+    def __init__(self, group, mode, images, **kwargs):
         super(Gas, self).__init__(group)
-        self.size = kwargs.get("size", (108, 108))
-        self.image = pygame.Surface(self.size)
+        self.max_size = kwargs.get("size", (108, 108))
         if mode == 'normal':
-            self.image.fill((150, 75, 0))
+            self.image = images[0]
         elif mode == 'toxic':
-            self.image.fill((0, 120, 0))
+            self.image = images[1]
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
         self.duration = kwargs.get("duration", 120)
+        self.appear = True
+        self.size = 1
+        self.image = pygame.transform.scale(self.image, self.max_size)
 
 
 class HorizontalPlatform(pygame.sprite.Sprite):
@@ -222,7 +385,7 @@ class HorizontalPlatform(pygame.sprite.Sprite):
 
     def update(self):
         for platform in self.list:
-            platform.rect.x += self.speed
+            platform.rect.move_ip(self.speed, 0)
         if self.going and (self.x2 <= self.list[-1].rect.x):
             self.speed *= -1
             self.going = False
@@ -252,7 +415,7 @@ class VerticalPlatform(pygame.sprite.Sprite):
 
     def update(self):
         for platform in self.list:
-            platform.rect.y += self.speed
+            platform.rect.move_ip(0, self.speed)
         if self.going and (self.y2 <= self.list[-1].rect.y):
             self.speed *= -1
             self.going = False

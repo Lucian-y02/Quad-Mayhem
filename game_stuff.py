@@ -17,13 +17,13 @@ class Weapon(pygame.sprite.Sprite):
         self.rect.y = kwargs.get("y", 0)
         self.mirror = kwargs.get("mirror", False)
 
-        self.walls = groups["walls_horizontal"]
-        self.bullet_group = groups["bullets"]
+        self.groups = groups
 
         # Кем используется
         self.user = kwargs.get("user", None)
 
         self.recoil = kwargs.get("recoil", 1)  # Отдача
+        self.bullet_speed = kwargs.get("bullet_speed", 32)
 
         # Гравитация
         self.gravity_force = kwargs.get("gravity", 8)  # Ускорение свободного падения
@@ -38,7 +38,7 @@ class Weapon(pygame.sprite.Sprite):
             move_y = self.gravity
 
             # Столкновение
-            for wall in self.walls:
+            for wall in self.groups["walls_horizontal"]:
                 if self.rect.colliderect(wall.rect):
                     self.gravity = 0
                     self.gravity_count = 0
@@ -62,26 +62,31 @@ class Weapon(pygame.sprite.Sprite):
             self.rect.y = self.user.rect.y + 20
 
     def shot(self):
-        if self.shot_timer == 0:
+        if (self.shot_timer == 0 and
+                not pygame.sprite.spritecollideany(self, self.groups["walls_horizontal"]) and
+                not pygame.sprite.spritecollideany(self, self.groups["walls_vertical"])):
             if not self.mirror:
-                Bullet(self.bullet_group, x=self.rect.x + self.rect.width,
-                       y=self.rect.y + self.rect.height // 2, mirror=False)
+                Bullet(self.groups, x=self.rect.x + self.rect.width - self.bullet_speed,
+                       y=self.rect.y + self.rect.height // 2, mirror=False,
+                       speed=self.bullet_speed)
                 self.user.recoil(-self.recoil)
             else:
-                Bullet(self.bullet_group, x=self.rect.x - 32,
-                       y=self.rect.y + self.rect.height // 2, mirror=True)
+                Bullet(self.groups, x=self.rect.x, y=self.rect.y + self.rect.height // 2,
+                       mirror=True, speed=self.bullet_speed)
                 self.user.recoil(self.recoil)
             self.shot_timer = 20
 
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, group, **kwargs):
-        super(Bullet, self).__init__(group)
+    def __init__(self, groups: dict, **kwargs):
+        super(Bullet, self).__init__(groups["bullets"])
         self.image = pygame.Surface(kwargs.get("size", (32, 2)))
         self.image.fill((150, 150, 150))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
+
+        self.groups = groups
 
         self.scatter_write = kwargs.get("scatter", (-2, 2))
         self.scatter = randint(self.scatter_write[0], self.scatter_write[1])
@@ -94,3 +99,7 @@ class Bullet(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.move_ip(self.speed, self.scatter)
+
+        if (pygame.sprite.spritecollideany(self, self.groups["walls_vertical"]) or
+                pygame.sprite.spritecollideany(self, self.groups["walls_horizontal"])):
+            self.kill()

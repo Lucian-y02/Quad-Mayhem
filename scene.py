@@ -1,6 +1,6 @@
 import sys
 
-from objects import Gas
+from objects import Gas, VerticalPlatform, HorizontalPlatform
 from functions import create_field, load_level
 import pygame
 
@@ -39,7 +39,8 @@ class Scene:
             "walls_vertical": pygame.sprite.Group(),
             "barrels": pygame.sprite.Group(),
             "toxic_barrels": pygame.sprite.Group(),
-            "gas": pygame.sprite.Group()
+            "gas": pygame.sprite.Group(),
+            "platforms": pygame.sprite.Group()
         }
 
     def add_players(self, players):  # Создание списка игроков
@@ -58,6 +59,8 @@ class Scene:
                 self.game_run = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
                 self.grid = not self.grid
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                print(event.pos)
 
     def update(self):
         self.teleport1 = self.teleports1[0]
@@ -95,7 +98,8 @@ class Scene:
     def render(self):
         self.screen.fill(self.bg_color)
         for key in self.groups_data:
-            self.groups_data[key].draw(self.screen)
+            if key != 'platforms':
+                self.groups_data[key].draw(self.screen)
         if self.draw_teleport:
             if self.teleport1 and self.teleport2:
                 group = pygame.sprite.Group()
@@ -136,4 +140,6 @@ if __name__ == '__main__':
     prototype = Scene(title="Prototype", FPS=60, size=(1920, 1080))
     list_of_players = create_field(load_level('level.txt'), prototype)
     prototype.add_players(list_of_players)
+    VerticalPlatform(prototype.groups_data, prototype.screen, x=250, y=200, y2=400, speed=1)
+    HorizontalPlatform(prototype.groups_data, prototype.screen, x=1020, y=230, x2=1210, speed=1)
     prototype.play()

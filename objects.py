@@ -182,7 +182,7 @@ class ToxicBarrel(pygame.sprite.Sprite):
         super(ToxicBarrel, self).__init__(groups['toxic_barrels'])
         self.size = kwargs.get("size", (16, 32))
         self.image = pygame.Surface(self.size)
-        self.image.fill((0, 200, 0))
+        self.image.fill((0, 120, 0))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
@@ -196,8 +196,68 @@ class Gas(pygame.sprite.Sprite):
         if mode == 'normal':
             self.image.fill((150, 75, 0))
         elif mode == 'toxic':
-            self.image.fill((0, 200, 0))
+            self.image.fill((0, 120, 0))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
         self.duration = kwargs.get("duration", 120)
+
+
+class HorizontalPlatform(pygame.sprite.Sprite):
+    def __init__(self, groups: dict, screen: pygame.Surface, **kwargs):
+        super(HorizontalPlatform, self).__init__(groups['platforms'])
+        self.screen = screen
+        self.going = True
+        self.x = kwargs.get("x", 0)
+        self.y = kwargs.get("y", 0)
+        self.x2 = kwargs.get("x2", 100)
+        self.speed = kwargs.get("speed", 0)
+        if self.speed < 0:
+            self.going = False
+        self.list = list()
+        self.list.append(WallHorizontal(group=groups['walls_horizontal'], x=self.x + 4, y=self.y, size=(48, 1)))
+        self.list.append(WallHorizontal(group=groups['walls_horizontal'], x=self.x + 4, y=self.y + 31, size=(48, 1)))
+        self.list.append(WallVertical(group=groups['walls_vertical'], x=self.x, y=self.y + 1, size=(1, 30)))
+        self.list.append(WallVertical(group=groups['walls_vertical'], x=self.x + 55, y=self.y + 1, size=(1, 30)))
+
+    def update(self):
+        for platform in self.list:
+            platform.rect.x += self.speed
+        if self.going and (self.x2 <= self.list[-1].rect.x):
+            self.speed *= -1
+            self.going = False
+            self.x2, self.x = self.x, self.x2
+        elif (not self.going) and (self.x2 >= self.list[-1].rect.x):
+            self.speed *= -1
+            self.going = True
+            self.x2, self.x = self.x, self.x2
+
+
+class VerticalPlatform(pygame.sprite.Sprite):
+    def __init__(self, groups: dict, screen: pygame.Surface, **kwargs):
+        super(VerticalPlatform, self).__init__(groups['platforms'])
+        self.screen = screen
+        self.going = True
+        self.x = kwargs.get("x", 0)
+        self.y = kwargs.get("y", 0)
+        self.y2 = kwargs.get("y2", 100)
+        self.speed = kwargs.get("speed", 0)
+        if self.speed < 0:
+            self.going = False
+        self.list = list()
+        self.list.append(WallHorizontal(group=groups['walls_horizontal'], x=self.x + 4, y=self.y, size=(48, 1)))
+        self.list.append(WallHorizontal(group=groups['walls_horizontal'], x=self.x + 4, y=self.y + 31, size=(48, 1)))
+        self.list.append(WallVertical(group=groups['walls_vertical'], x=self.x, y=self.y + 1, size=(1, 30)))
+        self.list.append(WallVertical(group=groups['walls_vertical'], x=self.x + 55, y=self.y + 1, size=(1, 30)))
+
+    def update(self):
+        for platform in self.list:
+            platform.rect.y += self.speed
+        if self.going and (self.y2 <= self.list[-1].rect.y):
+            self.speed *= -1
+            self.going = False
+            self.y2, self.y = self.y, self.y2
+        elif (not self.going) and (self.y2 >= self.list[-1].rect.y):
+            self.speed *= -1
+            self.going = True
+            self.y2, self.y = self.y, self.y2

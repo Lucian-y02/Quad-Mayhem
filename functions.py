@@ -1,6 +1,6 @@
 from random import shuffle
 
-from objects import Player, Teleport1, Teleport2, Barrel, ToxicBarrel
+from objects import Player, Teleport1, Teleport2, Barrel, ToxicBarrel, HorizontalPlatform, VerticalPlatform
 import tools_for_creating_maps as t
 
 
@@ -8,17 +8,12 @@ def create_field(level, prototype):  # Создание поля
     players = list()
     teleports1 = list()
     teleports2 = list()
+    plat = [None, None, None, None, None, None]
     spots = list()
     for col, a in enumerate(level):
         for row, b in enumerate(a):
             if b == '@':
                 spots.append((32 * row, 32 * col))
-            # elif b == '!':
-            #     players.append(Player(prototype.groups_data, x=32 * row, y=32 * col,
-            #                           gravity=11, jump_force=19, controller="joystick", color="blue"))
-            # elif b == '$':
-            #     players.append(Player(prototype.groups_data, x=32 * row, y=32 * col,
-            #                           gravity=11, jump_force=19, controller="keyboard_2", color="green"))
             elif b == 'a':
                 teleports1.append(Teleport1(x=row * 32, y=col * 32))
             elif b == 'A':
@@ -65,7 +60,7 @@ def create_field(level, prototype):  # Создание поля
     prototype.teleports2 = teleports2
     shuffle(spots)
     players.append(Player(prototype.groups_data, x=spots[0][0], y=spots[0][1],
-                   gravity=11, jump_force=19, controller="keyboard_1", color="blue"))
+                   gravity=11, jump_force=19, controller="keyboard_1", color="yellow"))
     players.append(Player(prototype.groups_data, x=spots[1][0], y=spots[1][1],
                           gravity=11, jump_force=19, controller="keyboard_2", color="green"))
     return players
@@ -75,5 +70,5 @@ def load_level(filename):
     with open(filename, 'r', encoding='utf8') as f:
         level = f.readlines()
         for i in range(len(level)):
-            level[i] = level[i].strip('\n ')
+            level[i] = ''.join(level[i].strip('\n ').split())
     return level

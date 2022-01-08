@@ -7,7 +7,7 @@ pygame.init()
 class Weapon(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(Weapon, self).__init__(groups["weapons"])
-        self.image = pygame.Surface(kwargs.get("size", (65, 15)))
+        self.image = pygame.Surface(kwargs.get("size", (65, 16)))
         self.image.fill((150, 150, 150))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
@@ -25,9 +25,11 @@ class Weapon(pygame.sprite.Sprite):
         self.gravity_count = 0
         self.gravity = 0  # Скорость падения
 
+        self.shot_timer = 0
+
     def update(self):
         if not self.user:
-
+            self.shot_timer = 0
             move_y = self.gravity
 
             # Столкновение
@@ -47,6 +49,7 @@ class Weapon(pygame.sprite.Sprite):
                 self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 3 else 0
                 self.gravity_count = 0
         else:
+            self.shot_timer -= 1 if self.shot_timer > 0 else 0
             if not self.mirror:
                 self.rect.x = self.user.rect.x - 7
             else:
@@ -54,24 +57,26 @@ class Weapon(pygame.sprite.Sprite):
             self.rect.y = self.user.rect.y + 20
 
     def shot(self):
-        if not self.mirror:
-            Bullet(self.bullet_group, x=self.rect.x + self.rect.width,
-                   y=self.rect.y + self.rect.height // 2, mirror=False)
-        else:
-            Bullet(self.bullet_group, x=self.rect.x,
-                   y=self.rect.y + self.rect.height // 2, mirror=True)
+        if self.shot_timer == 0:
+            if not self.mirror:
+                Bullet(self.bullet_group, x=self.rect.x + self.rect.width,
+                       y=self.rect.y + self.rect.height // 2, mirror=False)
+            else:
+                Bullet(self.bullet_group, x=self.rect.x - 32,
+                       y=self.rect.y + self.rect.height // 2, mirror=True)
+            self.shot_timer = 20
 
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, group, **kwargs):
         super(Bullet, self).__init__(group)
-        self.image = pygame.Surface((4, 2))
+        self.image = pygame.Surface(kwargs.get("size", (32, 2)))
         self.image.fill((150, 150, 150))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
 
-        self.speed = kwargs.get("speed", 12) * (-1 if kwargs.get("mirror", False) else 1)
+        self.speed = kwargs.get("speed", 32) * (-1 if kwargs.get("mirror", False) else 1)
 
     def update(self):
         self.rect.move_ip(self.speed, 0)

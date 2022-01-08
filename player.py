@@ -73,12 +73,14 @@ class Player(pygame.sprite.Sprite):
                     self.rect.x = wall.rect.x - self.speed - self.rect.width + 1
 
         # Столкновение с пулями
-        if pygame.sprite.spritecollideany(self, self.groups["bullets"]):
-            try:
-                self.weapon.user = None
-            except AttributeError:
-                pass
-            self.kill()
+        for bullet in self.groups["bullets"]:
+            if self.rect.colliderect(bullet.rect):
+                try:
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.kill()
+                bullet.kill()
 
         # Отслеживание нажатий
         move_x, move_y = self.control_function(move_x, move_y)
@@ -178,3 +180,6 @@ class Player(pygame.sprite.Sprite):
     # Способность 2
     def ability_2(self):
         pass
+
+    def recoil(self, recoil_force):
+        self.rect.move_ip(recoil_force, 0)

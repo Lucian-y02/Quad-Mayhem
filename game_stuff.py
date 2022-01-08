@@ -1,3 +1,6 @@
+from random import randint
+from math import asin, degrees
+
 import pygame
 
 
@@ -19,6 +22,8 @@ class Weapon(pygame.sprite.Sprite):
 
         # Кем используется
         self.user = kwargs.get("user", None)
+
+        self.recoil = kwargs.get("recoil", 1)  # Отдача
 
         # Гравитация
         self.gravity_force = kwargs.get("gravity", 8)  # Ускорение свободного падения
@@ -61,9 +66,11 @@ class Weapon(pygame.sprite.Sprite):
             if not self.mirror:
                 Bullet(self.bullet_group, x=self.rect.x + self.rect.width,
                        y=self.rect.y + self.rect.height // 2, mirror=False)
+                self.user.recoil(-self.recoil)
             else:
                 Bullet(self.bullet_group, x=self.rect.x - 32,
                        y=self.rect.y + self.rect.height // 2, mirror=True)
+                self.user.recoil(self.recoil)
             self.shot_timer = 20
 
 
@@ -76,7 +83,14 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
 
+        self.scatter_write = kwargs.get("scatter", (-2, 2))
+        self.scatter = randint(self.scatter_write[0], self.scatter_write[1])
         self.speed = kwargs.get("speed", 32) * (-1 if kwargs.get("mirror", False) else 1)
 
+        # self.image = pygame.transform.rotate(self.image,
+        #                                      degrees(asin(self.scatter /
+        #                                                   ((self.speed ** 2 +
+        #                                                     self.scatter ** 2) ** (1 / 2)))))
+
     def update(self):
-        self.rect.move_ip(self.speed, 0)
+        self.rect.move_ip(self.speed, self.scatter)

@@ -24,6 +24,7 @@ class Weapon(pygame.sprite.Sprite):
 
         self.recoil = kwargs.get("recoil", 1)  # Отдача
         self.bullet_speed = kwargs.get("bullet_speed", 32)
+        self.can_shot = True
 
         # Гравитация
         self.gravity_force = kwargs.get("gravity", 8)  # Ускорение свободного падения
@@ -62,9 +63,13 @@ class Weapon(pygame.sprite.Sprite):
             self.rect.y = self.user.rect.y + 20
 
     def shot(self):
-        if (self.shot_timer == 0 and
-                not pygame.sprite.spritecollideany(self, self.groups["walls_horizontal"]) and
-                not pygame.sprite.spritecollideany(self, self.groups["walls_vertical"])):
+        self.can_shot = True
+        if pygame.sprite.spritecollideany(self, self.groups["walls_vertical"]):
+            for wall in self.groups["walls_vertical"]:
+                if self.mirror and (abs(self.rect.x - wall.rect.x) <
+                                    abs(self.rect.x + self.rect.width - wall.rect.x)):
+                    self.can_shot = False
+        if self.shot_timer == 0 and self.can_shot:
             if not self.mirror:
                 Bullet(self.groups, x=self.rect.x + self.rect.width - self.bullet_speed,
                        y=self.rect.y + self.rect.height // 2, mirror=False,

@@ -17,6 +17,10 @@ class Weapon(pygame.sprite.Sprite):
         self.rect.y = kwargs.get("y", 0)
         self.mirror = kwargs.get("mirror", False)
 
+        # rect для обработки столкновения со стенами
+        self.second_rect = pygame.Rect((self.rect.x + self.rect.width // 2, self.rect.y),
+                                       (self.rect.width // 2, self.rect.height))
+
         self.groups = groups
 
         # Кем используется
@@ -54,21 +58,27 @@ class Weapon(pygame.sprite.Sprite):
             if self.gravity_count % 6 == 0:
                 self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 3 else 0
                 self.gravity_count = 0
+
+            self.second_rect.x = self.rect.x + self.rect.width // 2
+            self.second_rect.y = self.rect.y
         else:
             self.shot_timer -= 1 if self.shot_timer > 0 else 0
             if not self.mirror:
                 self.rect.x = self.user.rect.x - 7
+                self.second_rect.x = self.rect.x + self.rect.width // 2
             else:
                 self.rect.x = self.user.rect.x - (self.rect.width - 7 - self.user.rect.width)
+                self.second_rect.x = self.rect.x
             self.rect.y = self.user.rect.y + 20
+            self.second_rect.y = self.rect.y
 
     def shot(self):
         self.can_shot = True
         if pygame.sprite.spritecollideany(self, self.groups["walls_vertical"]):
             for wall in self.groups["walls_vertical"]:
-                if self.mirror and (abs(self.rect.x - wall.rect.x) <
-                                    abs(self.rect.x + self.rect.width - wall.rect.x)):
+                if self.second_rect.colliderect(wall.rect):
                     self.can_shot = False
+                    break
         if self.shot_timer == 0 and self.can_shot:
             if not self.mirror:
                 Bullet(self.groups, x=self.rect.x + self.rect.width - self.bullet_speed,

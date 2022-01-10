@@ -86,6 +86,7 @@ if __name__ == '__main__':
     box(prototype.groups_data, x=640, y=352)
     box(prototype.groups_data, x=608, y=320)
     box(prototype.groups_data, x=672, y=384)
+    box(prototype.groups_data, x=768, y=416)
 
     platform_left(prototype.groups_data, x=32 * 20, y=32 * 19)
     for i in range(21, 30):

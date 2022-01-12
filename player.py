@@ -24,6 +24,7 @@ class Player(pygame.sprite.Sprite):
             self.control_function = self.keyboard_2_check_pressing
 
         self.speed = kwargs.get("speed", 4)  # Скорость персонажа
+        self.health_points = kwargs.get("health_points", 100)
         self.groups = groups  # Словарь групп српайтов
 
         # Столкновение
@@ -75,12 +76,19 @@ class Player(pygame.sprite.Sprite):
         # Столкновение с пулями
         for bullet in self.groups["bullets"]:
             if self.rect.colliderect(bullet.rect):
-                try:
-                    self.weapon.user = None
-                except AttributeError:
-                    pass
-                self.kill()
+                self.health_points -= bullet.damage
                 bullet.kill()
+        for healing_box in self.groups["healing_boxes"]:
+            if self.rect.colliderect(healing_box.rect) and self.health_points != 100:
+                self.health_points += healing_box.heal
+                healing_box.kill()
+
+        if self.health_points <= 0:
+            try:
+                self.weapon.user = None
+            except AttributeError:
+                pass
+            self.kill()
 
         # Отслеживание нажатий
         move_x, move_y = self.control_function(move_x, move_y)

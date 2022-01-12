@@ -29,7 +29,9 @@ class Scene:
             "walls_horizontal": pygame.sprite.Group(),
             "walls_vertical": pygame.sprite.Group(),
             "weapons": pygame.sprite.Group(),
-            "bullets": pygame.sprite.Group()
+            "bullets": pygame.sprite.Group(),
+            "health_indicators": pygame.sprite.Group(),
+            "healing_boxes": pygame.sprite.Group()
         }
 
     # Добавление новой группы спрайтов
@@ -77,6 +79,8 @@ if __name__ == '__main__':
     player1 = Player(prototype.groups_data, x=800, y=400, controller="keyboard_2", color="green")
     player2 = Player(prototype.groups_data, x=550, y=150, controller="joystick", color="blue")
     player3 = Player(prototype.groups_data, x=200, y=100, controller="keyboard_1", color="red")
+    for player in prototype.groups_data["players"]:
+        HealthPointsIndicator(prototype.groups_data["health_indicators"], user=player)
 
     platform_left(prototype.groups_data, x=32 * 17, y=32 * 15)
     for i in range(18, 27):
@@ -107,5 +111,6 @@ if __name__ == '__main__':
     Weapon(prototype.groups_data, x=32 * 13, y=32 * 5)
     Weapon(prototype.groups_data, x=32 * 23, y=32 * 5)
     Weapon(prototype.groups_data, x=32 * 26, y=32 * 5)
+    HealingBox(prototype.groups_data, x=32 * 15, y=32 * 5)
 
     prototype.play()

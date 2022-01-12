@@ -128,6 +128,8 @@ class Player(pygame.sprite.Sprite):
                     not gun.user and self.grab_timer == 0):
                 gun.user = self
                 try:
+                    if self.weapon.bullet_count == 0:
+                        self.weapon.kill()
                     self.weapon.user = None
                 except AttributeError:
                     pass
@@ -151,6 +153,8 @@ class Player(pygame.sprite.Sprite):
                     not gun.user and self.grab_timer == 0):
                 gun.user = self
                 try:
+                    if self.weapon.bullet_count == 0:
+                        self.weapon.kill()
                     self.weapon.user = None
                 except AttributeError:
                     pass
@@ -174,6 +178,8 @@ class Player(pygame.sprite.Sprite):
                     not gun.user and self.grab_timer == 0):
                 gun.user = self
                 try:
+                    if self.weapon.bullet_count == 0:
+                        self.weapon.kill()
                     self.weapon.user = None
                 except AttributeError:
                     pass
@@ -189,5 +195,6 @@ class Player(pygame.sprite.Sprite):
     def ability_2(self):
         pass
 
+    # Отдача от оружия
     def recoil(self, recoil_force):
         self.rect.move_ip(recoil_force, 0)

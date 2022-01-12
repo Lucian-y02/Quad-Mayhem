@@ -27,8 +27,9 @@ class Weapon(pygame.sprite.Sprite):
         self.user = kwargs.get("user", None)
 
         self.recoil = kwargs.get("recoil", 1)  # Отдача
-        self.bullet_speed = kwargs.get("bullet_speed", 32)
+        self.bullet_speed = kwargs.get("bullet_speed", 32)  # Скорость пуль
         self.can_shot = True
+        self.bullet_count = kwargs.get("bullet_count", 10)
 
         # Гравитация
         self.gravity_force = kwargs.get("gravity", 8)  # Ускорение свободного падения
@@ -79,7 +80,7 @@ class Weapon(pygame.sprite.Sprite):
                 if self.second_rect.colliderect(wall.rect):
                     self.can_shot = False
                     break
-        if self.shot_timer == 0 and self.can_shot:
+        if self.shot_timer == 0 and self.can_shot and self.bullet_count != 0:
             if not self.mirror:
                 Bullet(self.groups, x=self.rect.x + self.rect.width - self.bullet_speed,
                        y=self.rect.y + self.rect.height // 2, mirror=False,
@@ -90,6 +91,7 @@ class Weapon(pygame.sprite.Sprite):
                        mirror=True, speed=self.bullet_speed)
                 self.user.recoil(self.recoil)
             self.shot_timer = 20
+            self.bullet_count -= 1
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -141,6 +143,7 @@ class HealthPointsIndicator(pygame.sprite.Sprite):
         self.rect.y = self.user.rect.y - 6
 
 
+# Аптечка
 class HealingBox(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(HealingBox, self).__init__(groups["healing_boxes"])

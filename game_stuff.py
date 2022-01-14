@@ -1,5 +1,4 @@
 from random import randint
-from math import asin, degrees
 
 import pygame
 
@@ -110,16 +109,12 @@ class Bullet(pygame.sprite.Sprite):
         self.speed = kwargs.get("speed", 32) * (-1 if kwargs.get("mirror", False) else 1)
         self.damage = kwargs.get("damage", 25)
 
-        # self.image = pygame.transform.rotate(self.image,
-        #                                      degrees(asin(self.scatter /
-        #                                                   ((self.speed ** 2 +
-        #                                                     self.scatter ** 2) ** (1 / 2)))))
-
     def update(self):
         self.rect.move_ip(self.speed, self.scatter)
 
         if (pygame.sprite.spritecollideany(self, self.groups["walls_vertical"]) or
-                pygame.sprite.spritecollideany(self, self.groups["walls_horizontal"])):
+                pygame.sprite.spritecollideany(self, self.groups["walls_horizontal"]) or
+                (0 >= self.rect.x >= 2000) or ((0 + self.rect.height) >= self.rect.y >= 1500)):
             self.kill()
 
 
@@ -138,7 +133,7 @@ class HealthPointsIndicator(pygame.sprite.Sprite):
         if self.user.health_points <= 0:
             self.kill()
         self.image = pygame.transform.scale(self.image,
-                                            (int(40 * (self.user.health_points / 100)), 3))
+                                            (max(int(40 * (self.user.health_points / 100)), 0), 3))
         self.rect.x = self.user.rect.x
         self.rect.y = self.user.rect.y - 6
 
@@ -146,7 +141,7 @@ class HealthPointsIndicator(pygame.sprite.Sprite):
 # Аптечка
 class HealingBox(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
-        super(HealingBox, self).__init__(groups["healing_boxes"])
+        super(HealingBox, self).__init__(groups["game_stuff"])
         self.image = pygame.Surface((25, 25))
         self.image.fill((0, 100, 0))
         self.rect = self.image.get_rect()
@@ -180,3 +175,49 @@ class HealingBox(pygame.sprite.Sprite):
         if self.gravity_count % 6 == 0:
             self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 3 else 0
             self.gravity_count = 0
+
+
+class Wall(pygame.sprite.Sprite):
+    def __init__(self, group, **kwargs):
+        super(Wall, self).__init__(group)
+        self.image = pygame.Surface(kwargs.get("size", (32, 32)))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)
+
+
+class WallHorizontal(Wall):
+    def __init__(self, group, **kwargs):
+        super(WallHorizontal, self).__init__(group, **kwargs)
+        self.image = pygame.Surface(kwargs.get("size", (32, 1)))
+
+
+class WallVertical(Wall):
+    def __init__(self, group, **kwargs):
+        super(WallVertical, self).__init__(group, **kwargs)
+        self.image = pygame.Surface(kwargs.get("size", (1, 32)))
+
+
+# Спаунер оружия
+class WeaponSpawner(pygame.sprite.Sprite):
+    def __init__(self, group, **kwargs):
+        super(WeaponSpawner, self).__init__(group)
+
+
+# Платформа для супер прыжка
+class SuperJump(pygame.sprite.Sprite):
+    def __init__(self, group, **kwargs):
+        super(SuperJump, self).__init__(group)
+        self.image = pygame.Surface((kwargs.get("size", (32, 4))))
+        self.image.fill((100, 0, 0))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0) + 32 - self.rect.height
+
+        self.super_jump_force = kwargs.get("super_jump_force", 4)
+
+
+# Стекло
+class Glass(pygame.sprite.Sprite):
+    def __init__(self, group, **kwargs):
+        super(Glass, self).__init__(group)

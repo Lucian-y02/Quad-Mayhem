@@ -1,4 +1,4 @@
-from wall import *
+from game_stuff import WallHorizontal, WallVertical
 
 import pygame
 

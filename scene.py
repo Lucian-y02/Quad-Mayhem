@@ -31,7 +31,8 @@ class Scene:
             "weapons": pygame.sprite.Group(),
             "bullets": pygame.sprite.Group(),
             "health_indicators": pygame.sprite.Group(),
-            "healing_boxes": pygame.sprite.Group()
+            "healing_boxes": pygame.sprite.Group(),
+            "game_stuff": pygame.sprite.Group()
         }
 
     # Добавление новой группы спрайтов
@@ -48,6 +49,9 @@ class Scene:
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_g:
                     self.grid = not self.grid
+                elif event.key == pygame.K_h:
+                    for pl in self.groups_data["players"]:
+                        pl.health_points = 100
 
     def render(self):
         self.screen.fill(self.bg_color)
@@ -112,5 +116,6 @@ if __name__ == '__main__':
     Weapon(prototype.groups_data, x=32 * 23, y=32 * 5)
     Weapon(prototype.groups_data, x=32 * 26, y=32 * 5)
     HealingBox(prototype.groups_data, x=32 * 15, y=32 * 5)
+    SuperJump(prototype.groups_data["game_stuff"], x=32 * 29, y=32 * 18)
 
     prototype.play()

@@ -1,3 +1,5 @@
+from game_stuff import HealthPointsIndicator
+
 import pygame
 
 
@@ -26,6 +28,7 @@ class Player(pygame.sprite.Sprite):
         self.speed = kwargs.get("speed", 4)  # Скорость персонажа
         self.health_points = kwargs.get("health_points", 100)
         self.groups = groups  # Словарь групп српайтов
+        HealthPointsIndicator(self.groups["health_indicators"], user=self)
 
         # Столкновение
         self.stay = False  # Определяет находится ли игрок на какой-либо опоре

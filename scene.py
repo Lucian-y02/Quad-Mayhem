@@ -44,7 +44,10 @@ class Scene:
             "gas": pygame.sprite.Group(),
             "platforms": pygame.sprite.Group(),
             "weapons": pygame.sprite.Group(),
-            "bullets": pygame.sprite.Group()
+            "bullets": pygame.sprite.Group(),
+            "health_indicators": pygame.sprite.Group(),
+            "healing_boxes": pygame.sprite.Group(),
+            "game_stuff": pygame.sprite.Group()
         }
 
         DBase('images.db')

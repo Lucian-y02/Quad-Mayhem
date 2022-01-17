@@ -113,7 +113,7 @@ if __name__ == '__main__':
     Weapon(prototype.groups_data, x=32 * 13, y=32 * 5)
     Weapon(prototype.groups_data, x=32 * 23, y=32 * 5)
     Weapon(prototype.groups_data, x=32 * 26, y=32 * 5)
-    HealingBox(prototype.groups_data, x=32 * 15, y=32 * 5)
-    SuperJump(prototype.groups_data["game_stuff"], x=32 * 29, y=32 * 18)
+    Ammo(prototype.groups_data, x=32 * 15, y=32 * 5)
+    Spikes(prototype.groups_data["game_stuff"], x=32 * 29, y=32 * 18)
 
     prototype.play()

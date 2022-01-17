@@ -29,6 +29,7 @@ class Weapon(pygame.sprite.Sprite):
         self.bullet_speed = kwargs.get("bullet_speed", 32)  # Скорость пуль
         self.can_shot = True
         self.bullet_count = kwargs.get("bullet_count", 10)
+        self.bullet_count_max = self.bullet_count  # Начальое количество пуль
 
         # Гравитация
         self.gravity_force = kwargs.get("gravity", 8)  # Ускорение свободного падения
@@ -142,7 +143,7 @@ class HealthPointsIndicator(pygame.sprite.Sprite):
 class HealingBox(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(HealingBox, self).__init__(groups["game_stuff"])
-        self.image = pygame.Surface((25, 25))
+        self.image = pygame.Surface(kwargs.get("size", (25, 25)))
         self.image.fill((0, 100, 0))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
@@ -221,3 +222,23 @@ class SuperJump(pygame.sprite.Sprite):
 class Glass(pygame.sprite.Sprite):
     def __init__(self, group, **kwargs):
         super(Glass, self).__init__(group)
+
+
+# Шипы
+class Spikes(pygame.sprite.Sprite):
+    def __init__(self, group, **kwargs):
+        super(Spikes, self).__init__(group)
+        self.image = pygame.Surface(kwargs.get("size", (32, 16)))
+        self.image.fill((175, 0, 0))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0) + 32 - self.rect.height
+
+        self.damage = kwargs.get("damage", 15)
+
+
+# Боеприпасы
+class Ammo(HealingBox):
+    def __init__(self, group, **kwargs):
+        super(Ammo, self).__init__(group, **kwargs)
+        self.image.fill((150, 150, 150))

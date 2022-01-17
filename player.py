@@ -84,13 +84,19 @@ class Player(pygame.sprite.Sprite):
 
         # Столкновене с другими игровыми объектами
         for item in self.groups["game_stuff"]:
-            if (self.rect.colliderect(item.rect) and item.__class__.__name__ == "HealingBox" and
-                    self.health_points != 100):
-                self.health_points += item.heal
-                item.kill()
-            elif self.rect.colliderect(item.rect) and item.__class__.__name__ == "SuperJump":
-                move_y -= self.jump_force * item.super_jump_force
-                self.stay = False
+            if self.rect.colliderect(item.rect):
+                if item.__class__.__name__ == "HealingBox" and self.health_points != 100:
+                    self.health_points += item.heal
+                    item.kill()
+                elif item.__class__.__name__ == "SuperJump":
+                    move_y -= self.jump_force * item.super_jump_force
+                    self.stay = False
+                elif item.__class__.__name__ == "Spikes" and not self.stay:
+                    self.health_points -= item.damage
+                elif item.__class__.__name__ == "Ammo" and self.weapon and \
+                        self.weapon.bullet_count != self.weapon.bullet_count_max:
+                    self.weapon.bullet_count = self.weapon.bullet_count_max
+                    item.kill()
 
         if self.health_points <= 0:
             try:

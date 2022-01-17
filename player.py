@@ -22,6 +22,9 @@ class Player(pygame.sprite.Sprite):
         if kwargs.get("controller", "keyboard_1") == "joystick":
             self.joystick = pygame.joystick.Joystick(0)
             self.control_function = self.joystick_check_pressing
+        elif kwargs.get("controller", "keyboard_1") == "joystick":
+            self.joystick = pygame.joystick.Joystick(1)
+            self.control_function = self.joystick_check_pressing
         elif kwargs.get("controller", "keyboard_1") == "keyboard_2":
             self.control_function = self.keyboard_2_check_pressing
 
@@ -32,6 +35,7 @@ class Player(pygame.sprite.Sprite):
 
         # Столкновение
         self.stay = False  # Определяет находится ли игрок на какой-либо опоре
+        self.jump = False  # Определяет находится ли игрок в прыжке
 
         # Оружие
         self.weapon = None  # Используемое игроком оружие
@@ -48,8 +52,9 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         # Показатели смещения
         move_x = 0
-        move_y = self.gravity - (self.jump_force if not self.stay else 0)
+        move_y = self.gravity - (self.jump_force if self.jump else 0)
 
+        self.stay = False
         # Столкновения
         for wall in self.groups["walls_horizontal"]:
             if self.rect.colliderect(wall):
@@ -57,6 +62,7 @@ class Player(pygame.sprite.Sprite):
                 if abs(self.rect.y + self.rect.height - wall.rect.y) < abs(self.rect.y -
                                                                            wall.rect.y):
                     self.stay = True
+                    self.jump = False
                     self.gravity = 0
                     self.gravity_count = 0
                     self.rect.y = wall.rect.y - self.rect.height + 1
@@ -136,6 +142,7 @@ class Player(pygame.sprite.Sprite):
         if self.joystick.get_button(0) and self.stay:
             move_y -= self.jump_force
             self.stay = False
+            self.jump = True
         if self.joystick.get_button(5) and self.weapon:
             self.weapon.shot()
         for gun in self.groups["weapons"]:
@@ -161,6 +168,7 @@ class Player(pygame.sprite.Sprite):
         if key[pygame.K_w] and self.stay:
             move_y -= self.jump_force
             self.stay = False
+            self.jump = True
         if key[pygame.K_v] and self.weapon:
             self.weapon.shot()
         for gun in self.groups["weapons"]:
@@ -186,6 +194,7 @@ class Player(pygame.sprite.Sprite):
         if key[pygame.K_UP] and self.stay:
             move_y -= self.jump_force
             self.stay = False
+            self.jump = True
         if key[pygame.K_KP3] and self.weapon:
             self.weapon.shot()
         for gun in self.groups["weapons"]:

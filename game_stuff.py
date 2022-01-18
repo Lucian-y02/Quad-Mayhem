@@ -308,6 +308,7 @@ class Weapon(pygame.sprite.Sprite):
         self.bullet_speed = kwargs.get("bullet_speed", 32)  # Скорость пуль
         self.can_shot = True
         self.bullet_count = kwargs.get("bullet_count", 10)
+        self.bullet_count_max = self.bullet_count  # Начальое количество пуль
 
         # Гравитация
         self.gravity_force = kwargs.get("gravity", 8)  # Ускорение свободного падения

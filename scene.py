@@ -1,7 +1,7 @@
 import sys
 
 from database import DBase, Table
-from game_stuff import VerticalPlatform, HorizontalPlatform, Weapon, HealingBox, Ammo
+from game_stuff import VerticalPlatform, HorizontalPlatform, Weapon, HealingBox, Ammo, Player
 from functions import create_field, load_level
 
 import pygame
@@ -140,13 +140,20 @@ class Scene:
 
 if __name__ == '__main__':
     prototype = Scene(title="Prototype", FPS=60, size=(1920, 1080))
-    list_of_players = create_field(load_level('level.txt'), prototype)
-    prototype.add_players(list_of_players)
+    spots = create_field(load_level('level.txt'), prototype)
+    players_list = list()
+    players_list.append(Player(prototype.groups_data, x=spots[0][0], y=spots[0][1],
+                               controller="keyboard_1", color="red"))
+    players_list.append(Player(prototype.groups_data, x=spots[1][0], y=spots[1][1],
+                               controller="keyboard_2", color="green"))
+    players_list.append(Player(prototype.groups_data, x=spots[2][0], y=spots[2][1],
+                               controller="joystick", color="gray"))
+    prototype.add_players(players_list)
     VerticalPlatform(prototype.groups_data, prototype.screen, x=250, y=200, y2=400, speed=1)
     HorizontalPlatform(prototype.groups_data, prototype.screen, x=1020, y=230, x2=1210, speed=1)
-    HealingBox(prototype.groups_data, x=600, y=200)
+    HealingBox(prototype.groups_data, x=600, y=500)
     Weapon(prototype.groups_data, x=32 * 13, y=32 * 5)
     Weapon(prototype.groups_data, x=32 * 23, y=32 * 5)
     Weapon(prototype.groups_data, x=32 * 26, y=32 * 5)
-    Ammo(prototype.groups_data, ddx=800, y=200)
+    Ammo(prototype.groups_data, x=800, y=500)
     prototype.play()

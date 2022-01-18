@@ -55,16 +55,12 @@ def create_field(level, prototype):  # Создание поля
                 Barrel(prototype, x=row * 32, y=col * 32)
             elif b == '-':
                 ToxicBarrel(prototype, x=row * 32, y=col * 32)
-            elif b == '=':
-                SuperJump(prototype.groups_data['game_stuff'], x=row * 32, y=col * 32)
+            # elif b == '=':
+            #     SuperJump(prototype.groups_data['game_stuff'], x=row * 32, y=col * 32, super_jump_force=6)
     prototype.teleports1 = teleports1
     prototype.teleports2 = teleports2
     shuffle(spots)
-    players.append(Player(prototype.groups_data, x=spots[0][0], y=spots[0][1],
-                   gravity=11, jump_force=19, controller="keyboard_1", color="yellow"))
-    players.append(Player(prototype.groups_data, x=spots[1][0], y=spots[1][1],
-                          gravity=11, jump_force=19, controller="keyboard_2", color="green"))
-    return players
+    return spots
 
 
 def load_level(filename):

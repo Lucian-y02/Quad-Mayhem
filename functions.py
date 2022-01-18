@@ -1,6 +1,6 @@
 from random import shuffle
 
-from objects import Player, Teleport1, Teleport2, Barrel, ToxicBarrel, SuperJump
+from game_stuff import Player, Teleport1, Teleport2, Barrel, ToxicBarrel, SuperJump
 import tools_for_creating_maps as t
 
 

@@ -149,8 +149,8 @@ if __name__ == '__main__':
     players_list.append(Player(prototype.groups_data, x=spots[2][0], y=spots[2][1],
                                controller="joystick", color="gray"))
     prototype.add_players(players_list)
-    VerticalPlatform(prototype.groups_data, prototype.screen, x=250, y=200, y2=400, speed=1)
-    HorizontalPlatform(prototype.groups_data, prototype.screen, x=1020, y=230, x2=1210, speed=1)
+    VerticalPlatform(prototype.groups_data, prototype.screen, x=250, y=200, y2=400, speed=7)
+    HorizontalPlatform(prototype.groups_data, prototype.screen, x=1020, y=230, x2=1210, speed=7)
     HealingBox(prototype.groups_data, x=600, y=500)
     Weapon(prototype.groups_data, x=32 * 13, y=32 * 5)
     Weapon(prototype.groups_data, x=32 * 23, y=32 * 5)

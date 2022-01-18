@@ -1,7 +1,7 @@
 import sys
 
 from database import DBase, Table
-from objects import VerticalPlatform, HorizontalPlatform, Weapon
+from objects import VerticalPlatform, HorizontalPlatform, Weapon, HealingBox
 from functions import create_field, load_level
 
 import pygame
@@ -144,6 +144,7 @@ if __name__ == '__main__':
     prototype.add_players(list_of_players)
     VerticalPlatform(prototype.groups_data, prototype.screen, x=250, y=200, y2=400, speed=1)
     HorizontalPlatform(prototype.groups_data, prototype.screen, x=1020, y=230, x2=1210, speed=1)
+    HealingBox(prototype.groups_data, x=600, y=200)
     Weapon(prototype.groups_data, x=32 * 13, y=32 * 5)
     Weapon(prototype.groups_data, x=32 * 23, y=32 * 5)
     Weapon(prototype.groups_data, x=32 * 26, y=32 * 5)

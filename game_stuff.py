@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, choice
 
 import pygame
 
@@ -27,9 +27,10 @@ class Weapon(pygame.sprite.Sprite):
 
         self.recoil = kwargs.get("recoil", 1)  # Отдача
         self.bullet_speed = kwargs.get("bullet_speed", 32)  # Скорость пуль
-        self.can_shot = True
-        self.bullet_count = kwargs.get("bullet_count", 10)
+        self.can_shot = True  # Возможность стрельбы
+        self.bullet_count = kwargs.get("bullet_count", 10)  # Максимальное количество пуль
         self.bullet_count_max = self.bullet_count  # Начальое количество пуль
+        self.spawner = kwargs.get("spawner", None)  # Спавнер предметов
 
         # Гравитация
         self.gravity_force = kwargs.get("gravity", 8)  # Ускорение свободного падения
@@ -199,10 +200,34 @@ class WallVertical(Wall):
         self.image = pygame.Surface(kwargs.get("size", (1, 32)))
 
 
-# Спаунер оружия
-class WeaponSpawner(pygame.sprite.Sprite):
-    def __init__(self, group, **kwargs):
-        super(WeaponSpawner, self).__init__(group)
+# Спаунер предметов
+class ItemsSpawner(pygame.sprite.Sprite):
+    def __init__(self, groups: dict, **kwargs):
+        super(ItemsSpawner, self).__init__(groups["game_stuff"])
+        self.image = pygame.Surface(kwargs.get("size", (28, 7)))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0) + 32 - self.rect.width // 2
+        self.rect.y = kwargs.get("y", 0) + 32 - self.rect.height
+
+        self.cool_down = kwargs.get("cool_down", 8)  # Интервал появления предметов
+        self.weapon_list = kwargs.get("weapon_list", [Weapon])  # Список пояляющихся предметов
+        self.weapon = kwargs.get("weapon", None)  # Находяееся в спаунере предмет
+
+        self.groups = groups
+
+        self.WEAPON_SPAWN = pygame.USEREVENT + 1
+        pygame.time.set_timer(self.WEAPON_SPAWN, 1000 * self.cool_down)
+
+    def update(self):
+        if not self.weapon:
+            pygame.time.set_timer(self.WEAPON_SPAWN, 1000 * self.cool_down)
+        for event in pygame.event.get():
+            if event.type == self.WEAPON_SPAWN:
+                chosen_weapon = choice(self.weapon_list)
+                chosen_weapon(self.groups, x=self.rect.x - self.rect.width // 2,
+                              y=self.rect.y - 24, gravity=0, spawner=self)
+                self.weapon = chosen_weapon
+                pygame.time.set_timer(self.WEAPON_SPAWN, 0)
 
 
 # Платформа для супер прыжка

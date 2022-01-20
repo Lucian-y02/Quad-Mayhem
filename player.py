@@ -156,6 +156,10 @@ class Player(pygame.sprite.Sprite):
                 except AttributeError:
                     pass
                 self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
                 self.grab_timer = 20
         return move_x, move_y
 
@@ -182,6 +186,10 @@ class Player(pygame.sprite.Sprite):
                 except AttributeError:
                     pass
                 self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
                 self.grab_timer = 20
         return move_x, move_y
 
@@ -208,6 +216,10 @@ class Player(pygame.sprite.Sprite):
                 except AttributeError:
                     pass
                 self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
                 self.grab_timer = 20
         return move_x, move_y
 

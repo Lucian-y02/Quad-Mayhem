@@ -40,8 +40,6 @@ class Scene:
         self.groups_data[name] = pygame.sprite.Group()
 
     def check_event(self):
-        for key in self.groups_data:
-            self.groups_data[key].update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT or \
                     (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
@@ -52,6 +50,8 @@ class Scene:
                 elif event.key == pygame.K_h:
                     for pl in self.groups_data["players"]:
                         pl.health_points = 100
+        for key in self.groups_data:
+            self.groups_data[key].update()
 
     def render(self):
         self.screen.fill(self.bg_color)
@@ -115,5 +115,6 @@ if __name__ == '__main__':
     Weapon(prototype.groups_data, x=32 * 26, y=32 * 5)
     Ammo(prototype.groups_data, x=32 * 15, y=32 * 5)
     Spikes(prototype.groups_data["game_stuff"], x=32 * 29, y=32 * 18)
+    ItemsSpawner(prototype.groups_data, x=32 * 25, y=32 * 18, cool_down=6)
 
     prototype.play()

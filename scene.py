@@ -79,10 +79,10 @@ class Scene:
 
 
 if __name__ == '__main__':
-    prototype = Scene(title="Prototype", FPS=60)
-    player1 = Player(prototype.groups_data, x=800, y=400, controller="keyboard_2", color="green")
+    prototype = Scene(title="Prototype", FPS=3)
+    # player1 = Player(prototype.groups_data, x=800, y=32 * 14, controller="keyboard_2", color="green")
     player2 = Player(prototype.groups_data, x=550, y=150, controller="joystick", color="blue")
-    player3 = Player(prototype.groups_data, x=200, y=100, controller="keyboard_1", color="red")
+    player3 = Player(prototype.groups_data, x=32 * 7, y=100, controller="keyboard_1", color="red")
 
     platform_left(prototype.groups_data, x=32 * 17, y=32 * 15)
     for i in range(18, 27):
@@ -93,6 +93,8 @@ if __name__ == '__main__':
     box(prototype.groups_data, x=608, y=320)
     box(prototype.groups_data, x=672, y=384)
     box(prototype.groups_data, x=768, y=416)
+    Beam(prototype.groups_data["game_stuff"], x=32 * 25, y=32 * 13)
+    Beam(prototype.groups_data["game_stuff"], x=32 * 26, y=32 * 13)
 
     platform_left(prototype.groups_data, x=32 * 20, y=32 * 19)
     for i in range(21, 30):
@@ -108,13 +110,18 @@ if __name__ == '__main__':
     left_wall(prototype.groups_data, x=32 * 17, y=32 * 9)
     platform_bottom_left(prototype.groups_data, x=32 * 10, y=32 * 10)
     platform_bottom_right(prototype.groups_data, x=32 * 17, y=32 * 10)
-    box(prototype.groups_data, x=32 * 6, y=32 * 6)
+
+    Beam(prototype.groups_data["game_stuff"], x=32 * 6, y=32 * 6)
+    Beam(prototype.groups_data["game_stuff"], x=32 * 5, y=32 * 6)
+
+    box(prototype.groups_data, x=32 * 7, y=32 * 6)
+    Beam(prototype.groups_data["game_stuff"], x=32 * 8, y=32 * 6)
 
     Weapon(prototype.groups_data, x=32 * 13, y=32 * 5)
-    Weapon(prototype.groups_data, x=32 * 23, y=32 * 5)
-    Weapon(prototype.groups_data, x=32 * 26, y=32 * 5)
+    # Weapon(prototype.groups_data, x=32 * 23, y=32 * 5)
+    # Weapon(prototype.groups_data, x=32 * 26, y=32 * 5)
     Ammo(prototype.groups_data, x=32 * 15, y=32 * 5)
     Spikes(prototype.groups_data["game_stuff"], x=32 * 29, y=32 * 18)
-    ItemsSpawner(prototype.groups_data, x=32 * 25, y=32 * 18, cool_down=6)
+    ItemsSpawner(prototype.groups_data, x=32 * 25, y=32 * 18, cool_down=2)
 
     prototype.play()

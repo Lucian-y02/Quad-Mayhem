@@ -6,6 +6,7 @@ import pygame
 pygame.init()
 
 
+# Оружие
 class Weapon(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(Weapon, self).__init__(groups["weapons"])
@@ -95,6 +96,7 @@ class Weapon(pygame.sprite.Sprite):
             self.bullet_count -= 1
 
 
+# Пуля
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(Bullet, self).__init__(groups["bullets"])
@@ -120,10 +122,11 @@ class Bullet(pygame.sprite.Sprite):
             self.kill()
 
 
+# Полоска здоровья
 class HealthPointsIndicator(pygame.sprite.Sprite):
     def __init__(self, group, **kwargs):
         super(HealthPointsIndicator, self).__init__(group)
-        self.image = pygame.Surface((40, 3))
+        self.image = pygame.Surface((30, 3))
         self.image.fill((0, 150, 0))
         self.rect = self.image.get_rect()
         self.rect.x = 0
@@ -135,7 +138,7 @@ class HealthPointsIndicator(pygame.sprite.Sprite):
         if self.user.health_points <= 0:
             self.kill()
         self.image = pygame.transform.scale(self.image,
-                                            (max(int(40 * (self.user.health_points / 100)), 0), 3))
+                                            (max(int(30 * (self.user.health_points / 100)), 0), 3))
         self.rect.x = self.user.rect.x
         self.rect.y = self.user.rect.y - 6
 
@@ -179,6 +182,7 @@ class HealingBox(pygame.sprite.Sprite):
             self.gravity_count = 0
 
 
+# Стена
 class Wall(pygame.sprite.Sprite):
     def __init__(self, group, **kwargs):
         super(Wall, self).__init__(group)
@@ -188,12 +192,14 @@ class Wall(pygame.sprite.Sprite):
         self.rect.y = kwargs.get("y", 0)
 
 
+# Горизонатльая стена
 class WallHorizontal(Wall):
     def __init__(self, group, **kwargs):
         super(WallHorizontal, self).__init__(group, **kwargs)
         self.image = pygame.Surface(kwargs.get("size", (32, 1)))
 
 
+# Вертикальная стена
 class WallVertical(Wall):
     def __init__(self, group, **kwargs):
         super(WallVertical, self).__init__(group, **kwargs)
@@ -267,3 +273,13 @@ class Ammo(HealingBox):
     def __init__(self, group, **kwargs):
         super(Ammo, self).__init__(group, **kwargs)
         self.image.fill((150, 150, 150))
+
+
+# Балка
+class Beam(pygame.sprite.Sprite):
+    def __init__(self, group, **kwargs):
+        super(Beam, self).__init__(group)
+        self.image = pygame.Surface(kwargs.get("size", (32, 16)))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)

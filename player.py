@@ -10,7 +10,7 @@ pygame.joystick.init()
 class Player(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(Player, self).__init__(groups["players"])
-        self.image = pygame.Surface((40, 60))
+        self.image = pygame.Surface(kwargs.get("size", (30, 42)))
         self.image.fill(kwargs.get("color", (50, 50, 50)))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
@@ -47,7 +47,7 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 0  # Скорость падения
 
         # Прыжок
-        self.jump_force = kwargs.get("jump", 16)
+        self.jump_force = kwargs.get("jump_force", 16)
 
     def update(self):
         # Показатели смещения
@@ -69,9 +69,14 @@ class Player(pygame.sprite.Sprite):
                     move_y = 0
                 # Потолок
                 elif self.rect.y - wall.rect.y < 0:
-                    self.gravity += self.gravity_force
-                    self.gravity_count = 1
+                    # self.gravity += self.gravity_force
+                    # self.gravity_count = 1
+                    # self.rect.y = wall.rect.y + 1
+
                     self.rect.y = wall.rect.y + 1
+                    move_y += self.jump_force * 2
+                    self.gravity_count = 1
+                    self.jump = False
         for wall in self.groups["walls_vertical"]:
             if self.rect.colliderect(wall):
                 # Левая стена
@@ -103,6 +108,17 @@ class Player(pygame.sprite.Sprite):
                         self.weapon.bullet_count != self.weapon.bullet_count_max:
                     self.weapon.bullet_count = self.weapon.bullet_count_max
                     item.kill()
+                elif item.__class__.__name__ == "Beam":
+                    # if abs(self.rect.y + self.rect.height - item.rect.y) < abs(self.rect.y -
+                    #                                                            item.rect.y):
+                    if (self.rect.height - 2) < abs(self.rect.y - item.rect.y) and \
+                            (self.gravity > self.jump_force and self.gravity != 0):
+                        self.stay = True
+                        self.jump = False
+                        self.gravity = 0
+                        self.gravity_count = 0
+                        self.rect.y = item.rect.y - self.rect.height + 1
+                        move_y = 0
 
         if self.health_points <= 0:
             try:
@@ -129,7 +145,7 @@ class Player(pygame.sprite.Sprite):
 
         # Влияния ускорения свободного падения
         self.gravity_count += 1
-        if self.gravity_count % 6 == 0:
+        if self.gravity_count % 4 == 0:
             self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 3 else 0
             self.gravity_count = 0
 

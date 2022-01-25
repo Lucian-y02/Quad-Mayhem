@@ -141,7 +141,7 @@ if __name__ == '__main__':
     Weapon(prototype.groups_data, x=32 * 10, y=32 * 5)
     Ammo(prototype.groups_data, x=32 * 12, y=32 * 5)
     Spikes(prototype.groups_data["game_stuff"], x=32 * 29, y=32 * 18)
-    ItemsSpawner(prototype.groups_data, x=32 * 25, y=32 * 18, cool_down=2)
+    ItemsSpawner(prototype.groups_data, x=32 * 25, y=32 * 18)
 
     TeamFlag(prototype.groups_data, x=32 * 16, y=32 * 5, team="1",
              end_function=prototype.end_of_game_session)

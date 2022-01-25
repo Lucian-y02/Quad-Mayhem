@@ -238,25 +238,23 @@ class ItemsSpawner(pygame.sprite.Sprite):
         self.rect.x = kwargs.get("x", 0) + 32 - self.rect.width // 2
         self.rect.y = kwargs.get("y", 0) + 32 - self.rect.height
 
-        self.cool_down = kwargs.get("cool_down", 2)  # Интервал появления предметов
+        self.cool_down = kwargs.get("cool_down", 200)  # Интервал появления предметов
         self.weapon_list = kwargs.get("weapon_list", [Weapon])  # Список пояляющихся предметов
-        self.weapon = kwargs.get("weapon", None)  # Находяееся в спаунере предмет
+        self.weapon = kwargs.get("weapon", None)  # Находящийся в спаунере предмет
 
         self.groups = groups
 
-        self.WEAPON_SPAWN = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.WEAPON_SPAWN, 1000 * self.cool_down)
+        self.timer = 0
 
     def update(self):
         if not self.weapon:
-            pygame.time.set_timer(self.WEAPON_SPAWN, 1000 * self.cool_down)
-        for event in pygame.event.get():
-            if event.type == self.WEAPON_SPAWN:
-                chosen_weapon = choice(self.weapon_list)
-                chosen_weapon(self.groups, x=self.rect.x - self.rect.width // 2,
-                              y=self.rect.y - 24, gravity=0, spawner=self)
-                self.weapon = chosen_weapon
-                pygame.time.set_timer(self.WEAPON_SPAWN, 0)
+            self.timer += 1
+        if self.timer >= self.cool_down:
+            self.timer = 0
+            chosen_weapon = choice(self.weapon_list)
+            chosen_weapon(self.groups, x=self.rect.x - self.rect.width // 2,
+                          y=self.rect.y - 24, gravity=0, spawner=self)
+            self.weapon = chosen_weapon
 
 
 # Платформа для супер прыжка

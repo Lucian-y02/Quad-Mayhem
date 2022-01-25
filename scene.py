@@ -150,6 +150,7 @@ class Scene:
         for g in range(self.height // 32):
             pygame.draw.line(self.screen, (0, 0, 200), (0, 32 * g), (self.width + 64, 32 * g))
 
+
 def menu(game):
     game.screen.fill('white')
     play_btn_coords = (400, 200)

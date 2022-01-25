@@ -126,21 +126,27 @@ class Bullet(pygame.sprite.Sprite):
 class HealthPointsIndicator(pygame.sprite.Sprite):
     def __init__(self, group, **kwargs):
         super(HealthPointsIndicator, self).__init__(group)
-        self.image = pygame.Surface((30, 3))
+        self.image = pygame.Surface(kwargs.get("size", (30, 3)))
         self.image.fill((0, 150, 0))
         self.rect = self.image.get_rect()
         self.rect.x = 0
         self.rect.y = 0
 
+        self.shift_horizontal = kwargs.get("shift_horizontal", 0)
+        self.shift_vertical = kwargs.get("shift_vertical", 6)
         self.user = kwargs.get("user", None)
+
+        self.max_health_points = kwargs.get("max_health_points", 100)
 
     def update(self):
         if self.user.health_points <= 0:
             self.kill()
         self.image = pygame.transform.scale(self.image,
-                                            (max(int(30 * (self.user.health_points / 100)), 0), 3))
-        self.rect.x = self.user.rect.x
-        self.rect.y = self.user.rect.y - 6
+                                            (max(int(self.rect.width *
+                                                     (self.user.health_points /
+                                                      self.max_health_points)), 0), 3))
+        self.rect.x = self.user.rect.x - self.shift_horizontal
+        self.rect.y = self.user.rect.y - self.shift_vertical
 
 
 # Аптечка
@@ -277,9 +283,44 @@ class Ammo(HealingBox):
 
 # Балка
 class Beam(pygame.sprite.Sprite):
-    def __init__(self, group, **kwargs):
-        super(Beam, self).__init__(group)
-        self.image = pygame.Surface(kwargs.get("size", (32, 16)))
+    def __init__(self, groups: dict, **kwargs):
+        super(Beam, self).__init__(groups["game_stuff"])
+        self.image = pygame.Surface(kwargs.get("size", (32, 15)))
+        self.image.fill((100, 100, 100))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
-        self.rect.y = kwargs.get("y", 0)
+        self.rect.y = kwargs.get("y", 0) + 1
+        WallHorizontal(groups["walls_horizontal"], x=self.rect.x, y=self.rect.y - 1)
+
+
+class TeamFlag(pygame.sprite.Sprite):
+    def __init__(self, groups: dict, **kwargs):
+        super(TeamFlag, self).__init__(groups["game_stuff"])
+        self.image = pygame.Surface(kwargs.get("size", (6, 64)))
+        self.image.fill((150, 100, 150))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0) + 16 - self.image.get_width() // 2
+        self.rect.y = kwargs.get("y", 0) + 32
+
+        self.players_data = groups["players"]
+
+        self.health_points = kwargs.get("health_points", 1000)
+        HealthPointsIndicator(groups["game_stuff"], user=self, max_health_points=1000,
+                              size=(96, 3), shift_horizontal=48 - self.rect.width // 2,
+                              shift_vertical=-67)
+        self.team = kwargs.get("team", "0")  # Чьей команде принадлежит точка
+        self.end_function = kwargs.get("end_function", None)  # Функция окончания игровой сессии
+
+        self.timer = 0
+
+    def update(self):
+        for player in self.players_data:
+            if self.rect.colliderect(player.rect) and player.team != self.team:
+                self.timer += 1
+
+        if self.timer % 1 == 0 and self.timer != 0:
+            self.health_points -= 1
+            self.timer = 0
+
+        if self.health_points <= 0:
+            self.end_function(f"team 2 win!")

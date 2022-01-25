@@ -28,14 +28,16 @@ class Player(pygame.sprite.Sprite):
         elif kwargs.get("controller", "keyboard_1") == "keyboard_2":
             self.control_function = self.keyboard_2_check_pressing
 
+        self.team = kwargs.get("team", "0")  # В какой команде находится игрок
         self.speed = kwargs.get("speed", 4)  # Скорость персонажа
         self.health_points = kwargs.get("health_points", 100)
         self.groups = groups  # Словарь групп српайтов
-        HealthPointsIndicator(self.groups["health_indicators"], user=self)
+        HealthPointsIndicator(self.groups["game_stuff"], user=self)
 
         # Столкновение
         self.stay = False  # Определяет находится ли игрок на какой-либо опоре
         self.jump = False  # Определяет находится ли игрок в прыжке
+        self.on_beam = False  # Определяет может ли игрок проходить сквозь платформу
 
         # Оружие
         self.weapon = None  # Используемое игроком оружие
@@ -61,14 +63,16 @@ class Player(pygame.sprite.Sprite):
                 # Пол
                 if abs(self.rect.y + self.rect.height - wall.rect.y) < abs(self.rect.y -
                                                                            wall.rect.y):
-                    self.stay = True
-                    self.jump = False
-                    self.gravity = 0
-                    self.gravity_count = 0
+                    if not self.on_beam:
+                        self.stay = True
+                        self.gravity = 0
+                        self.gravity_count = 0
+                        self.jump = False
+                        move_y = 0
                     self.rect.y = wall.rect.y - self.rect.height + 1
-                    move_y = 0
+
                 # Потолок
-                elif self.rect.y - wall.rect.y < 0:
+                elif self.rect.y - wall.rect.y < 0 and not self.on_beam:
                     # self.gravity += self.gravity_force
                     # self.gravity_count = 1
                     # self.rect.y = wall.rect.y + 1
@@ -93,6 +97,7 @@ class Player(pygame.sprite.Sprite):
                 self.health_points -= bullet.damage
                 bullet.kill()
 
+        self.on_beam = False
         # Столкновене с другими игровыми объектами
         for item in self.groups["game_stuff"]:
             if self.rect.colliderect(item.rect):
@@ -111,14 +116,14 @@ class Player(pygame.sprite.Sprite):
                 elif item.__class__.__name__ == "Beam":
                     # if abs(self.rect.y + self.rect.height - item.rect.y) < abs(self.rect.y -
                     #                                                            item.rect.y):
-                    if (self.rect.height - 2) < abs(self.rect.y - item.rect.y) and \
-                            (self.gravity > self.jump_force and self.gravity != 0):
-                        self.stay = True
-                        self.jump = False
-                        self.gravity = 0
-                        self.gravity_count = 0
-                        self.rect.y = item.rect.y - self.rect.height + 1
-                        move_y = 0
+                    # if (self.rect.height - 1) < abs(self.rect.y - item.rect.y):
+                    #     self.stay = True
+                    #     self.jump = False
+                    #     self.gravity = 0
+                    #     self.gravity_count = 0
+                    #     self.rect.y = item.rect.y - self.rect.height + 1
+                    #     move_y = 0
+                    self.on_beam = True
 
         if self.health_points <= 0:
             try:

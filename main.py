@@ -139,6 +139,9 @@ class CTF:
                 gas.duration -= 1
                 if gas.duration == 0:
                     gas.kill()
+            if self.draw_final_text:
+                self.screen.blit(self.pixel_font.render(self.final_text, False, (10, 10, 10)),
+                                 (self.width // 2 - 96, self.height // 2))
 
     # Основная функция сцена
     def play(self):
@@ -160,8 +163,8 @@ class CTF:
 
     def end_of_game_session(self, final_text):
         for key in self.groups_data:
-            for game_object in self.groups_data[key]:
-                game_object.kill()
+            for game_obj in self.groups_data[key]:
+                game_obj.kill()
         self.final_text = final_text
         self.draw_final_text = True
 
@@ -274,7 +277,7 @@ class FFA:
                 if gas.duration == 0:
                     gas.kill()
 
-    # Основная функция сцена
+    # Основная функция сцены
     def play(self):
         while self.game_run:
             self.check_event()
@@ -294,7 +297,7 @@ class FFA:
 
 
 def menu():
-    screen.fill('white')
+    screen.fill((200, 200, 200))
     play_btn_coords = (400, 200)
     quit_btn_coords = (800, 200)
     screen.blit(play_btn, play_btn_coords)
@@ -319,7 +322,7 @@ def menu():
 
 
 def mode_choice():
-    screen.fill('white')
+    screen.fill((200, 200, 200))
     ffa_btn_coords = (400, 200)
     ctf_btn_coords = (800, 200)
     screen.blit(ffa_btn, ffa_btn_coords)
@@ -355,4 +358,7 @@ if __name__ == '__main__':
         prototype = CTF()
         list_of_players = create_field(load_level('levelctf.txt'), prototype, 'CTF')
         prototype.add_players(list_of_players)
+        for game_object in prototype.groups_data["game_stuff"]:
+            if game_object.__class__.__name__ == "TeamFlag":
+                game_object.end_function = prototype.end_of_game_session
         prototype.play()

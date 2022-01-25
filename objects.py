@@ -449,6 +449,24 @@ class HealthPointsIndicator(pygame.sprite.Sprite):
         self.rect.y = self.user.rect.y - self.shift_vertical
 
 
+# Таймер
+class TimeIndicator(HealthPointsIndicator):
+    def __init__(self, group, **kwargs):
+        super(TimeIndicator, self).__init__(group, **kwargs)
+        self.max_time = kwargs.get("max_time", 1000)
+        self.image.fill(kwargs.get("color", (0, 0, 150)))
+
+    def update(self):
+        if self.user.time <= 0:
+            self.kill()
+        self.image = pygame.transform.scale(self.image,
+                                            (max(int(self.rect.width *
+                                                     (self.user.time /
+                                                      self.max_time)), 0), 3))
+        self.rect.x = self.user.rect.x - self.shift_horizontal
+        self.rect.y = self.user.rect.y - self.shift_vertical
+
+
 # Аптечка
 class HealingBox(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
@@ -497,25 +515,23 @@ class ItemsSpawner(pygame.sprite.Sprite):
         self.rect.x = kwargs.get("x", 0) + 32 - self.rect.width // 2
         self.rect.y = kwargs.get("y", 0) + 32 - self.rect.height
 
-        self.cool_down = kwargs.get("cool_down", 8)  # Интервал появления предметов
+        self.cool_down = kwargs.get("cool_down", 200)  # Интервал появления предметов
         self.weapon_list = kwargs.get("weapon_list", [Weapon])  # Список пояляющихся предметов
-        self.weapon = kwargs.get("weapon", None)  # Находяееся в спаунере предмет
+        self.weapon = kwargs.get("weapon", None)  # Находящийся в спаунере предмет
 
         self.groups = groups
 
-        self.WEAPON_SPAWN = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.WEAPON_SPAWN, 1000 * self.cool_down)
+        self.timer = 0
 
     def update(self):
         if not self.weapon:
-            pygame.time.set_timer(self.WEAPON_SPAWN, 1000 * self.cool_down)
-        for event in pygame.event.get():
-            if event.type == self.WEAPON_SPAWN:
-                chosen_weapon = choice(self.weapon_list)
-                chosen_weapon(self.groups, x=self.rect.x - self.rect.width // 2,
-                              y=self.rect.y - 24, gravity=0, spawner=self)
-                self.weapon = chosen_weapon
-                pygame.time.set_timer(self.WEAPON_SPAWN, 0)
+            self.timer += 1
+        if self.timer >= self.cool_down:
+            self.timer = 0
+            chosen_weapon = choice(self.weapon_list)
+            chosen_weapon(self.groups, x=self.rect.x - self.rect.width // 2,
+                          y=self.rect.y - 24, gravity=0, spawner=self)
+            self.weapon = chosen_weapon
 
 
 # Платформа для супер прыжка
@@ -578,22 +594,35 @@ class TeamFlag(pygame.sprite.Sprite):
         HealthPointsIndicator(groups["game_stuff"], user=self, max_health_points=1000,
                               size=(96, 3), shift_horizontal=48 - self.rect.width // 2,
                               shift_vertical=-67)
-        self.team = kwargs.get("team", "0")  # Чьей команде принадлежит точка
+        self.time = kwargs.get("time", 1000)
+        TimeIndicator(groups["game_stuff"], user=self, max_time=1000,
+                      size=(96, 3), shift_horizontal=48 - self.rect.width // 2,
+                      shift_vertical=-73, color=(0, 0, 150))
+
+        self.team = kwargs.get("team", "1")  # Чьей команде принадлежит точка
         self.end_function = kwargs.get("end_function", None)  # Функция окончания игровой сессии
 
-        self.timer = 0
+        self.timer_health = 0  # Уменьшение HP
+        self.simple_timer = 0  # Уменшьение времени для захвата
 
     def update(self):
+        self.simple_timer += 1
         for player in self.players_data:
             if self.rect.colliderect(player.rect) and player.team != self.team:
-                self.timer += 1
+                self.timer_health += 1
 
-        if self.timer % 1 == 0 and self.timer != 0:
+        if self.timer_health % 1 == 0 and self.timer_health != 0:
             self.health_points -= 1
-            self.timer = 0
+            self.timer_health = 0
+
+        if self.simple_timer % 6 == 0 and self.simple_timer != 0:
+            self.time -= 1
+            self.simple_timer = 0
 
         if self.health_points <= 0:
-            self.end_function(f"team 2 win!")
+            self.end_function("Команда атаки победила!")
+        elif self.time <= 0:
+            self.end_function("Команда защиты победила!")
 
 
 class Barrel(pygame.sprite.Sprite):

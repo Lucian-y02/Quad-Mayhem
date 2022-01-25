@@ -107,9 +107,9 @@ def create_field(level, prototype, name):  # Создание поля
         HorizontalPlatform(prototype.groups_data, prototype.screen, x=34 * 32, y=10 * 32, x2=29 * 32, speed=-1)
         shuffle(spots)
         players.append(Player(prototype.groups_data, x=spots[0][0], y=spots[0][1],
-                       controller="keyboard_1", color="yellow"))
+                       controller="keyboard_1", color="yellow", team="2"))
         players.append(Player(prototype.groups_data, x=spots[1][0], y=spots[1][1],
-                       controller="keyboard_2", color="green"))
+                       controller="keyboard_2", color="green", team="1"))
     elif name == 'CTF':
         HorizontalPlatform(prototype.groups_data, prototype.screen, x=9 * 32, y=13 * 32, x2=13 * 32, speed=1)
         HorizontalPlatform(prototype.groups_data, prototype.screen, x=33 * 32, y=11 * 32, x2=29 * 32, speed=-1)
@@ -117,9 +117,9 @@ def create_field(level, prototype, name):  # Создание поля
         shuffle(team2)
         print(team1, team2)
         players.append(Player(prototype.groups_data, x=team1[0][0], y=team1[0][1],
-                       controller="keyboard_1", color="yellow", team='2'))
+                       controller="keyboard_1", color="yellow", team="2"))
         players.append(Player(prototype.groups_data, x=team2[0][0], y=team2[0][1],
-                       controller="keyboard_2", color="green", team='1'))
+                       controller="keyboard_2", color="green", team="1"))
     return players
 
 

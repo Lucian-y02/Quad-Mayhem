@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, choice
 
 import pygame  # всем привет
 
@@ -59,7 +59,7 @@ class Teleport2(pygame.sprite.Sprite):
 class Player(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(Player, self).__init__(groups["players"])
-        self.image = pygame.Surface((40, 60))
+        self.image = pygame.Surface(kwargs.get("size", (30, 42)))
         self.image.fill(kwargs.get("color", (50, 50, 50)))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
@@ -71,16 +71,22 @@ class Player(pygame.sprite.Sprite):
         if kwargs.get("controller", "keyboard_1") == "joystick":
             self.joystick = pygame.joystick.Joystick(0)
             self.control_function = self.joystick_check_pressing
+        elif kwargs.get("controller", "keyboard_1") == "joystick":
+            self.joystick = pygame.joystick.Joystick(1)
+            self.control_function = self.joystick_check_pressing
         elif kwargs.get("controller", "keyboard_1") == "keyboard_2":
             self.control_function = self.keyboard_2_check_pressing
 
+        self.team = kwargs.get("team", "0")  # В какой команде находится игрок
         self.speed = kwargs.get("speed", 4)  # Скорость персонажа
         self.health_points = kwargs.get("health_points", 100)
         self.groups = groups  # Словарь групп српайтов
-        HealthPointsIndicator(self.groups["health_indicators"], user=self)
+        HealthPointsIndicator(self.groups["game_stuff"], user=self)
 
         # Столкновение
         self.stay = False  # Определяет находится ли игрок на какой-либо опоре
+        self.jump = False  # Определяет находится ли игрок в прыжке
+        self.on_beam = False  # Определяет может ли игрок проходить сквозь платформу
 
         # Оружие
         self.weapon = None  # Используемое игроком оружие
@@ -92,29 +98,38 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 0  # Скорость падения
 
         # Прыжок
-        self.jump_force = kwargs.get("jump", 16)
+        self.jump_force = kwargs.get("jump_force", 16)
 
     def update(self):
         # Показатели смещения
         move_x = 0
-        move_y = self.gravity - (self.jump_force if not self.stay else 0)
+        move_y = self.gravity - (self.jump_force if self.jump else 0)
 
+        self.stay = False
         # Столкновения
         for wall in self.groups["walls_horizontal"]:
             if self.rect.colliderect(wall):
                 # Пол
                 if abs(self.rect.y + self.rect.height - wall.rect.y) < abs(self.rect.y -
                                                                            wall.rect.y):
-                    self.stay = True
-                    self.gravity = 0
-                    self.gravity_count = 0
+                    if not self.on_beam:
+                        self.stay = True
+                        self.gravity = 0
+                        self.gravity_count = 0
+                        self.jump = False
+                        move_y = 0
                     self.rect.y = wall.rect.y - self.rect.height + 1
-                    move_y = 0
+
                 # Потолок
-                elif self.rect.y - wall.rect.y < 0:
-                    self.gravity += self.gravity_force
-                    self.gravity_count = 1
+                elif self.rect.y - wall.rect.y < 0 and not self.on_beam:
+                    # self.gravity += self.gravity_force
+                    # self.gravity_count = 1
+                    # self.rect.y = wall.rect.y + 1
+
                     self.rect.y = wall.rect.y + 1
+                    move_y += self.jump_force * 2
+                    self.gravity_count = 1
+                    self.jump = False
         for wall in self.groups["walls_vertical"]:
             if self.rect.colliderect(wall):
                 # Левая стена
@@ -131,15 +146,33 @@ class Player(pygame.sprite.Sprite):
                 self.health_points -= bullet.damage
                 bullet.kill()
 
+        self.on_beam = False
         # Столкновене с другими игровыми объектами
         for item in self.groups["game_stuff"]:
-            if (self.rect.colliderect(item.rect) and item.__class__.__name__ == "HealingBox" and
-                    self.health_points != 100):
-                self.health_points += item.heal
-                item.kill()
-            elif self.rect.colliderect(item.rect) and item.__class__.__name__ == "SuperJump":
-                move_y -= self.jump_force * item.super_jump_force
-                self.stay = False
+            if self.rect.colliderect(item.rect):
+                if item.__class__.__name__ == "HealingBox" and self.health_points != 100:
+                    self.health_points += item.heal
+                    item.kill()
+                elif item.__class__.__name__ == "SuperJump":
+                    move_y -= self.jump_force * item.super_jump_force
+                    self.stay = False
+                elif item.__class__.__name__ == "Spikes" and not self.stay:
+                    self.health_points -= item.damage
+                elif item.__class__.__name__ == "Ammo" and self.weapon and \
+                        self.weapon.bullet_count != self.weapon.bullet_count_max:
+                    self.weapon.bullet_count = self.weapon.bullet_count_max
+                    item.kill()
+                elif item.__class__.__name__ == "Beam":
+                    # if abs(self.rect.y + self.rect.height - item.rect.y) < abs(self.rect.y -
+                    #                                                            item.rect.y):
+                    # if (self.rect.height - 1) < abs(self.rect.y - item.rect.y):
+                    #     self.stay = True
+                    #     self.jump = False
+                    #     self.gravity = 0
+                    #     self.gravity_count = 0
+                    #     self.rect.y = item.rect.y - self.rect.height + 1
+                    #     move_y = 0
+                    self.on_beam = True
 
         if self.health_points <= 0:
             try:
@@ -166,7 +199,7 @@ class Player(pygame.sprite.Sprite):
 
         # Влияния ускорения свободного падения
         self.gravity_count += 1
-        if self.gravity_count % 6 == 0:
+        if self.gravity_count % 4 == 0:
             self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 3 else 0
             self.gravity_count = 0
 
@@ -179,6 +212,7 @@ class Player(pygame.sprite.Sprite):
         if self.joystick.get_button(0) and self.stay:
             move_y -= self.jump_force
             self.stay = False
+            self.jump = True
         if self.joystick.get_button(5) and self.weapon:
             self.weapon.shot()
         for gun in self.groups["weapons"]:
@@ -192,6 +226,10 @@ class Player(pygame.sprite.Sprite):
                 except AttributeError:
                     pass
                 self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
                 self.grab_timer = 20
         return move_x, move_y
 
@@ -204,6 +242,7 @@ class Player(pygame.sprite.Sprite):
         if key[pygame.K_w] and self.stay:
             move_y -= self.jump_force
             self.stay = False
+            self.jump = True
         if key[pygame.K_v] and self.weapon:
             self.weapon.shot()
         for gun in self.groups["weapons"]:
@@ -217,6 +256,10 @@ class Player(pygame.sprite.Sprite):
                 except AttributeError:
                     pass
                 self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
                 self.grab_timer = 20
         return move_x, move_y
 
@@ -229,6 +272,7 @@ class Player(pygame.sprite.Sprite):
         if key[pygame.K_UP] and self.stay:
             move_y -= self.jump_force
             self.stay = False
+            self.jump = True
         if key[pygame.K_KP3] and self.weapon:
             self.weapon.shot()
         for gun in self.groups["weapons"]:
@@ -242,6 +286,10 @@ class Player(pygame.sprite.Sprite):
                 except AttributeError:
                     pass
                 self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
                 self.grab_timer = 20
         return move_x, move_y
 
@@ -258,6 +306,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.move_ip(recoil_force, 0)
 
 
+# Оружие
 class Weapon(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(Weapon, self).__init__(groups["weapons"])
@@ -279,8 +328,10 @@ class Weapon(pygame.sprite.Sprite):
 
         self.recoil = kwargs.get("recoil", 1)  # Отдача
         self.bullet_speed = kwargs.get("bullet_speed", 32)  # Скорость пуль
-        self.can_shot = True
-        self.bullet_count = kwargs.get("bullet_count", 10)
+        self.can_shot = True  # Возможность стрельбы
+        self.bullet_count = kwargs.get("bullet_count", 10)  # Максимальное количество пуль
+        self.bullet_count_max = self.bullet_count  # Начальое количество пуль
+        self.spawner = kwargs.get("spawner", None)  # Спавнер предметов
 
         # Гравитация
         self.gravity_force = kwargs.get("gravity", 8)  # Ускорение свободного падения
@@ -345,6 +396,7 @@ class Weapon(pygame.sprite.Sprite):
             self.bullet_count -= 1
 
 
+# Пуля
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(Bullet, self).__init__(groups["bullets"])
@@ -370,31 +422,38 @@ class Bullet(pygame.sprite.Sprite):
             self.kill()
 
 
+# Полоска здоровья
 class HealthPointsIndicator(pygame.sprite.Sprite):
     def __init__(self, group, **kwargs):
         super(HealthPointsIndicator, self).__init__(group)
-        self.image = pygame.Surface((40, 3))
+        self.image = pygame.Surface(kwargs.get("size", (30, 3)))
         self.image.fill((0, 150, 0))
         self.rect = self.image.get_rect()
         self.rect.x = 0
         self.rect.y = 0
 
+        self.shift_horizontal = kwargs.get("shift_horizontal", 0)
+        self.shift_vertical = kwargs.get("shift_vertical", 6)
         self.user = kwargs.get("user", None)
+
+        self.max_health_points = kwargs.get("max_health_points", 100)
 
     def update(self):
         if self.user.health_points <= 0:
             self.kill()
         self.image = pygame.transform.scale(self.image,
-                                            (max(int(40 * (self.user.health_points / 100)), 0), 3))
-        self.rect.x = self.user.rect.x
-        self.rect.y = self.user.rect.y - 6
+                                            (max(int(self.rect.width *
+                                                     (self.user.health_points /
+                                                      self.max_health_points)), 0), 3))
+        self.rect.x = self.user.rect.x - self.shift_horizontal
+        self.rect.y = self.user.rect.y - self.shift_vertical
 
 
 # Аптечка
 class HealingBox(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(HealingBox, self).__init__(groups["game_stuff"])
-        self.image = pygame.Surface((25, 25))
+        self.image = pygame.Surface(kwargs.get("size", (25, 25)))
         self.image.fill((0, 100, 0))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
@@ -429,6 +488,37 @@ class HealingBox(pygame.sprite.Sprite):
             self.gravity_count = 0
 
 
+# Спаунер предметов
+class ItemsSpawner(pygame.sprite.Sprite):
+    def __init__(self, groups: dict, **kwargs):
+        super(ItemsSpawner, self).__init__(groups["game_stuff"])
+        self.image = pygame.Surface(kwargs.get("size", (28, 7)))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0) + 32 - self.rect.width // 2
+        self.rect.y = kwargs.get("y", 0) + 32 - self.rect.height
+
+        self.cool_down = kwargs.get("cool_down", 8)  # Интервал появления предметов
+        self.weapon_list = kwargs.get("weapon_list", [Weapon])  # Список пояляющихся предметов
+        self.weapon = kwargs.get("weapon", None)  # Находяееся в спаунере предмет
+
+        self.groups = groups
+
+        self.WEAPON_SPAWN = pygame.USEREVENT + 1
+        pygame.time.set_timer(self.WEAPON_SPAWN, 1000 * self.cool_down)
+
+    def update(self):
+        if not self.weapon:
+            pygame.time.set_timer(self.WEAPON_SPAWN, 1000 * self.cool_down)
+        for event in pygame.event.get():
+            if event.type == self.WEAPON_SPAWN:
+                chosen_weapon = choice(self.weapon_list)
+                chosen_weapon(self.groups, x=self.rect.x - self.rect.width // 2,
+                              y=self.rect.y - 24, gravity=0, spawner=self)
+                self.weapon = chosen_weapon
+                pygame.time.set_timer(self.WEAPON_SPAWN, 0)
+
+
+# Платформа для супер прыжка
 class SuperJump(pygame.sprite.Sprite):
     def __init__(self, group, **kwargs):
         super(SuperJump, self).__init__(group)
@@ -439,6 +529,71 @@ class SuperJump(pygame.sprite.Sprite):
         self.rect.y = kwargs.get("y", 0) + 32 - self.rect.height
 
         self.super_jump_force = kwargs.get("super_jump_force", 4)
+
+
+# Шипы
+class Spikes(pygame.sprite.Sprite):
+    def __init__(self, group, **kwargs):
+        super(Spikes, self).__init__(group)
+        self.image = pygame.Surface(kwargs.get("size", (32, 16)))
+        self.image.fill((175, 0, 0))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0) + 32 - self.rect.height
+
+        self.damage = kwargs.get("damage", 15)
+
+
+# Боеприпасы
+class Ammo(HealingBox):
+    def __init__(self, group, **kwargs):
+        super(Ammo, self).__init__(group, **kwargs)
+        self.image.fill((150, 150, 150))
+
+
+# Балка
+class Beam(pygame.sprite.Sprite):
+    def __init__(self, groups: dict, **kwargs):
+        super(Beam, self).__init__(groups["game_stuff"])
+        self.image = pygame.Surface(kwargs.get("size", (32, 15)))
+        self.image.fill((100, 100, 100))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0) + 1
+        WallHorizontal(groups["walls_horizontal"], x=self.rect.x, y=self.rect.y - 1)
+
+
+class TeamFlag(pygame.sprite.Sprite):
+    def __init__(self, groups: dict, **kwargs):
+        super(TeamFlag, self).__init__(groups["game_stuff"])
+        self.image = pygame.Surface(kwargs.get("size", (6, 64)))
+        self.image.fill((150, 100, 150))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0) + 16 - self.image.get_width() // 2
+        self.rect.y = kwargs.get("y", 0) + 32
+
+        self.players_data = groups["players"]
+
+        self.health_points = kwargs.get("health_points", 1000)
+        HealthPointsIndicator(groups["game_stuff"], user=self, max_health_points=1000,
+                              size=(96, 3), shift_horizontal=48 - self.rect.width // 2,
+                              shift_vertical=-67)
+        self.team = kwargs.get("team", "0")  # Чьей команде принадлежит точка
+        self.end_function = kwargs.get("end_function", None)  # Функция окончания игровой сессии
+
+        self.timer = 0
+
+    def update(self):
+        for player in self.players_data:
+            if self.rect.colliderect(player.rect) and player.team != self.team:
+                self.timer += 1
+
+        if self.timer % 1 == 0 and self.timer != 0:
+            self.health_points -= 1
+            self.timer = 0
+
+        if self.health_points <= 0:
+            self.end_function(f"team 2 win!")
 
 
 class Barrel(pygame.sprite.Sprite):
@@ -512,10 +667,10 @@ class HorizontalPlatform(pygame.sprite.Sprite):
         if self.speed < 0:
             self.going = False
         self.list = list()
-        self.list.append(WallHorizontal(group=groups['walls_horizontal'], x=self.x + 4, y=self.y, size=(48, 1)))
-        self.list.append(WallHorizontal(group=groups['walls_horizontal'], x=self.x + 4, y=self.y + 31, size=(48, 1)))
+        self.list.append(WallHorizontal(group=groups['walls_horizontal'], x=self.x + 1, y=self.y, size=(62, 1)))
+        self.list.append(WallHorizontal(group=groups['walls_horizontal'], x=self.x + 1, y=self.y + 29, size=(62, 1)))
         self.list.append(WallVertical(group=groups['walls_vertical'], x=self.x, y=self.y + 1, size=(1, 30)))
-        self.list.append(WallVertical(group=groups['walls_vertical'], x=self.x + 55, y=self.y + 1, size=(1, 30)))
+        self.list.append(WallVertical(group=groups['walls_vertical'], x=self.x + 64, y=self.y + 1, size=(1, 28)))
 
     def update(self):
         for platform in self.list:
@@ -542,10 +697,10 @@ class VerticalPlatform(pygame.sprite.Sprite):
         if self.speed < 0:
             self.going = False
         self.list = list()
-        self.list.append(WallHorizontal(group=groups['walls_horizontal'], x=self.x + 4, y=self.y, size=(48, 1)))
-        self.list.append(WallHorizontal(group=groups['walls_horizontal'], x=self.x + 4, y=self.y + 31, size=(48, 1)))
+        self.list.append(WallHorizontal(group=groups['walls_horizontal'], x=self.x + 1, y=self.y, size=(62, 1)))
+        self.list.append(WallHorizontal(group=groups['walls_horizontal'], x=self.x + 1, y=self.y + 29, size=(62, 1)))
         self.list.append(WallVertical(group=groups['walls_vertical'], x=self.x, y=self.y + 1, size=(1, 30)))
-        self.list.append(WallVertical(group=groups['walls_vertical'], x=self.x + 55, y=self.y + 1, size=(1, 30)))
+        self.list.append(WallVertical(group=groups['walls_vertical'], x=self.x + 64, y=self.y + 1, size=(1, 28)))
 
     def update(self):
         for platform in self.list:

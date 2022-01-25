@@ -70,7 +70,7 @@ class Scene:
             self.draw_grid()
         if self.draw_final_text:
             self.screen.blit(self.pixel_font.render(self.final_text, False, (10, 10, 10)),
-                             (self.width // 2 - 64, self.height // 2))
+                             (self.width // 2 - 96, self.height // 2))
 
     # Основная функция сцена
     def play(self):

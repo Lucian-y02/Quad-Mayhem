@@ -78,26 +78,17 @@ class Table:
 if __name__ == '__main__':
     DBase('images.db')
     screen = pg.display.set_mode((400, 400))
-    image1 = pg.image.load("gas_normal.png")
-    image2 = pg.image.load("gas_toxic.png")
-    Table('images').put_image(1, image1)
-    Table('images').put_image(2, image2)
+    image1 = pg.image.load("pause_button.png")
+    Table('images').put_image(8, image1)
     DBase().commit()
-    curr_image = image1 = Table('images').get_image(1)[1].convert()
-    image2 = Table('images').get_image(2)[2].convert()
+    curr_image = image1 = Table('images').get_image(8)[8].convert()
     image1.set_colorkey('white')
-    image2.set_colorkey('white')
     flag = True
     while flag:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 flag = False
                 break
-            if event.type == pg.KEYDOWN:
-                if event.key == pg.K_RIGHT:
-                    curr_image = image2
-                if event.key == pg.K_LEFT:
-                    curr_image = image1
         screen.fill('blue')
         screen.blit(curr_image, (100, 100))
         pg.display.flip()

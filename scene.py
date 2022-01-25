@@ -65,7 +65,6 @@ class Scene:
         self.pause_btn.set_colorkey('white')
         self.images = [self.normal_gas, self.toxic_gas]
 
-        self.pause = None
         self.stop = False
 
     def add_players(self, players):  # Создание списка игроков
@@ -151,10 +150,6 @@ class Scene:
         for g in range(self.height // 32):
             pygame.draw.line(self.screen, (0, 0, 200), (0, 32 * g), (self.width + 64, 32 * g))
 
-    def set_pause(self, pause):
-        self.pause = pause
-
-
 def menu(game):
     game.screen.fill('white')
     play_btn_coords = (400, 200)
@@ -216,7 +211,6 @@ if __name__ == '__main__':
     mode_choice(prototype)
     list_of_players = create_field(load_level('level.txt'), prototype)
     prototype.add_players(list_of_players)
-    prototype.set_pause(Pause(prototype, x=1280, y=0, size=(50, 50)))
     VerticalPlatform(prototype.groups_data, prototype.screen, x=250, y=200, y2=400, speed=1)
     HorizontalPlatform(prototype.groups_data, prototype.screen, x=1020, y=230, x2=1210, speed=1)
     Weapon(prototype.groups_data, x=32 * 13, y=32 * 5)

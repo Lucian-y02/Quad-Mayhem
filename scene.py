@@ -1,7 +1,7 @@
 import sys
 
 from database import DBase, Table
-from objects import VerticalPlatform, HorizontalPlatform, Weapon, Pause
+from objects import VerticalPlatform, HorizontalPlatform, Weapon
 from functions import create_field, load_level
 
 import pygame

@@ -77,11 +77,11 @@ class Table:
 
 if __name__ == '__main__':
     DBase('images.db')
-    screen = pg.display.set_mode((400, 400))
-    image1 = pg.image.load("pause_button.png")
-    Table('images').put_image(8, image1)
+    screen = pg.display.set_mode((900, 800))
+    image1 = pg.image.load("pause.png")
+    Table('images').put_image(9, image1)
     DBase().commit()
-    curr_image = image1 = Table('images').get_image(8)[8].convert()
+    curr_image = image1 = Table('images').get_image(9)[9].convert()
     image1.set_colorkey('white')
     flag = True
     while flag:

@@ -17,7 +17,13 @@ ffa_btn = Table('images').get_image(5)[5].convert()
 ctf_btn = Table('images').get_image(6)[6].convert()
 tdm_btn = Table('images').get_image(7)[7].convert()
 pause_btn = Table('images').get_image(8)[8].convert()
+pause = Table('images').get_image(9)[9].convert()
 normal_gas.set_colorkey('white')
 toxic_gas.set_colorkey('white')
 pause_btn.set_colorkey('white')
 images = [normal_gas, toxic_gas]
+
+btn1_coords = (418, 347)
+btn2_coords = (756, 347)
+btn3_coords = (418, 448)
+btn4_coords = (754, 448)

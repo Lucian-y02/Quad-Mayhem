@@ -115,7 +115,6 @@ def create_field(level, prototype, name):  # Создание поля
         HorizontalPlatform(prototype, prototype.screen, x=33 * 32, y=11 * 32, x2=29 * 32, speed=-1)
         shuffle(team1)
         shuffle(team2)
-        print(team1, team2)
         players.append(Player(prototype.groups_data, x=team1[0][0], y=team1[0][1],
                        controller="keyboard_1", color="yellow", team="2"))
         players.append(Player(prototype.groups_data, x=team2[0][0], y=team2[0][1],

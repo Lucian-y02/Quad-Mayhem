@@ -18,6 +18,8 @@ class CTF:
         self.final_text = "The end"
         self.draw_final_text = False
 
+        self.result = ''
+
         self.clock = pygame.time.Clock()
         self.game_run = True
 
@@ -74,6 +76,23 @@ class CTF:
                     self.FPS = 3 if self.FPS == 60 else 60
                 elif event.key == pygame.K_o:
                     self.end_of_game_session("The end")
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.stop:
+                    coords = event.pos
+                    if btn1_coords[0] < coords[0] < btn1_coords[0] + 200 and \
+                            btn1_coords[1] < coords[1] < btn1_coords[1] + 60:
+                        self.result = 'МЕНЮ'
+                        self.game_run = False
+                    elif btn2_coords[0] < coords[0] < btn2_coords[0] + 200 and \
+                            btn2_coords[1] < coords[1] < btn2_coords[1] + 60:
+                        self.result = 'ЗАНОВО'
+                        self.game_run = False
+                    elif btn3_coords[0] < coords[0] < btn3_coords[0] + 200 and \
+                            btn3_coords[1] < coords[1] < btn3_coords[1] + 60:
+                        self.stop = False
+                    elif btn4_coords[0] < coords[0] < btn4_coords[0] + 200 and \
+                            btn4_coords[1] < coords[1] < btn4_coords[1] + 60:
+                        sys.exit(pygame.quit())
 
     def update(self):
         if not self.stop:
@@ -125,6 +144,8 @@ class CTF:
             if self.draw_final_text:
                 self.screen.blit(self.pixel_font.render(self.final_text, False, (10, 10, 10)),
                                  (self.width // 2 - 96, self.height // 2))
+        elif self.stop:
+            self.screen.blit(pause, (384, 184))
 
     # Основная функция сцена
     def play(self):
@@ -135,8 +156,6 @@ class CTF:
                 self.update()
             pygame.display.flip()
             self.clock.tick(self.FPS)
-        pygame.quit()
-        sys.exit()
 
     # Рисование сетки
     def draw_grid(self):
@@ -179,6 +198,8 @@ class FFA:
         self.players = None
         self.horizontal_platforms = list()
 
+        self.result = ''
+
         self.teleport_timer2 = self.teleport_timer = kwargs.get("teleport_cooldown", 120)
         # Игровые объекты
         self.groups_data = {
@@ -212,10 +233,35 @@ class FFA:
             if event.type == pygame.QUIT or \
                     (event.type == pygame.KEYDOWN and event.key == pygame.K_DELETE):
                 self.game_run = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.stop:
+                    coords = event.pos
+                    if btn1_coords[0] < coords[0] < btn1_coords[0] + 200 and \
+                            btn1_coords[1] < coords[1] < btn1_coords[1] + 60:
+                        self.result = 'МЕНЮ'
+                        self.game_run = False
+                    elif btn2_coords[0] < coords[0] < btn2_coords[0] + 200 and \
+                            btn2_coords[1] < coords[1] < btn2_coords[1] + 60:
+                        self.result = 'ЗАНОВО'
+                        self.game_run = False
+                    elif btn3_coords[0] < coords[0] < btn3_coords[0] + 200 and \
+                            btn3_coords[1] < coords[1] < btn3_coords[1] + 60:
+                        self.stop = False
+                    elif btn4_coords[0] < coords[0] < btn4_coords[0] + 200 and \
+                            btn4_coords[1] < coords[1] < btn4_coords[1] + 60:
+                        sys.exit(pygame.quit())
             if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
                 self.grid = not self.grid
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.stop = not self.stop
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_g:
+                    self.grid = not self.grid
+                elif event.key == pygame.K_h:
+                    for pl in self.groups_data["players"]:
+                        pl.health_points = 100
+                elif event.key == pygame.K_f:
+                    self.FPS = 3 if self.FPS == 60 else 60
 
     def update(self):
         if not self.stop:
@@ -264,6 +310,8 @@ class FFA:
                 gas.duration -= 1
                 if gas.duration == 0:
                     gas.kill()
+        elif self.stop:
+            self.screen.blit(pause, (384, 184))
 
     # Основная функция сцены
     def play(self):
@@ -274,8 +322,6 @@ class FFA:
                 self.update()
             pygame.display.flip()
             self.clock.tick(self.FPS)
-        pygame.quit()
-        sys.exit()
 
     def draw_grid(self):
         for j in range(self.width // 32 + 3):
@@ -337,16 +383,33 @@ def mode_choice():
 if __name__ == '__main__':
     menu()
     mode = mode_choice()
-    if mode == 'FFA':
-        prototype = FFA()
-        list_of_players = create_field(load_level('levelffa.txt'), prototype, 'FFA')
-        prototype.add_players(list_of_players)
-        prototype.play()
-    elif mode == 'CTF':
-        prototype = CTF()
-        list_of_players = create_field(load_level('levelctf.txt'), prototype, 'CTF')
-        prototype.add_players(list_of_players)
-        for game_object in prototype.groups_data["game_stuff"]:
-            if game_object.__class__.__name__ == "TeamFlag":
-                game_object.end_function = prototype.end_of_game_session
-        prototype.play()
+    while 1:
+        if mode == 'FFA':
+            prototype = FFA()
+            list_of_players = create_field(load_level('levelffa.txt'), prototype, 'FFA')
+            prototype.add_players(list_of_players)
+            prototype.play()
+        else:
+            prototype = CTF()
+            list_of_players = create_field(load_level('levelctf.txt'), prototype, 'CTF')
+            prototype.add_players(list_of_players)
+            for game_object in prototype.groups_data["game_stuff"]:
+                if game_object.__class__.__name__ == "TeamFlag":
+                    game_object.end_function = prototype.end_of_game_session
+            prototype.play()
+        if prototype.result == 'МЕНЮ':
+            menu()
+            mode = mode_choice()
+        elif prototype.result == 'ЗАНОВО':
+            if mode == 'FFA':
+                prototype = FFA()
+                list_of_players = create_field(load_level('levelffa.txt'), prototype, 'FFA')
+                prototype.add_players(list_of_players)
+                prototype.play()
+            else:
+                prototype = CTF()
+                list_of_players = create_field(load_level('levelctf.txt'), prototype, 'CTF')
+                prototype.add_players(list_of_players)
+                for game_object in prototype.groups_data["game_stuff"]:
+                    if game_object.__class__.__name__ == "TeamFlag":
+                        game_object.end_function = prototype.end_of_game_session

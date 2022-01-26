@@ -1,5 +1,7 @@
 from random import randint, choice
 
+from constants import *
+
 import pygame  # всем привет
 
 
@@ -21,6 +23,10 @@ class WallHorizontal(Wall):
         super(WallHorizontal, self).__init__(group, **kwargs)
         self.image = pygame.Surface(kwargs.get("size", (32, 1)))
         self.mask = pygame.mask.from_surface(self.image)
+        self.speed = 0
+
+    def set_speed(self, speed):
+        self.speed = speed
 
 
 class WallVertical(Wall):
@@ -661,20 +667,20 @@ class ToxicBarrel(pygame.sprite.Sprite):
         collision = pygame.sprite.spritecollideany(self, self.prototype.groups_data['bullets'])
         if collision:
             self.prototype.gas.append(Gas(self.prototype.groups_data['gas'], 'toxic',
-                                          self.prototype.images, x=self.rect.x - 46,
+                                          images, x=self.rect.x - 46,
                                           y=self.rect.y - 38, duration=120))
             self.kill()
             collision.kill()
 
 
 class Gas(pygame.sprite.Sprite):
-    def __init__(self, group, mode, images, **kwargs):
+    def __init__(self, group, mode, class_images, **kwargs):
         super(Gas, self).__init__(group)
         self.max_size = kwargs.get("size", (108, 108))
         if mode == 'normal':
-            self.image = images[0]
+            self.image = class_images[0]
         elif mode == 'toxic':
-            self.image = images[1]
+            self.image = class_images[1]
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
@@ -685,9 +691,9 @@ class Gas(pygame.sprite.Sprite):
 
 
 class HorizontalPlatform(pygame.sprite.Sprite):
-    def __init__(self, groups: dict, screen: pygame.Surface, **kwargs):
-        super(HorizontalPlatform, self).__init__(groups['platforms'])
-        self.screen = screen
+    def __init__(self, prototype, class_screen: pygame.Surface, **kwargs):
+        super(HorizontalPlatform, self).__init__(prototype.groups_data['platforms'])
+        self.screen = class_screen
         self.going = True
         self.x = kwargs.get("x", 0)
         self.y = kwargs.get("y", 0)
@@ -696,12 +702,19 @@ class HorizontalPlatform(pygame.sprite.Sprite):
         if self.speed < 0:
             self.going = False
         self.list = list()
-        self.list.append(WallHorizontal(group=groups['walls_horizontal'], x=self.x + 1, y=self.y, size=(62, 1)))
-        self.list.append(WallHorizontal(group=groups['walls_horizontal'], x=self.x + 1, y=self.y + 29, size=(62, 1)))
-        self.list.append(WallVertical(group=groups['walls_vertical'], x=self.x, y=self.y + 1, size=(1, 30)))
-        self.list.append(WallVertical(group=groups['walls_vertical'], x=self.x + 64, y=self.y + 1, size=(1, 28)))
+        a = WallHorizontal(group=prototype.groups_data['walls_horizontal'], speed=self.speed,
+                           x=self.x + 1, y=self.y, size=(62, 1))
+        self.list.append(a)
+        prototype.horizontal_platforms.append(a)
+        self.list.append(WallHorizontal(group=prototype.groups_data['walls_horizontal'],
+                                        x=self.x + 1, y=self.y + 29, size=(62, 1)))
+        self.list.append(WallVertical(group=prototype.groups_data['walls_vertical'],
+                                      x=self.x, y=self.y + 1, size=(1, 28)))
+        self.list.append(WallVertical(group=prototype.groups_data['walls_vertical'],
+                                      x=self.x + 64, y=self.y + 1, size=(1, 28)))
 
     def update(self):
+        self.list[0].set_speed(self.speed)
         for platform in self.list:
             platform.rect.move_ip(self.speed, 0)
         if self.going and (self.x2 <= self.list[-1].rect.x):
@@ -715,9 +728,9 @@ class HorizontalPlatform(pygame.sprite.Sprite):
 
 
 class VerticalPlatform(pygame.sprite.Sprite):
-    def __init__(self, groups: dict, screen: pygame.Surface, **kwargs):
+    def __init__(self, groups: dict, class_screen: pygame.Surface, **kwargs):
         super(VerticalPlatform, self).__init__(groups['platforms'])
-        self.screen = screen
+        self.screen = class_screen
         self.going = True
         self.x = kwargs.get("x", 0)
         self.y = kwargs.get("y", 0)

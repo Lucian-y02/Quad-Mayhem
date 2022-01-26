@@ -1,30 +1,9 @@
 import sys
 
-from database import DBase, Table
 from functions import create_field, load_level
+from constants import *
 
 import pygame
-
-
-pygame.init()
-size = width, height = (1280, 800)
-FPS = 60
-bg_color = 200, 200, 200
-screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
-pygame.display.set_caption("Quad Mayhem")
-DBase('images.db')
-normal_gas = Table('images').get_image(1)[1].convert()
-toxic_gas = Table('images').get_image(2)[2].convert()
-play_btn = Table('images').get_image(3)[3].convert()
-quit_btn = Table('images').get_image(4)[4].convert()
-ffa_btn = Table('images').get_image(5)[5].convert()
-ctf_btn = Table('images').get_image(6)[6].convert()
-tdm_btn = Table('images').get_image(7)[7].convert()
-pause_btn = Table('images').get_image(8)[8].convert()
-normal_gas.set_colorkey('white')
-toxic_gas.set_colorkey('white')
-pause_btn.set_colorkey('white')
-images = [normal_gas, toxic_gas]
 
 
 class CTF:
@@ -49,6 +28,7 @@ class CTF:
         self.teleport2 = None
         self.draw_teleport = True  # Рисовать ли телепорт
         self.players = None
+        self.horizontal_platforms = list()
 
         self.teleport_timer2 = self.teleport_timer = kwargs.get("teleport_cooldown", 120)
         # Игровые объекты
@@ -116,6 +96,9 @@ class CTF:
                     self.teleports1.append(self.teleport1)
                     self.teleports2.remove(self.teleport2)
                     self.teleports2.append(self.teleport2)
+                for platform in self.horizontal_platforms:
+                    if pygame.sprite.collide_mask(gamer, platform):
+                        gamer.rect.x += platform.speed
 
     def render(self):
         if not self.stop:
@@ -148,7 +131,8 @@ class CTF:
         while self.game_run:
             self.check_event()
             self.render()
-
+            if self.teleports1 and self.teleports2:
+                self.update()
             pygame.display.flip()
             self.clock.tick(self.FPS)
         pygame.quit()
@@ -193,6 +177,7 @@ class FFA:
         self.teleport2 = None
         self.draw_teleport = True  # Рисовать ли телепорт
         self.players = None
+        self.horizontal_platforms = list()
 
         self.teleport_timer2 = self.teleport_timer = kwargs.get("teleport_cooldown", 120)
         # Игровые объекты
@@ -253,6 +238,9 @@ class FFA:
                     self.teleports1.append(self.teleport1)
                     self.teleports2.remove(self.teleport2)
                     self.teleports2.append(self.teleport2)
+                for platform in self.horizontal_platforms:
+                    if pygame.sprite.collide_mask(gamer, platform):
+                        gamer.rect.x += platform.speed
 
     def render(self):
         if not self.stop:

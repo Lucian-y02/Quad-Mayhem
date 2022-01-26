@@ -101,18 +101,18 @@ def create_field(level, prototype, name):  # Создание поля
     prototype.teleports1 = teleports1
     prototype.teleports2 = teleports2
     if name == 'FFA':
-        HorizontalPlatform(prototype.groups_data, prototype.screen, x=11 * 32, y=6 * 32, x2=16 * 32, speed=1)
-        HorizontalPlatform(prototype.groups_data, prototype.screen, x=35 * 32, y=6 * 32, x2=30 * 32, speed=-1)
-        HorizontalPlatform(prototype.groups_data, prototype.screen, x=12 * 32, y=10 * 32, x2=17 * 32, speed=1)
-        HorizontalPlatform(prototype.groups_data, prototype.screen, x=34 * 32, y=10 * 32, x2=29 * 32, speed=-1)
+        HorizontalPlatform(prototype, prototype.screen, x=11 * 32, y=6 * 32, x2=16 * 32, speed=1)
+        HorizontalPlatform(prototype, prototype.screen, x=35 * 32, y=6 * 32, x2=30 * 32, speed=-1)
+        HorizontalPlatform(prototype, prototype.screen, x=12 * 32, y=10 * 32, x2=17 * 32, speed=1)
+        HorizontalPlatform(prototype, prototype.screen, x=34 * 32, y=10 * 32, x2=29 * 32, speed=-1)
         shuffle(spots)
         players.append(Player(prototype.groups_data, x=spots[0][0], y=spots[0][1],
                        controller="keyboard_1", color="yellow", team="2"))
         players.append(Player(prototype.groups_data, x=spots[1][0], y=spots[1][1],
                        controller="keyboard_2", color="green", team="1"))
     elif name == 'CTF':
-        HorizontalPlatform(prototype.groups_data, prototype.screen, x=9 * 32, y=13 * 32, x2=13 * 32, speed=1)
-        HorizontalPlatform(prototype.groups_data, prototype.screen, x=33 * 32, y=11 * 32, x2=29 * 32, speed=-1)
+        HorizontalPlatform(prototype, prototype.screen, x=9 * 32, y=13 * 32, x2=13 * 32, speed=1)
+        HorizontalPlatform(prototype, prototype.screen, x=33 * 32, y=11 * 32, x2=29 * 32, speed=-1)
         shuffle(team1)
         shuffle(team2)
         print(team1, team2)

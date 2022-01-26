@@ -100,10 +100,10 @@ class Scene:
 
 if __name__ == '__main__':
     prototype = Scene(title="Prototype", FPS=60)
-    player2 = Player(prototype.groups_data, x=550, y=150, controller="joystick", color="blue",
-                     team="2")
-    player3 = Player(prototype.groups_data, x=32 * 7, y=100, controller="keyboard_1", color="red",
-                     team="1")
+    player2 = Player(prototype.groups_data, x=32 * 25, y=32 * 11, controller="joystick", color="blue",
+                     team="2", screen=prototype.screen, lives=5)
+    player3 = Player(prototype.groups_data, x=32 * 7, y=32 * 5, controller="keyboard_2", color="red",
+                     team="1", screen=prototype.screen, lives=5)
 
     platform_left(prototype.groups_data, x=32 * 17, y=32 * 15)
     for i in range(18, 27):
@@ -136,11 +136,12 @@ if __name__ == '__main__':
     Beam(prototype.groups_data, x=32 * 5, y=32 * 6)
 
     box(prototype.groups_data, x=32 * 7, y=32 * 6)
+    box(prototype.groups_data, 32 * 30, y=32 * 17)
     Beam(prototype.groups_data, x=32 * 8, y=32 * 6)
 
     Weapon(prototype.groups_data, x=32 * 10, y=32 * 5)
     Ammo(prototype.groups_data, x=32 * 12, y=32 * 5)
-    Spikes(prototype.groups_data["game_stuff"], x=32 * 29, y=32 * 18)
+    Spikes(prototype.groups_data["game_stuff"], x=32 * 22, y=32 * 18)
     ItemsSpawner(prototype.groups_data, x=32 * 25, y=32 * 18)
 
     TeamFlag(prototype.groups_data, x=32 * 16, y=32 * 5, team="1",

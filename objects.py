@@ -65,11 +65,12 @@ class Teleport2(pygame.sprite.Sprite):
 class Player(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(Player, self).__init__(groups["players"])
+        self.pixel_font = pygame.font.Font("PixelFont.ttf", 26)
         self.image = pygame.Surface(kwargs.get("size", (30, 42)))
         self.image.fill(kwargs.get("color", (50, 50, 50)))
         self.rect = self.image.get_rect()
-        self.rect.x = kwargs.get("x", 0)
-        self.rect.y = kwargs.get("y", 0)
+        self.rect.x = kwargs.get("x", 0) + 1
+        self.rect.y = kwargs.get("y", 0) - self.rect.height + 33
         self.mirror = kwargs.get("mirror", False)
 
         # Определение, чем урпавляется пересонаж
@@ -83,9 +84,18 @@ class Player(pygame.sprite.Sprite):
         elif kwargs.get("controller", "keyboard_1") == "keyboard_2":
             self.control_function = self.keyboard_2_check_pressing
 
+        # Возрождение
+        self.lives = kwargs.get("lives", -1) - 1  # Количество возрождений
+        # Места, где игрок может возродиться
+        self.recovery_places = kwargs.get("recovery_places",
+                                          [(kwargs.get("x", 0), kwargs.get("y", 0) - 32)])
+        self.killing_zone = kwargs.get("killing_zone", 800)
+
+        self.screen = kwargs.get("screen", None)
         self.team = kwargs.get("team", "0")  # В какой команде находится игрок
         self.speed = kwargs.get("speed", 4)  # Скорость персонажа
-        self.health_points = kwargs.get("health_points", 100)
+        self.max_health_points = kwargs.get("max_health_points", 100)
+        self.health_points = self.max_health_points
         self.groups = groups  # Словарь групп српайтов
         HealthPointsIndicator(self.groups["game_stuff"], user=self)
 
@@ -133,9 +143,8 @@ class Player(pygame.sprite.Sprite):
                     # self.rect.y = wall.rect.y + 1
 
                     self.rect.y = wall.rect.y + 1
-                    move_y += self.jump_force * 2
                     self.gravity_count = 1
-                    self.jump = False
+                    self.jump = False if self.gravity <= self.gravity_force else True
         for wall in self.groups["walls_vertical"]:
             if self.rect.colliderect(wall):
                 # Левая стена
@@ -157,7 +166,8 @@ class Player(pygame.sprite.Sprite):
         for item in self.groups["game_stuff"]:
             if self.rect.colliderect(item.rect):
                 if item.__class__.__name__ == "HealingBox" and self.health_points != 100:
-                    self.health_points += item.heal
+                    self.health_points += min(item.heal,
+                                              self.max_health_points - self.health_points)
                     item.kill()
                 elif item.__class__.__name__ == "SuperJump":
                     move_y -= self.jump_force * item.super_jump_force
@@ -180,12 +190,23 @@ class Player(pygame.sprite.Sprite):
                     #     move_y = 0
                     self.on_beam = True
 
-        if self.health_points <= 0:
+        # Уничтожение игрока
+        if self.health_points <= 0 or self.rect.y > self.killing_zone:
             try:
                 self.weapon.user = None
             except AttributeError:
                 pass
-            self.kill()
+            self.weapon = None
+            if self.lives != 0:
+                self.lives -= 1
+                self.recovery()
+            else:
+                self.kill()
+
+        # Отображение количества жизней у игрока
+        if self.lives > 0:
+            self.screen.blit(self.pixel_font.render(str(self.lives), False, (10, 10, 10)),
+                             (self.rect.x + 1, self.rect.y - 16))
 
         # Отслеживание нажатий
         move_x, move_y = self.control_function(move_x, move_y)
@@ -205,8 +226,8 @@ class Player(pygame.sprite.Sprite):
 
         # Влияния ускорения свободного падения
         self.gravity_count += 1
-        if self.gravity_count % 4 == 0:
-            self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 3 else 0
+        if self.gravity_count == 4 and self.gravity_count != 0:
+            self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 2 else 0
             self.gravity_count = 0
 
         # Таймеры
@@ -299,12 +320,20 @@ class Player(pygame.sprite.Sprite):
                 self.grab_timer = 20
         return move_x, move_y
 
+    # Возрождение
+    def recovery(self):
+        self.health_points = self.max_health_points
+        chosen_place = choice(self.recovery_places)  # Выбранное место возраждения
+        self.rect.x = chosen_place[0] + 1
+        self.rect.y = chosen_place[1] - self.rect.height + 33
+        self.gravity = 0
+        self.gravity_count = 0
+        self.stay = False
+        self.jump = False
+        self.on_beam = False
+
     # Способность 1
     def ability_1(self):
-        pass
-
-    # Способность 2
-    def ability_2(self):
         pass
 
     # Отдача от оружия
@@ -646,7 +675,7 @@ class Barrel(pygame.sprite.Sprite):
         collision = pygame.sprite.spritecollideany(self, self.prototype.groups_data['bullets'])
         if collision:
             self.prototype.gas.append(Gas(self.prototype.groups_data['gas'], 'normal',
-                                          self.prototype.images, x=self.rect.x - 46,
+                                          images, x=self.rect.x - 46,
                                           y=self.rect.y - 38, duration=30))
             self.kill()
             collision.kill()
@@ -686,6 +715,7 @@ class Gas(pygame.sprite.Sprite):
         self.rect.y = kwargs.get("y", 0)
         self.duration = kwargs.get("duration", 120)
         self.appear = True
+        self.mode = mode
         self.size = 1
         self.image = pygame.transform.scale(self.image, self.max_size)
 

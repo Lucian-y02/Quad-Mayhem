@@ -92,9 +92,9 @@ def create_field(level, prototype, name):  # Создание поля
             elif b == '3':
                 HealingBox(prototype.groups_data, x=row * 32, y=col * 32)
             elif b == '4' and name == 'CTF':
-                team1.append((row * 32, col * 32))
-            elif b == '5' and name == 'CTF':
                 team2.append((row * 32, col * 32))
+            elif b == '5' and name == 'CTF':
+                team1.append((row * 32, col * 32))
             elif b == '6':
                 TeamFlag(prototype.groups_data, x=row*32, y=col*32, team='1')
 
@@ -107,18 +107,18 @@ def create_field(level, prototype, name):  # Создание поля
         HorizontalPlatform(prototype, prototype.screen, x=34 * 32, y=10 * 32, x2=29 * 32, speed=-1)
         shuffle(spots)
         players.append(Player(prototype.groups_data, x=spots[0][0], y=spots[0][1],
-                       controller="keyboard_1", color="yellow", team="2"))
+                       controller="keyboard_1", color="yellow", team="2", screen=prototype.screen))
         players.append(Player(prototype.groups_data, x=spots[1][0], y=spots[1][1],
-                       controller="keyboard_2", color="green", team="1"))
+                       controller="keyboard_2", color="green", team="1", screen=prototype.screen))
     elif name == 'CTF':
-        HorizontalPlatform(prototype, prototype.screen, x=9 * 32, y=13 * 32, x2=13 * 32, speed=1)
-        HorizontalPlatform(prototype, prototype.screen, x=33 * 32, y=11 * 32, x2=29 * 32, speed=-1)
+        HorizontalPlatform(prototype, prototype.screen, x=9 * 32, y=11 * 32, x2=13 * 32, speed=1)
         shuffle(team1)
         shuffle(team2)
         players.append(Player(prototype.groups_data, x=team1[0][0], y=team1[0][1],
-                       controller="keyboard_1", color="yellow", team="2"))
+                       controller="keyboard_1", color="yellow", team="1", screen=prototype.screen))
         players.append(Player(prototype.groups_data, x=team2[0][0], y=team2[0][1],
-                       controller="keyboard_2", color="green", team="1"))
+                       controller="keyboard_2", color="green", team="2", screen=prototype.screen))
+        TeamFlag(prototype.groups_data, x=32 * 26, y=32 * 8)
     return players
 
 

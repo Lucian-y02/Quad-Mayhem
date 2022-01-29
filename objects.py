@@ -547,7 +547,7 @@ class ItemsSpawner(pygame.sprite.Sprite):
         super(ItemsSpawner, self).__init__(groups["game_stuff"])
         self.image = pygame.Surface(kwargs.get("size", (28, 7)))
         self.rect = self.image.get_rect()
-        self.rect.x = kwargs.get("x", 0) + 32 - self.rect.width // 2
+        self.rect.x = kwargs.get("x", 0) + (32 - self.rect.width) // 2
         self.rect.y = kwargs.get("y", 0) + 32 - self.rect.height
 
         self.cool_down = kwargs.get("cool_down", 200)  # Интервал появления предметов

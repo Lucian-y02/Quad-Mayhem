@@ -2,6 +2,7 @@ import sys
 
 from functions import create_field, load_level
 from constants import *
+from objects import Mouse, Button
 
 import pygame
 
@@ -380,6 +381,72 @@ def mode_choice():
         clock.tick(60)
 
 
+def hero_choice():
+    screen.fill((200, 200, 200))
+    group = pygame.sprite.Group()
+    draw_group = pygame.sprite.Group()
+    mouse = Mouse(group)
+    first_row_coords = [(209, 346), (453, 346), (702, 346), (951, 346)]
+    second_row_coords = [(209, 419), (454, 419), (702, 419), (953, 419)]
+    third_row_coords = [(209, 500), (454, 500), (701, 500), (951, 500)]
+
+    btn_attack = Button(attack_btn, draw_group, x=first_row_coords[0][0], y=first_row_coords[0][1])
+    btn_attack2 = Button(attack_btn, draw_group, x=first_row_coords[1][0], y=first_row_coords[1][1])
+    btn_attack3 = Button(attack_btn, draw_group, x=first_row_coords[2][0], y=first_row_coords[2][1])
+    btn_attack4 = Button(attack_btn, draw_group, x=first_row_coords[3][0], y=first_row_coords[3][1])
+
+    attack_buttons = [btn_attack, btn_attack2, btn_attack3, btn_attack4]
+
+    btn_def = Button(def_btn, draw_group, x=second_row_coords[0][0], y=second_row_coords[0][1])
+    btn_def2 = Button(def_btn, draw_group, x=second_row_coords[1][0], y=second_row_coords[1][1])
+    btn_def3 = Button(def_btn, draw_group, x=second_row_coords[2][0], y=second_row_coords[2][1])
+    btn_def4 = Button(def_btn, draw_group, x=second_row_coords[3][0], y=second_row_coords[3][1])
+
+    defence_buttons = [btn_def, btn_def2, btn_def3, btn_def4]
+
+    btn_not = Button(not_in_btn, draw_group, x=third_row_coords[0][0], y=third_row_coords[0][1])
+    btn_not2 = Button(not_in_btn, draw_group, x=third_row_coords[1][0], y=third_row_coords[1][1])
+    btn_not3 = Button(not_in_btn, draw_group, x=third_row_coords[2][0], y=third_row_coords[2][1])
+    btn_not4 = Button(not_in_btn, draw_group, x=third_row_coords[3][0], y=third_row_coords[3][1])
+
+    not_in_buttons = [btn_not, btn_not2, btn_not3, btn_not4]
+
+    result = {0: None, 1: None, 2: None, 3: None}
+
+    flag = True
+
+    clock = pygame.time.Clock()
+    running = True
+
+    start = None
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or \
+                    (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                sys.exit(pygame.quit())
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for i in range(0, 4):
+                    if pygame.sprite.collide_mask(mouse, not_in_buttons[i]):
+                        result[i] = 'NO'
+                    elif pygame.sprite.collide_mask(mouse, defence_buttons[i]):
+                        result[i] = 'DEF'
+                    if pygame.sprite.collide_mask(mouse, attack_buttons[i]):
+                        result[i] = 'ATT'
+                if start:
+                    if pygame.sprite.collide_mask(mouse, start):
+                        return result
+            if event.type == pygame.MOUSEMOTION:
+                mouse.update(event.pos[0], event.pos[1])
+        if all(result.values()) and flag:
+            flag = False
+            start = Button(start_btn, draw_group, x=534, y=585)
+        screen.blit(hero_choicing, (184, 84))
+        draw_group.draw(screen)
+        pygame.display.flip()
+        clock.tick(60)
+
+
 if __name__ == '__main__':
     menu()
     mode = mode_choice()
@@ -390,6 +457,7 @@ if __name__ == '__main__':
             prototype.add_players(list_of_players)
             prototype.play()
         else:
+            hero_choice()
             prototype = CTF()
             list_of_players = create_field(load_level('levelctf.txt'), prototype, 'CTF')
             prototype.add_players(list_of_players)

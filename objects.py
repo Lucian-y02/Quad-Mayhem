@@ -9,6 +9,39 @@ pygame.init()
 pygame.joystick.init()
 
 
+class Mouse(pygame.sprite.Sprite):
+    def __init__(self, group):
+        super(Mouse, self).__init__(group)
+        self.image = pygame.Surface((1, 1))
+        self.rect = self.image.get_rect()
+
+    def update(self, x, y):
+        self.rect.x = x
+        self.rect.y = y
+
+
+class Button(pygame.sprite.Sprite):
+    def __init__(self, image, group, **kwargs):
+        super(Button, self).__init__(group)
+        self.image = image
+        self.size = kwargs.get("size", None)
+        if self.size:
+            self.image = pygame.transform.scale(self.image, size)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)
+
+    def btn_not_clicked(self):
+        pass
+
+    def btn_def_clicked(self):
+        pass
+
+    def btn_attack_clicked(self):
+        pass
+
+
 class Wall(pygame.sprite.Sprite):
     def __init__(self, group, **kwargs):
         super(Wall, self).__init__(group)

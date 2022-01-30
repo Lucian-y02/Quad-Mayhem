@@ -74,8 +74,6 @@ class CTF:
                 elif event.key == pygame.K_h:
                     for pl in self.groups_data["players"]:
                         pl.health_points = 100
-                elif event.key == pygame.K_f:
-                    self.FPS = 3 if self.FPS == 60 else 60
                 elif event.key == pygame.K_o:
                     self.end_of_game_session("The end")
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -173,8 +171,8 @@ class CTF:
         self.final_text = final_text
         self.draw_final_text = True
 
-    def add_players(self, players):  # Создание списка игроков
-        self.players = players
+    def add_players(self, list_players):  # Создание списка игроков
+        self.players = list_players
 
 
 class FFA:
@@ -262,8 +260,6 @@ class FFA:
                 elif event.key == pygame.K_h:
                     for pl in self.groups_data["players"]:
                         pl.health_points = 100
-                elif event.key == pygame.K_f:
-                    self.FPS = 3 if self.FPS == 60 else 60
 
     def update(self):
         if not self.stop:
@@ -483,36 +479,36 @@ if __name__ == '__main__':
             players = list()
             if heroes[0] == '1':
                 players.append(Jasper(prototype.groups_data, x=team1[0][0], y=team1[0][1],
-                               controller="keyboard_1", color="red", team='1', screen=prototype.screen,
+                               controller="keyboard_1", color="red", team='2', screen=prototype.screen,
                                cool_down=2000, recovery_places=team1))
             elif heroes[0] == '2':
                 players.append(Jasper(prototype.groups_data, x=team2[0][0], y=team2[0][1],
-                                      controller="keyboard_2", color="red", team='2', screen=prototype.screen,
+                                      controller="keyboard_2", color="red", team='1', screen=prototype.screen,
                                       cool_down=2000, recovery_places=team2))
             if heroes[1] == '1':
                 players.append(Adam(prototype.groups_data, x=team1[0][0], y=team1[0][1],
-                                    controller="keyboard_1", color="yellow", team='1', screen=prototype.screen,
-                                    cool_down=2000, recovery_places=team1))
+                                    controller="keyboard_1", color="yellow", team='2', screen=prototype.screen,
+                                    cool_down=1000, recovery_places=team1))
             elif heroes[1] == '2':
                 players.append(Adam(prototype.groups_data, x=team2[0][0], y=team2[0][1],
-                                    controller="keyboard_2", color="yellow", team='2', screen=prototype.screen,
-                                    cool_down=2000, recovery_places=team2))
+                                    controller="keyboard_2", color="yellow", team='1', screen=prototype.screen,
+                                    cool_down=1000, recovery_places=team2))
             if heroes[2] == '1':
                 players.append(Vincent(prototype.groups_data, x=team1[0][0], y=team1[0][1],
-                                       controller="keyboard_1", color="blue", team='1', screen=prototype.screen,
-                                       cool_down=2000, recovery_places=team1))
+                                       controller="keyboard_1", color="blue", team='2', screen=prototype.screen,
+                                       cool_down=3000, recovery_places=team1))
             elif heroes[2] == '2':
                 players.append(Vincent(prototype.groups_data, x=team2[0][0], y=team2[0][1],
-                                       controller="keyboard_2", color="blue", team='2', screen=prototype.screen,
-                                       cool_down=2000, recovery_places=team2))
+                                       controller="keyboard_2", color="blue", team='1', screen=prototype.screen,
+                                       cool_down=3000, recovery_places=team2))
             if heroes[3] == '1':
                 players.append(Guido(prototype.groups_data, x=team1[0][0], y=team1[0][1],
-                                     controller="keyboard_1", color="green", team='1', screen=prototype.screen,
-                                     cool_down=2000, recovery_places=team1))
+                                     controller="keyboard_1", color="green", team='2', screen=prototype.screen,
+                                     cool_down=4000, recovery_places=team1))
             elif heroes[3] == '2':
                 players.append(Guido(prototype.groups_data, x=team2[0][0], y=team2[0][1],
-                                     controller="keyboard_2", color="green", team='2', screen=prototype.screen,
-                                     cool_down=2000, recovery_places=team2))
+                                     controller="keyboard_2", color="green", team='1', screen=prototype.screen,
+                                     cool_down=4000, recovery_places=team2))
             prototype.add_players(players)
             for game_object in prototype.groups_data["game_stuff"]:
                 if game_object.__class__.__name__ == "TeamFlag":

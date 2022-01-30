@@ -82,7 +82,7 @@ class Weapon(pygame.sprite.Sprite):
                 self.can_shot = False
                 break
         for door in self.groups["doors"]:
-            if self.second_rect.colliderect(door.rect):
+            if self.second_rect.colliderect(door.rect) and not door.is_open:
                 self.can_shot = False
                 break
         if self.shot_timer == 0 and self.can_shot and self.bullet_count != 0:
@@ -135,9 +135,7 @@ class Bullet(pygame.sprite.Sprite):
         if (pygame.sprite.spritecollideany(self, self.groups["walls_vertical"]) or
                 pygame.sprite.spritecollideany(self, self.groups["walls_horizontal"]) or
                 (0 >= self.rect.x >= 2000) or ((0 + self.rect.height) >= self.rect.y >= 1500) or
-                abs(self.rect.x - self.old_x) >= self.distance or
-                (not self.through_the_doors and
-                 pygame.sprite.spritecollideany(self, self.groups["doors"]))):
+                abs(self.rect.x - self.old_x) >= self.distance):
             self.kill()
 
 
@@ -494,10 +492,27 @@ class TurretOfGuido(pygame.sprite.Sprite):
 
 
 class Door(pygame.sprite.Sprite):
-    def __init__(self, group, **kwargs):
-        super(Door, self).__init__(group)
+    def __init__(self, groups: dict, **kwargs):
+        super(Door, self).__init__(groups["doors"])
         self.image = pygame.Surface(kwargs.get("size", (24, 64)))
         self.image.fill(kwargs.get("color", (100, 100, 100)))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0) + (32 - self.rect.width) // 2
         self.rect.y = kwargs.get("y", 0)
+
+        # Игроки
+        self.players_data = groups["players"]
+
+        # Пули
+        self.bullets = groups["bullets"]
+
+        # Открыта или закрыта
+        self.is_open = kwargs.get("is_open", False)
+
+    def update(self):
+        self.is_open = True if pygame.sprite.spritecollideany(self, self.players_data) else False
+
+        for bullet in self.bullets:
+            if (self.rect.colliderect(bullet.rect) and not self.is_open and
+                    not bullet.through_the_doors):
+                bullet.kill()

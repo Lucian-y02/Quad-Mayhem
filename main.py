@@ -429,7 +429,7 @@ def hero_choice():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for i in range(0, 4):
                     if pygame.sprite.collide_mask(mouse, not_in_buttons[i]):
-                        result[i] = 'NO'
+                        result[i] = 'NOT'
                         chosen_btns[i] = not_in_buttons[i]
                     elif pygame.sprite.collide_mask(mouse, defence_buttons[i]):
                         result[i] = 'DEF'

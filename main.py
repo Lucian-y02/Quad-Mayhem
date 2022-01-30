@@ -484,37 +484,35 @@ if __name__ == '__main__':
             if heroes[0] == '1':
                 players.append(Jasper(prototype.groups_data, x=team1[0][0], y=team1[0][1],
                                controller="keyboard_1", color="red", team='1', screen=prototype.screen,
-                               lives=5, cool_down=2000, recovery_places=team1))
+                               cool_down=2000, recovery_places=team1))
             elif heroes[0] == '2':
                 players.append(Jasper(prototype.groups_data, x=team2[0][0], y=team2[0][1],
                                       controller="keyboard_2", color="red", team='2', screen=prototype.screen,
-                                      lives=5, cool_down=2000, recovery_places=team2))
+                                      cool_down=2000, recovery_places=team2))
             if heroes[1] == '1':
                 players.append(Adam(prototype.groups_data, x=team1[0][0], y=team1[0][1],
                                     controller="keyboard_1", color="yellow", team='1', screen=prototype.screen,
-                                    lives=5, cool_down=2000, recovery_places=team1))
+                                    cool_down=2000, recovery_places=team1))
             elif heroes[1] == '2':
                 players.append(Adam(prototype.groups_data, x=team2[0][0], y=team2[0][1],
                                     controller="keyboard_2", color="yellow", team='2', screen=prototype.screen,
-                                    lives=5, cool_down=2000, recovery_places=team2))
+                                    cool_down=2000, recovery_places=team2))
             if heroes[2] == '1':
                 players.append(Vincent(prototype.groups_data, x=team1[0][0], y=team1[0][1],
                                        controller="keyboard_1", color="blue", team='1', screen=prototype.screen,
-                                       lives=5, cool_down=2000, recovery_places=team1))
+                                       cool_down=2000, recovery_places=team1))
             elif heroes[2] == '2':
                 players.append(Vincent(prototype.groups_data, x=team2[0][0], y=team2[0][1],
                                        controller="keyboard_2", color="blue", team='2', screen=prototype.screen,
-                                       lives=5, cool_down=2000, recovery_places=team2))
+                                       cool_down=2000, recovery_places=team2))
             if heroes[3] == '1':
                 players.append(Guido(prototype.groups_data, x=team1[0][0], y=team1[0][1],
                                      controller="keyboard_1", color="green", team='1', screen=prototype.screen,
-                                     lives=5, cool_down=2000, recovery_places=team1))
+                                     cool_down=2000, recovery_places=team1))
             elif heroes[3] == '2':
                 players.append(Guido(prototype.groups_data, x=team2[0][0], y=team2[0][1],
                                      controller="keyboard_2", color="green", team='2', screen=prototype.screen,
-                                     lives=5, cool_down=2000, recovery_places=team2))
-            print(team1, team2)
-            print(team1[0][0] / 32, team1[0][1] / 32, team2[0][0] / 32, team2[0][1] / 32)
+                                     cool_down=2000, recovery_places=team2))
             prototype.add_players(players)
             for game_object in prototype.groups_data["game_stuff"]:
                 if game_object.__class__.__name__ == "TeamFlag":

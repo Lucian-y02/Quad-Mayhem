@@ -2,7 +2,8 @@ import sys
 
 from functions import create_field, load_level
 from constants import *
-from objects import Mouse, Button
+from game_stuff import Mouse, Button
+from player import Jasper, Guido, Adam, Vincent
 
 import pygame
 
@@ -219,8 +220,8 @@ class FFA:
         }
         self.stop = False
 
-    def add_players(self, players):  # Создание списка игроков
-        self.players = players
+    def add_players(self, list_players):  # Создание списка игроков
+        self.players = list_players
 
     # Добавление новой группы спрайтов
     def add_group(self, name):
@@ -429,13 +430,13 @@ def hero_choice():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for i in range(0, 4):
                     if pygame.sprite.collide_mask(mouse, not_in_buttons[i]):
-                        result[i] = 'NOT'
+                        result[i] = '3'
                         chosen_btns[i] = not_in_buttons[i]
                     elif pygame.sprite.collide_mask(mouse, defence_buttons[i]):
-                        result[i] = 'DEF'
+                        result[i] = '2'
                         chosen_btns[i] = defence_buttons[i]
                     if pygame.sprite.collide_mask(mouse, attack_buttons[i]):
-                        result[i] = 'ATT'
+                        result[i] = '1'
                         chosen_btns[i] = attack_buttons[i]
                 if start:
                     if pygame.sprite.collide_mask(mouse, start):
@@ -476,10 +477,45 @@ if __name__ == '__main__':
             prototype.add_players(list_of_players)
             prototype.play()
         else:
-            hero_choice()
+            heroes = hero_choice()
             prototype = CTF()
-            list_of_players = create_field(load_level('levelctf.txt'), prototype, 'CTF')
-            prototype.add_players(list_of_players)
+            team1, team2 = create_field(load_level('levelctf.txt'), prototype, 'CTF')
+            players = list()
+            if heroes[0] == '1':
+                players.append(Jasper(prototype.groups_data, x=team1[0][0], y=team1[0][1],
+                               controller="keyboard_1", color="red", team='1', screen=prototype.screen,
+                               lives=5, cool_down=2000, recovery_places=team1))
+            elif heroes[0] == '2':
+                players.append(Jasper(prototype.groups_data, x=team2[0][0], y=team2[0][1],
+                                      controller="keyboard_2", color="red", team='2', screen=prototype.screen,
+                                      lives=5, cool_down=2000, recovery_places=team2))
+            if heroes[1] == '1':
+                players.append(Adam(prototype.groups_data, x=team1[0][0], y=team1[0][1],
+                                    controller="keyboard_1", color="yellow", team='1', screen=prototype.screen,
+                                    lives=5, cool_down=2000, recovery_places=team1))
+            elif heroes[1] == '2':
+                players.append(Adam(prototype.groups_data, x=team2[0][0], y=team2[0][1],
+                                    controller="keyboard_2", color="yellow", team='2', screen=prototype.screen,
+                                    lives=5, cool_down=2000, recovery_places=team2))
+            if heroes[2] == '1':
+                players.append(Vincent(prototype.groups_data, x=team1[0][0], y=team1[0][1],
+                                       controller="keyboard_1", color="blue", team='1', screen=prototype.screen,
+                                       lives=5, cool_down=2000, recovery_places=team1))
+            elif heroes[2] == '2':
+                players.append(Vincent(prototype.groups_data, x=team2[0][0], y=team2[0][1],
+                                       controller="keyboard_2", color="blue", team='2', screen=prototype.screen,
+                                       lives=5, cool_down=2000, recovery_places=team2))
+            if heroes[3] == '1':
+                players.append(Guido(prototype.groups_data, x=team1[0][0], y=team1[0][1],
+                                     controller="keyboard_1", color="green", team='1', screen=prototype.screen,
+                                     lives=5, cool_down=2000, recovery_places=team1))
+            elif heroes[3] == '2':
+                players.append(Guido(prototype.groups_data, x=team2[0][0], y=team2[0][1],
+                                     controller="keyboard_2", color="green", team='2', screen=prototype.screen,
+                                     lives=5, cool_down=2000, recovery_places=team2))
+            print(team1, team2)
+            print(team1[0][0] / 32, team1[0][1] / 32, team2[0][0] / 32, team2[0][1] / 32)
+            prototype.add_players(players)
             for game_object in prototype.groups_data["game_stuff"]:
                 if game_object.__class__.__name__ == "TeamFlag":
                     game_object.end_function = prototype.end_of_game_session

@@ -1,6 +1,6 @@
 from random import shuffle
 
-from objects import *
+from game_stuff import *
 import tools_for_creating_maps as t
 
 
@@ -106,20 +106,13 @@ def create_field(level, prototype, name):  # Создание поля
         HorizontalPlatform(prototype, prototype.screen, x=12 * 32, y=10 * 32, x2=17 * 32, speed=1)
         HorizontalPlatform(prototype, prototype.screen, x=34 * 32, y=10 * 32, x2=29 * 32, speed=-1)
         shuffle(spots)
-        players.append(Player(prototype.groups_data, x=spots[0][0], y=spots[0][1],
-                       controller="keyboard_1", color="yellow", team="2", screen=prototype.screen))
-        players.append(Player(prototype.groups_data, x=spots[1][0], y=spots[1][1],
-                       controller="keyboard_2", color="green", team="1", screen=prototype.screen))
+        return spots
     elif name == 'CTF':
         HorizontalPlatform(prototype, prototype.screen, x=9 * 32, y=11 * 32, x2=13 * 32, speed=1)
         shuffle(team1)
         shuffle(team2)
-        players.append(Player(prototype.groups_data, x=team1[0][0], y=team1[0][1],
-                       controller="keyboard_1", color="yellow", team="1", screen=prototype.screen))
-        players.append(Player(prototype.groups_data, x=team2[0][0], y=team2[0][1],
-                       controller="keyboard_2", color="green", team="2", screen=prototype.screen))
         TeamFlag(prototype.groups_data, x=32 * 26, y=32 * 8)
-    return players
+        return team1, team2
 
 
 def load_level(filename):

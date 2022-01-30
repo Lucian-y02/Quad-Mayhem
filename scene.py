@@ -35,6 +35,7 @@ class Scene:
             "bullets": pygame.sprite.Group(),
             "healing_boxes": pygame.sprite.Group(),
             "game_stuff": pygame.sprite.Group(),
+            "doors": pygame.sprite.Group(),
             "weapons": pygame.sprite.Group()
         }
 
@@ -111,6 +112,7 @@ if __name__ == '__main__':
     box(prototype.groups_data, x=640, y=352)
     box(prototype.groups_data, x=608, y=320)
     box(prototype.groups_data, x=672, y=384)
+    Door(prototype.groups_data["doors"], x=672, y=416)
     box(prototype.groups_data, x=768, y=416)
     Beam(prototype.groups_data, x=32 * 25, y=32 * 13)
     Beam(prototype.groups_data, x=32 * 26, y=32 * 13)

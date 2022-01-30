@@ -77,11 +77,14 @@ class Weapon(pygame.sprite.Sprite):
 
     def shot(self):
         self.can_shot = True
-        if pygame.sprite.spritecollideany(self, self.groups["walls_vertical"]):
-            for wall in self.groups["walls_vertical"]:
-                if self.second_rect.colliderect(wall.rect):
-                    self.can_shot = False
-                    break
+        for wall in self.groups["walls_vertical"]:
+            if self.second_rect.colliderect(wall.rect):
+                self.can_shot = False
+                break
+        for door in self.groups["doors"]:
+            if self.second_rect.colliderect(door.rect):
+                self.can_shot = False
+                break
         if self.shot_timer == 0 and self.can_shot and self.bullet_count != 0:
             if not self.mirror:
                 Bullet(self.groups, x=self.rect.x + self.rect.width - self.bullet_speed,
@@ -123,13 +126,18 @@ class Bullet(pygame.sprite.Sprite):
         # Урон
         self.damage = kwargs.get("damage", 25)
 
+        # Может ли пуля проходить сквозь двери
+        self.through_the_doors = kwargs.get("through_the_doors", False)
+
     def update(self):
         self.rect.move_ip(self.speed, self.scatter)
 
         if (pygame.sprite.spritecollideany(self, self.groups["walls_vertical"]) or
                 pygame.sprite.spritecollideany(self, self.groups["walls_horizontal"]) or
                 (0 >= self.rect.x >= 2000) or ((0 + self.rect.height) >= self.rect.y >= 1500) or
-                abs(self.rect.x - self.old_x) >= self.distance):
+                abs(self.rect.x - self.old_x) >= self.distance or
+                (not self.through_the_doors and
+                 pygame.sprite.spritecollideany(self, self.groups["doors"]))):
             self.kill()
 
 
@@ -483,3 +491,13 @@ class TurretOfGuido(pygame.sprite.Sprite):
 
         self.time -= self.decay_rate
         self.shot_time += 1
+
+
+class Door(pygame.sprite.Sprite):
+    def __init__(self, group, **kwargs):
+        super(Door, self).__init__(group)
+        self.image = pygame.Surface(kwargs.get("size", (24, 64)))
+        self.image.fill(kwargs.get("color", (100, 100, 100)))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0) + (32 - self.rect.width) // 2
+        self.rect.y = kwargs.get("y", 0)

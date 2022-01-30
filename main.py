@@ -412,6 +412,7 @@ def hero_choice():
     not_in_buttons = [btn_not, btn_not2, btn_not3, btn_not4]
 
     result = {0: None, 1: None, 2: None, 3: None}
+    chosen_btns = {0: None, 1: None, 2: None, 3: None}
 
     flag = True
 
@@ -429,10 +430,13 @@ def hero_choice():
                 for i in range(0, 4):
                     if pygame.sprite.collide_mask(mouse, not_in_buttons[i]):
                         result[i] = 'NO'
+                        chosen_btns[i] = not_in_buttons[i]
                     elif pygame.sprite.collide_mask(mouse, defence_buttons[i]):
                         result[i] = 'DEF'
+                        chosen_btns[i] = defence_buttons[i]
                     if pygame.sprite.collide_mask(mouse, attack_buttons[i]):
                         result[i] = 'ATT'
+                        chosen_btns[i] = attack_buttons[i]
                 if start:
                     if pygame.sprite.collide_mask(mouse, start):
                         return result
@@ -441,6 +445,21 @@ def hero_choice():
         if all(result.values()) and flag:
             flag = False
             start = Button(start_btn, draw_group, x=534, y=585)
+        for i in not_in_buttons:
+            if i not in chosen_btns.values():
+                i.set_image(not_in_btn)
+            else:
+                i.set_image(not_in_btn_light)
+        for i in defence_buttons:
+            if i not in chosen_btns.values():
+                i.set_image(def_btn)
+            else:
+                i.set_image(def_btn_light)
+        for i in attack_buttons:
+            if i not in chosen_btns.values():
+                i.set_image(attack_btn)
+            else:
+                i.set_image(attack_btn_light)
         screen.blit(hero_choicing, (184, 84))
         draw_group.draw(screen)
         pygame.display.flip()

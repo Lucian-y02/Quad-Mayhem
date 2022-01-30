@@ -32,6 +32,11 @@ class Button(pygame.sprite.Sprite):
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
 
+    def set_image(self, image):
+        self.image = image
+        if self.size:
+            self.image = pygame.transform.scale(self.image, size)
+
     def btn_not_clicked(self):
         pass
 

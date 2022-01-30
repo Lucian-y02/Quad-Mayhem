@@ -1,6 +1,7 @@
 from random import choice
 
-from game_stuff import HealthPointsIndicator
+from game_stuff import HealthPointsIndicator, TimeIndicator, JasperProtect, \
+    VincentPoisonRay, TurretOfGuido
 
 import pygame
 
@@ -20,6 +21,9 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = kwargs.get("y", 0) - self.rect.height + 33
         self.mirror = kwargs.get("mirror", False)
 
+        # Защита игрока
+        self.protect = kwargs.get("protect", None)
+
         # Определение, чем урпавляется пересонаж
         self.control_function = self.keyboard_1_check_pressing
         if kwargs.get("controller", "keyboard_1") == "joystick":
@@ -38,13 +42,16 @@ class Player(pygame.sprite.Sprite):
                                           [(kwargs.get("x", 0), kwargs.get("y", 0) - 32)])
         self.killing_zone = kwargs.get("killing_zone", 800)
 
+        # Возможность нанесения урона
+        self.immortal = kwargs.get("immortal", False)
+
         self.screen = kwargs.get("screen", None)
         self.team = kwargs.get("team", "0")  # В какой команде находится игрок
         self.speed = kwargs.get("speed", 4)  # Скорость персонажа
         self.max_health_points = kwargs.get("max_health_points", 100)
         self.health_points = self.max_health_points
         self.groups = groups  # Словарь групп српайтов
-        HealthPointsIndicator(self.groups["game_stuff"], user=self)
+        HealthPointsIndicator(self.groups["game_stuff"], user=self, shift_vertical=9)
 
         # Столкновение
         self.stay = False  # Определяет находится ли игрок на какой-либо опоре
@@ -62,6 +69,14 @@ class Player(pygame.sprite.Sprite):
 
         # Прыжок
         self.jump_force = kwargs.get("jump_force", 16)
+
+        # Восстановление способности
+        self.cool_down_of_ability = kwargs.get("cool_down", 1000)
+        self.timer = TimeIndicator(self.groups["game_stuff"],
+                                   user=self, max_time=self.cool_down_of_ability,
+                                   color=(0, 0, 200))
+        self.time = 1
+        self.ability_recovery = kwargs.get("ability_recovery", 1)  # Скорость восстановления
 
     def update(self):
         # Показатели смещения
@@ -104,7 +119,7 @@ class Player(pygame.sprite.Sprite):
 
         # Столкновение с пулями
         for bullet in self.groups["bullets"]:
-            if self.rect.colliderect(bullet.rect):
+            if self.rect.colliderect(bullet.rect) and not self.immortal:
                 self.health_points -= bullet.damage
                 bullet.kill()
 
@@ -148,12 +163,16 @@ class Player(pygame.sprite.Sprite):
                 self.lives -= 1
                 self.recovery()
             else:
+                self.timer.kill()
                 self.kill()
 
         # Отображение количества жизней у игрока
         if self.lives > 0:
             self.screen.blit(self.pixel_font.render(str(self.lives), False, (10, 10, 10)),
                              (self.rect.x + 1, self.rect.y - 16))
+
+        # Восстановление способности
+        self.time = min(self.cool_down_of_ability, self.time + self.ability_recovery)
 
         # Отслеживание нажатий
         move_x, move_y = self.control_function(move_x, move_y)
@@ -189,6 +208,8 @@ class Player(pygame.sprite.Sprite):
             self.jump = True
         if self.joystick.get_button(5) and self.weapon:
             self.weapon.shot()
+        if self.joystick.get_button(1) and self.time == self.cool_down_of_ability:
+            self.ability()
         for gun in self.groups["weapons"]:
             if (self.rect.colliderect(gun.rect) and self.joystick.get_button(4) and
                     not gun.user and self.grab_timer == 0):
@@ -219,6 +240,8 @@ class Player(pygame.sprite.Sprite):
             self.jump = True
         if key[pygame.K_v] and self.weapon:
             self.weapon.shot()
+        if key[pygame.K_f] and self.time == self.cool_down_of_ability:
+            self.ability()
         for gun in self.groups["weapons"]:
             if (self.rect.colliderect(gun.rect) and key[pygame.K_c] and
                     not gun.user and self.grab_timer == 0):
@@ -249,6 +272,8 @@ class Player(pygame.sprite.Sprite):
             self.jump = True
         if key[pygame.K_KP3] and self.weapon:
             self.weapon.shot()
+        if key[pygame.K_KP0] and self.time == self.cool_down_of_ability:
+            self.ability()
         for gun in self.groups["weapons"]:
             if (self.rect.colliderect(gun.rect) and key[pygame.K_KP2] and
                     not gun.user and self.grab_timer == 0):
@@ -279,10 +304,54 @@ class Player(pygame.sprite.Sprite):
         self.jump = False
         self.on_beam = False
 
-    # Способность 1
-    def ability_1(self):
-        pass
+    # Способность
+    def ability(self):
+        print("ABILITY!!!")
+        self.time = 1
 
     # Отдача от оружия
     def recoil(self, recoil_force):
         self.rect.move_ip(recoil_force, 0)
+
+
+class Jasper(Player):
+    def __int__(self, groups: dict, **kwargs):
+        super(Jasper, self).__init__(groups, **kwargs)
+        self.name = "Джаспер"
+
+    def ability(self):
+        self.immortal = True
+        self.time = 1
+        self.ability_recovery = 0
+        self.protect = JasperProtect(self.groups, user=self)
+
+
+class Adam(Player):
+    def __init__(self, groups: dict, **kwargs):
+        super(Adam, self).__init__(groups, **kwargs)
+        self.name = "Адам"
+
+    def ability(self):
+        if self.weapon:
+            self.time = 1
+            self.weapon.bullet_count = self.weapon.bullet_count_max
+
+
+class Vincent(Player):
+    def __init__(self, groups: dict, **kwargs):
+        super(Vincent, self).__init__(groups, **kwargs)
+        self.name = "Винсенте"
+
+    def ability(self):
+        self.time = 1
+        VincentPoisonRay(self.groups, user=self)
+
+
+class Guido(Player):
+    def __init__(self, groups: dict, **kwargs):
+        super(Guido, self).__init__(groups, **kwargs)
+        self.name = "Гуидо"
+
+    def ability(self):
+        self.time = 1
+        TurretOfGuido(self.groups, user=self)

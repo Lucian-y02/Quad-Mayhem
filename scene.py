@@ -1,7 +1,7 @@
 import sys
 
 from tools_for_creating_maps import *
-from player import Player
+from player import Player, Jasper, Adam, Vincent, Guido
 from game_stuff import *
 
 import pygame
@@ -32,10 +32,10 @@ class Scene:
             "players": pygame.sprite.Group(),
             "walls_horizontal": pygame.sprite.Group(),
             "walls_vertical": pygame.sprite.Group(),
-            "weapons": pygame.sprite.Group(),
             "bullets": pygame.sprite.Group(),
             "healing_boxes": pygame.sprite.Group(),
-            "game_stuff": pygame.sprite.Group()
+            "game_stuff": pygame.sprite.Group(),
+            "weapons": pygame.sprite.Group()
         }
 
     # Добавление новой группы спрайтов
@@ -54,8 +54,6 @@ class Scene:
                 elif event.key == pygame.K_h:
                     for pl in self.groups_data["players"]:
                         pl.health_points = 100
-                elif event.key == pygame.K_f:
-                    self.FPS = 3 if self.FPS == 60 else 60
                 elif event.key == pygame.K_o:
                     self.end_of_game_session("The end")
         for key in self.groups_data:
@@ -100,10 +98,10 @@ class Scene:
 
 if __name__ == '__main__':
     prototype = Scene(title="Prototype", FPS=60)
-    player2 = Player(prototype.groups_data, x=32 * 25, y=32 * 11, controller="joystick", color="blue",
-                     team="2", screen=prototype.screen, lives=5)
-    player3 = Player(prototype.groups_data, x=32 * 7, y=32 * 5, controller="keyboard_2", color="red",
-                     team="1", screen=prototype.screen, lives=5)
+    player2 = Guido(prototype.groups_data, x=32 * 25, y=32 * 11, controller="joystick", color="blue",
+                    team="2", screen=prototype.screen, lives=5, cool_down=4000)
+    player3 = Jasper(prototype.groups_data, x=32 * 7, y=32 * 5, controller="keyboard_1", color="red",
+                     team="1", screen=prototype.screen, lives=5, cool_down=2000)
 
     platform_left(prototype.groups_data, x=32 * 17, y=32 * 15)
     for i in range(18, 27):

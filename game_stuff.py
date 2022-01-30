@@ -29,8 +29,8 @@ class Weapon(pygame.sprite.Sprite):
         self.recoil = kwargs.get("recoil", 1)  # Отдача
         self.bullet_speed = kwargs.get("bullet_speed", 32)  # Скорость пуль
         self.can_shot = True  # Возможность стрельбы
-        self.bullet_count = kwargs.get("bullet_count", 10)  # Максимальное количество пуль
-        self.bullet_count_max = self.bullet_count  # Начальое количество пуль
+        self.bullet_count = kwargs.get("bullet_count", 10)  # Начальое количество пуль
+        self.bullet_count_max = self.bullet_count  # Максимальное количество пуль
         self.spawner = kwargs.get("spawner", None)  # Спавнер предметов
 
         # Гравитация
@@ -101,16 +101,26 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(Bullet, self).__init__(groups["bullets"])
         self.image = pygame.Surface(kwargs.get("size", (32, 2)))
-        self.image.fill((150, 150, 150))
+        self.image.fill(kwargs.get("color", (150, 150, 150)))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
 
+        # Начальная координата, нужная для отлеживаня расстояния, которое пролетела пуля
+        self.old_x = self.rect.x
+        # Максимальное расстояние, которое может пролететь пуля
+        self.distance = kwargs.get("distance", 1000)
+
         self.groups = groups
 
+        # Разброс
         self.scatter_write = kwargs.get("scatter", (-2, 2))
         self.scatter = randint(self.scatter_write[0], self.scatter_write[1])
+
+        # Скорость пули
         self.speed = kwargs.get("speed", 32) * (-1 if kwargs.get("mirror", False) else 1)
+
+        # Урон
         self.damage = kwargs.get("damage", 25)
 
     def update(self):
@@ -118,7 +128,8 @@ class Bullet(pygame.sprite.Sprite):
 
         if (pygame.sprite.spritecollideany(self, self.groups["walls_vertical"]) or
                 pygame.sprite.spritecollideany(self, self.groups["walls_horizontal"]) or
-                (0 >= self.rect.x >= 2000) or ((0 + self.rect.height) >= self.rect.y >= 1500)):
+                (0 >= self.rect.x >= 2000) or ((0 + self.rect.height) >= self.rect.y >= 1500) or
+                abs(self.rect.x - self.old_x) >= self.distance):
             self.kill()
 
 
@@ -235,7 +246,7 @@ class ItemsSpawner(pygame.sprite.Sprite):
         super(ItemsSpawner, self).__init__(groups["game_stuff"])
         self.image = pygame.Surface(kwargs.get("size", (28, 7)))
         self.rect = self.image.get_rect()
-        self.rect.x = kwargs.get("x", 0) + 32 - self.rect.width // 2
+        self.rect.x = kwargs.get("x", 0) + (32 - self.rect.width) // 2
         self.rect.y = kwargs.get("y", 0) + 32 - self.rect.height
 
         self.cool_down = kwargs.get("cool_down", 200)  # Интервал появления предметов
@@ -270,12 +281,6 @@ class SuperJump(pygame.sprite.Sprite):
         self.super_jump_force = kwargs.get("super_jump_force", 4)
 
 
-# Стекло
-class Glass(pygame.sprite.Sprite):
-    def __init__(self, group, **kwargs):
-        super(Glass, self).__init__(group)
-
-
 # Шипы
 class Spikes(pygame.sprite.Sprite):
     def __init__(self, group, **kwargs):
@@ -308,6 +313,7 @@ class Beam(pygame.sprite.Sprite):
         WallHorizontal(groups["walls_horizontal"], x=self.rect.x, y=self.rect.y - 1)
 
 
+# Флаг для режима "Захват флага"
 class TeamFlag(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(TeamFlag, self).__init__(groups["game_stuff"])
@@ -352,3 +358,128 @@ class TeamFlag(pygame.sprite.Sprite):
             self.end_function("Команда атаки победила!")
         elif self.time <= 0:
             self.end_function("Команда защиты победила!")
+
+
+# Силовое поле Джаспера
+class JasperProtect(pygame.sprite.Sprite):
+    def __init__(self, groups: dict, **kwargs):
+        super(JasperProtect, self).__init__(groups["game_stuff"])
+        self.user = kwargs.get("user", None)
+        self.image = pygame.Surface(kwargs.get("size", (32, 44)))
+        self.image.fill((250, 0, 250))
+        self.image.set_alpha(75)
+        self.image.convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.x = self.user.rect.x - 1
+        self.rect.y = self.user.rect.y - 1
+
+        # Группа пуль
+        self.bullets_group = groups["bullets"]
+
+        # Прочность силового поля
+        self.max_health_points = kwargs.get("health_points", 30)
+        self.health_points = self.max_health_points
+        HealthPointsIndicator(groups["game_stuff"], max_health_points=self.max_health_points,
+                              shift_vertical=8, color=(200, 0, 200), user=self)
+
+    def update(self):
+        # Перемещение
+        self.rect.x = self.user.rect.x - 1
+        self.rect.y = self.user.rect.y - 1
+
+        if self.health_points <= 0:
+            self.user.ability_recovery = 1
+            self.user.protect = None
+            self.user.immortal = False
+            self.kill()
+
+        for bullet in self.bullets_group:
+            if self.rect.colliderect(bullet.rect):
+                self.health_points -= bullet.damage
+                bullet.kill()
+
+
+# Ядовитое облако Винцента
+class VincentPoisonRay(pygame.sprite.Sprite):
+    def __init__(self, groups: dict, **kwargs):
+        super(VincentPoisonRay, self).__init__(groups["game_stuff"])
+        self.user = kwargs.get("user", None)
+        self.image = pygame.Surface(kwargs.get("size", (96, 30)))
+        self.image.fill(kwargs.get("color", (0, 250, 0)))
+        self.image.set_alpha(45)
+        self.image.convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.x = self.user.rect.x - 33
+        self.rect.y = self.user.rect.y + (self.user.rect.height - 32)
+
+        # Исчезновение
+        self.max_time = kwargs.get("time", 1000)
+        self.time = self.max_time
+        self.timer = TimeIndicator(groups["game_stuff"], user=self, max_time=self.max_time,
+                                   shift_vertical=-38, shift_horizontal=-32)
+        self.decay_rate = kwargs.get("decay_rate", 2)  # Скорость распада
+
+        # Список игроков
+        self.players_list = groups["players"]
+
+        self.damage = kwargs.get("damage", 1)  # Урок
+
+    def update(self):
+        if self.time <= 0:
+            self.timer.kill()
+            self.kill()
+
+        self.time -= self.decay_rate
+
+        for player in self.players_list:
+            if player.__class__.__name__ == "Jasper" and player.protect:
+                player.protect.health_points -= self.damage
+            elif (self.rect.colliderect(player.rect) and not player.immortal and
+                      player.__class__.__name__ != self.user.__class__.__name__):
+                player.health_points -= self.damage
+
+
+# Турель Гуидо
+class TurretOfGuido(pygame.sprite.Sprite):
+    def __init__(self, groups: dict, **kwargs):
+        super(TurretOfGuido, self).__init__(groups["game_stuff"])
+        self.user = kwargs.get("user", None)
+        self.image = pygame.Surface(kwargs.get("size", (24, 24)))
+        self.image.fill(kwargs.get("color", (0, 150, 0)))
+        self.rect = self.image.get_rect()
+        self.rect.x = self.user.rect.x
+        self.rect.y = self.user.rect.y + self.user.rect.height - self.rect.height
+
+        # Исчезновение
+        self.max_time = kwargs.get("time", 1750)
+        self.time = self.max_time
+        self.timer = TimeIndicator(groups["game_stuff"], user=self, max_time=self.max_time,
+                                   size=(self.rect.width, 3))
+        self.decay_rate = kwargs.get("decay_rate", 1)  # Скорость распада
+
+        self.mirror = self.user.mirror
+        self.groups = groups
+
+        # Выстрел турели
+        self.cool_down_of_shot = kwargs.get("cool_down", 100)
+        self.shot_time = 0
+
+    def update(self):
+        if self.time <= 0:
+            self.timer.kill()
+            self.kill()
+        if self.shot_time == self.cool_down_of_shot:
+            self.shot_time = 0
+            if not self.mirror:
+                Bullet(self.groups, distance=170, scatter=(0, 0), damage=10,
+                       speed=4, size=(8, 6), color=(150, 0, 0), mirror=self.mirror,
+                       x=self.rect.x + (self.rect.width - 8),
+                       y=self.rect.y + (self.rect.height // 2))
+            elif self.mirror:
+                Bullet(self.groups, distance=170, scatter=(0, 0), damage=10,
+                       speed=4, size=(8, 6), color=(150, 0, 0), mirror=self.mirror,
+                       x=self.rect.x,
+                       y=self.rect.y + (self.rect.height // 2))
+
+        self.time -= self.decay_rate
+        self.shot_time += 1

@@ -1,4 +1,5 @@
 import sys
+from random import shuffle
 
 from functions import create_field, load_level
 from constants import *
@@ -378,7 +379,7 @@ def mode_choice():
         clock.tick(60)
 
 
-def hero_choice():
+def hero_choice_ctf():
     screen.fill((200, 200, 200))
     group = pygame.sprite.Group()
     draw_group = pygame.sprite.Group()
@@ -441,7 +442,7 @@ def hero_choice():
                 mouse.update(event.pos[0], event.pos[1])
         if all(result.values()) and flag:
             flag = False
-            start = Button(start_btn, draw_group, x=534, y=585)
+            start = Button(continue_but, draw_group, x=534, y=585)
         for i in not_in_buttons:
             if i not in chosen_btns.values():
                 i.set_image(not_in_btn)
@@ -463,53 +464,270 @@ def hero_choice():
         clock.tick(60)
 
 
+def hero_choice_ffa():
+    screen.fill((200, 200, 200))
+    group = pygame.sprite.Group()
+    draw_group = pygame.sprite.Group()
+    mouse = Mouse(group)
+    first_row_coords = [(206, 355), (459, 355), (708, 355), (959, 355)]
+    second_row_coords = [(207, 432), (460, 432), (710, 432), (959, 432)]
+
+    btn_in1 = Button(in_but, draw_group, x=first_row_coords[0][0], y=first_row_coords[0][1])
+    btn_in2 = Button(in_but, draw_group, x=first_row_coords[1][0], y=first_row_coords[1][1])
+    btn_in3 = Button(in_but, draw_group, x=first_row_coords[2][0], y=first_row_coords[2][1])
+    btn_in4 = Button(in_but, draw_group, x=first_row_coords[3][0], y=first_row_coords[3][1])
+
+    in_buttons = [btn_in1, btn_in2, btn_in3, btn_in4]
+
+    btn_notin1 = Button(not_in_btn, draw_group, x=second_row_coords[0][0], y=second_row_coords[0][1])
+    btn_notin2 = Button(not_in_btn, draw_group, x=second_row_coords[1][0], y=second_row_coords[1][1])
+    btn_notin3 = Button(not_in_btn, draw_group, x=second_row_coords[2][0], y=second_row_coords[2][1])
+    btn_notin4 = Button(not_in_btn, draw_group, x=second_row_coords[3][0], y=second_row_coords[3][1])
+
+    notin_buttons = [btn_notin1, btn_notin2, btn_notin3, btn_notin4]
+
+    result = {0: None, 1: None, 2: None, 3: None}
+    chosen_btns = {0: None, 1: None, 2: None, 3: None}
+
+    flag = True
+
+    clock = pygame.time.Clock()
+    running = True
+
+    start = None
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or \
+                    (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                sys.exit(pygame.quit())
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for i in range(0, 4):
+                    if pygame.sprite.collide_mask(mouse, notin_buttons[i]):
+                        result[i] = '3'
+                        chosen_btns[i] = notin_buttons[i]
+                    elif pygame.sprite.collide_mask(mouse, in_buttons[i]):
+                        result[i] = '1'
+                        chosen_btns[i] = in_buttons[i]
+                if start:
+                    if pygame.sprite.collide_mask(mouse, start):
+                        return result
+            if event.type == pygame.MOUSEMOTION:
+                mouse.update(event.pos[0], event.pos[1])
+        if all(result.values()) and flag:
+            flag = False
+            start = Button(continue_but, draw_group, x=534, y=585)
+        for i in notin_buttons:
+            if i not in chosen_btns.values():
+                i.set_image(not_in_btn)
+            else:
+                i.set_image(not_in_btn_light)
+        for i in in_buttons:
+            if i not in chosen_btns.values():
+                i.set_image(in_but)
+            else:
+                i.set_image(in_but_light)
+        screen.blit(hero_choicing2, (184, 84))
+        draw_group.draw(screen)
+        pygame.display.flip()
+        clock.tick(60)
+
+
+def controls_choice(result):
+    screen.fill((200, 200, 200))
+    group = pygame.sprite.Group()
+    draw_group = pygame.sprite.Group()
+    mouse = Mouse(group)
+    first_row_coords = [(208, 341), (458, 341), (708, 341), (958, 341)]
+    second_row_coords = [(208, 401), (458, 401), (708, 401), (958, 401)]
+    third_row_coords = [(208, 461), (458, 461), (708, 461), (958, 461)]
+    fourth_row_coords = [(208, 521), (458, 521), (708, 521), (958, 521)]
+    wasd1, arrows1, gp1_1, gp2_1, wasd2, arrows2, gp1_2, gp2_2, gp1_3, wasd3, arrows3, gp2_3, \
+        gp2_4, gp1_4, arrows4, wasd4 = [None for _ in range(16)]
+    chosen_btns = {0: None, 1: None, 2: None, 3: None}
+    ret = {0: None, 1: None, 2: None, 3: None}
+    if result[0] != '3':
+        wasd1 = Button(wasd, draw_group, x=first_row_coords[0][0], y=first_row_coords[0][1])
+        arrows1 = Button(arrows, draw_group, x=second_row_coords[0][0], y=second_row_coords[0][1])
+        gp1_1 = Button(gamepad1, draw_group, x=third_row_coords[0][0], y=third_row_coords[0][1])
+        gp2_1 = Button(gamepad2, draw_group, x=fourth_row_coords[0][0], y=fourth_row_coords[0][1])
+    else:
+        ret[0] = 'NOT'
+    if result[1] != '3':
+        wasd2 = Button(wasd, draw_group, x=first_row_coords[1][0], y=first_row_coords[1][1])
+        arrows2 = Button(arrows, draw_group, x=second_row_coords[1][0], y=second_row_coords[1][1])
+        gp1_2 = Button(gamepad1, draw_group, x=third_row_coords[1][0], y=third_row_coords[1][1])
+        gp2_2 = Button(gamepad2, draw_group, x=fourth_row_coords[1][0], y=fourth_row_coords[1][1])
+    else:
+        ret[1] = 'NOT'
+    if result[2] != '3':
+        gp1_3 = Button(gamepad1, draw_group, x=third_row_coords[2][0], y=third_row_coords[2][1])
+        wasd3 = Button(wasd, draw_group, x=first_row_coords[2][0], y=first_row_coords[2][1])
+        arrows3 = Button(arrows, draw_group, x=second_row_coords[2][0], y=second_row_coords[2][1])
+        gp2_3 = Button(gamepad2, draw_group, x=fourth_row_coords[2][0], y=fourth_row_coords[2][1])
+    else:
+        ret[2] = 'NOT'
+    if result[3] != '3':
+        gp2_4 = Button(gamepad2, draw_group, x=fourth_row_coords[3][0], y=fourth_row_coords[3][1])
+        gp1_4 = Button(gamepad1, draw_group, x=third_row_coords[3][0], y=third_row_coords[3][1])
+        arrows4 = Button(arrows, draw_group, x=second_row_coords[3][0], y=second_row_coords[3][1])
+        wasd4 = Button(wasd, draw_group, x=first_row_coords[3][0], y=first_row_coords[3][1])
+    else:
+        ret[3] = 'NOT'
+    wasd_btns = [wasd1, wasd2, wasd3, wasd4]
+    gp2_btns = [gp2_1, gp2_2, gp2_3, gp2_4]
+    gp1_btns = [gp1_1, gp1_2, gp1_3, gp1_4]
+    arrows_btns = [arrows1, arrows2, arrows3, arrows4]
+    flag = True
+    clock = pygame.time.Clock()
+    running = True
+    start = None
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or \
+                    (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                sys.exit(pygame.quit())
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for i in range(0, 4):
+                    if wasd_btns[i]:
+                        if pygame.sprite.collide_mask(mouse, wasd_btns[i]):
+                            ret[i] = 'keyboard_1'
+                            chosen_btns[i] = wasd_btns[i]
+                    if arrows_btns[i]:
+                        if pygame.sprite.collide_mask(mouse, arrows_btns[i]):
+                            ret[i] = 'keyboard_2'
+                            chosen_btns[i] = arrows_btns[i]
+                    if gp1_btns[i]:
+                        if pygame.sprite.collide_mask(mouse, gp1_btns[i]):
+                            ret[i] = 'joystick_1'
+                            chosen_btns[i] = gp1_btns[i]
+                    if gp2_btns[i]:
+                        if pygame.sprite.collide_mask(mouse, gp2_btns[i]):
+                            ret[i] = 'joystick_2'
+                            chosen_btns[i] = gp2_btns[i]
+                    if start:
+                        if pygame.sprite.collide_mask(mouse, start):
+                            return ret
+            if event.type == pygame.MOUSEMOTION:
+                mouse.update(event.pos[0], event.pos[1])
+        if all(result.values()) and flag:
+            flag = False
+            start = Button(start_btn, draw_group, x=534, y=585)
+        for i in wasd_btns:
+            if i:
+                if i not in chosen_btns.values():
+                    i.set_image(wasd)
+                else:
+                    i.set_image(wasd_light)
+        for i in arrows_btns:
+            if i:
+                if i not in chosen_btns.values():
+                    i.set_image(arrows)
+                else:
+                    i.set_image(arrows_light)
+        for i in gp1_btns:
+            if i:
+                if i not in chosen_btns.values():
+                    i.set_image(gamepad1)
+                else:
+                    i.set_image(gamepad1_light)
+        for i in gp2_btns:
+            if i:
+                if i not in chosen_btns.values():
+                    i.set_image(gamepad2)
+                else:
+                    i.set_image(gamepad2_light)
+        screen.blit(control_choice, (184, 84))
+        draw_group.draw(screen)
+        pygame.display.flip()
+        clock.tick(60)
+
+
+def add_players_ctf(players, controls, first_team, second_team):
+    players_list = list()
+    if players[0] == '1':
+        players_list.append(Jasper(prototype.groups_data, x=first_team[0][0], y=first_team[0][1],
+                            controller=controls[0], color="red", team='2', screen=prototype.screen,
+                            cool_down=2000, recovery_places=first_team))
+    elif players[0] == '2':
+        players_list.append(Jasper(prototype.groups_data, x=second_team[0][0], y=second_team[0][1],
+                            controller=controls[0], color="red", team='1', screen=prototype.screen,
+                            cool_down=2000, recovery_places=second_team))
+
+    if players[1] == '1':
+        players_list.append(Vincent(prototype.groups_data, x=first_team[0][0], y=first_team[0][1],
+                            controller=controls[1], color="blue", team='2', screen=prototype.screen,
+                            cool_down=3000, recovery_places=first_team))
+    elif players[1] == '2':
+        players_list.append(Vincent(prototype.groups_data, x=second_team[0][0], y=second_team[0][1],
+                            controller=controls[1], color="blue", team='1', screen=prototype.screen,
+                            cool_down=3000, recovery_places=second_team))
+
+    if players[2] == '1':
+        players_list.append(Adam(prototype.groups_data, x=first_team[0][0], y=first_team[0][1],
+                            controller=controls[2], color="yellow", team='2', screen=prototype.screen,
+                            cool_down=1000, recovery_places=first_team))
+    elif players[2] == '2':
+        players_list.append(Adam(prototype.groups_data, x=second_team[0][0], y=second_team[0][1],
+                            controller=controls[2], color="yellow", team='1', screen=prototype.screen,
+                            cool_down=1000, recovery_places=second_team))
+
+    if players[3] == '1':
+        players_list.append(Guido(prototype.groups_data, x=first_team[0][0], y=first_team[0][1],
+                            controller=controls[3], color="green", team='2', screen=prototype.screen,
+                            cool_down=4000, recovery_places=first_team))
+    elif players[3] == '2':
+        players_list.append(Guido(prototype.groups_data, x=second_team[0][0], y=second_team[0][1],
+                            controller=controls[3], color="green", team='1', screen=prototype.screen,
+                            cool_down=4000, recovery_places=second_team))
+    return players_list
+
+
+def add_players_ffa(players, controls, places):
+    players_list = list()
+    shuffle(places)
+    if players[0] != '3':
+        players_list.append(Jasper(prototype.groups_data, x=places[0][0], y=places[0][1],
+                            controller=controls[0], color="red", lives=5, screen=prototype.screen,
+                            cool_down=2000, recovery_places=places))
+    shuffle(places)
+    if players[1] != '3':
+        players_list.append(Vincent(prototype.groups_data, x=places[0][0], y=places[0][1],
+                            controller=controls[1], color="blue", lives=5, screen=prototype.screen,
+                            cool_down=3000, recovery_places=places))
+    shuffle(places)
+    if players[2] != '3':
+        players_list.append(Adam(prototype.groups_data, x=places[0][0], y=places[0][1],
+                            controller=controls[2], color="yellow", lives=5, screen=prototype.screen,
+                            cool_down=1000, recovery_places=places))
+    shuffle(places)
+    if players[3] != '3':
+        players_list.append(Guido(prototype.groups_data, x=places[0][0], y=places[0][1],
+                            controller=controls[3], color="green", lives=5, screen=prototype.screen,
+                            cool_down=4000, recovery_places=places))
+    return players_list
+
+
 if __name__ == '__main__':
     menu()
     mode = mode_choice()
     while 1:
         if mode == 'FFA':
+            heroes = hero_choice_ffa()
+            control = controls_choice(heroes)
             prototype = FFA()
-            list_of_players = create_field(load_level('levelffa.txt'), prototype, 'FFA')
-            prototype.add_players(list_of_players)
+            spots = create_field(load_level('levelffa.txt'), prototype, 'FFA')
+            player = add_players_ffa(heroes, control, spots)
+            prototype.add_players(player)
             prototype.play()
         else:
-            heroes = hero_choice()
+            heroes = hero_choice_ctf()
+            control = controls_choice(heroes)
             prototype = CTF()
             team1, team2 = create_field(load_level('levelctf.txt'), prototype, 'CTF')
-            players = list()
-            if heroes[0] == '1':
-                players.append(Jasper(prototype.groups_data, x=team1[0][0], y=team1[0][1],
-                               controller="keyboard_1", color="red", team='2', screen=prototype.screen,
-                               cool_down=2000, recovery_places=team1))
-            elif heroes[0] == '2':
-                players.append(Jasper(prototype.groups_data, x=team2[0][0], y=team2[0][1],
-                                      controller="keyboard_2", color="red", team='1', screen=prototype.screen,
-                                      cool_down=2000, recovery_places=team2))
-            if heroes[1] == '1':
-                players.append(Adam(prototype.groups_data, x=team1[0][0], y=team1[0][1],
-                                    controller="keyboard_1", color="yellow", team='2', screen=prototype.screen,
-                                    cool_down=1000, recovery_places=team1))
-            elif heroes[1] == '2':
-                players.append(Adam(prototype.groups_data, x=team2[0][0], y=team2[0][1],
-                                    controller="keyboard_2", color="yellow", team='1', screen=prototype.screen,
-                                    cool_down=1000, recovery_places=team2))
-            if heroes[2] == '1':
-                players.append(Vincent(prototype.groups_data, x=team1[0][0], y=team1[0][1],
-                                       controller="keyboard_1", color="blue", team='2', screen=prototype.screen,
-                                       cool_down=3000, recovery_places=team1))
-            elif heroes[2] == '2':
-                players.append(Vincent(prototype.groups_data, x=team2[0][0], y=team2[0][1],
-                                       controller="keyboard_2", color="blue", team='1', screen=prototype.screen,
-                                       cool_down=3000, recovery_places=team2))
-            if heroes[3] == '1':
-                players.append(Guido(prototype.groups_data, x=team1[0][0], y=team1[0][1],
-                                     controller="keyboard_1", color="green", team='2', screen=prototype.screen,
-                                     cool_down=4000, recovery_places=team1))
-            elif heroes[3] == '2':
-                players.append(Guido(prototype.groups_data, x=team2[0][0], y=team2[0][1],
-                                     controller="keyboard_2", color="green", team='1', screen=prototype.screen,
-                                     cool_down=4000, recovery_places=team2))
-            prototype.add_players(players)
+            player = add_players_ctf(heroes, control, team1, team2)
+            prototype.add_players(player)
             for game_object in prototype.groups_data["game_stuff"]:
                 if game_object.__class__.__name__ == "TeamFlag":
                     game_object.end_function = prototype.end_of_game_session

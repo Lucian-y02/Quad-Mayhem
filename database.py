@@ -63,37 +63,41 @@ class Table:
             sql = f'INSERT INTO {self.name} (id, data) VALUES (?, ?)'
             self.cur.execute(sql, (id, pickle.dumps(data)))
 
-    def put_image(self, id, image: pg.Surface):
-        data = (pg.image.tostring(image, 'RGB'), image.get_size())
+    def put_image(self, id, value: pg.Surface):
+        data = (pg.image.tostring(value, 'RGB'), value.get_size())
         self.put(id, data)
 
     def get_image(self, id):
         dic = self.get(id)
         for key, val in dic.items():
-            image = pg.image.fromstring(val[0], val[1], 'RGB')
-            dic[key] = image
+            value = pg.image.fromstring(val[0], val[1], 'RGB')
+            dic[key] = value
         return dic
 
 
 if __name__ == '__main__':
     DBase('images.db')
     screen = pg.display.set_mode((1000, 600))
-    image1 = pg.image.load("data/but_light2.png")
-    Table('images').put_image(15, image1)
-    image1 = pg.image.load("data/but_light3.png")
-    Table('images').put_image(16, image1)
-    image1 = pg.image.load("data/but_light4.png")
-    Table('images').put_image(17, image1)
-    DBase().commit()
-    curr_image = Table('images').get_image(17)[17].convert()
-    curr_image.set_colorkey('white')
+    image1 = pg.image.load("data/teamchoiceffa.png")
+    Table('images').put_image(28, image1)
     flag = True
+    current = 26
+    DBase('images.db').commit()
     while flag:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 flag = False
                 break
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_d or event.key == pg.K_RIGHT:
+                    current += 1
+                    print(current)
+                if event.key == pg.K_a or event.key == pg.K_LEFT:
+                    current -= 1
+                    print(current)
         screen.fill('blue')
-        screen.blit(curr_image, (100, 100))
+        image = Table('images').get_image(current)[current].convert()
+        image.set_colorkey('white')
+        screen.blit(image, (0, 0))
         pg.display.flip()
     pg.quit()

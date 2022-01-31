@@ -318,6 +318,8 @@ class Jasper(Player):
     def __int__(self, groups: dict, **kwargs):
         super(Jasper, self).__init__(groups, **kwargs)
         self.name = "Джаспер"
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect()
 
     def ability(self):
         self.immortal = True
@@ -330,6 +332,8 @@ class Adam(Player):
     def __init__(self, groups: dict, **kwargs):
         super(Adam, self).__init__(groups, **kwargs)
         self.name = "Адам"
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect()
 
     def ability(self):
         if self.weapon:
@@ -341,6 +345,8 @@ class Vincent(Player):
     def __init__(self, groups: dict, **kwargs):
         super(Vincent, self).__init__(groups, **kwargs)
         self.name = "Винсенте"
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect()
 
     def ability(self):
         self.time = 1
@@ -351,6 +357,8 @@ class Guido(Player):
     def __init__(self, groups: dict, **kwargs):
         super(Guido, self).__init__(groups, **kwargs)
         self.name = "Гуидо"
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect()
 
     def ability(self):
         self.time = 1

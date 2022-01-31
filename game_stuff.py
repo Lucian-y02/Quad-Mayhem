@@ -17,6 +17,8 @@ class Weapon(pygame.sprite.Sprite):
         self.rect.y = kwargs.get("y", 0)
         self.mirror = kwargs.get("mirror", False)
         self.old_value_mirror = self.mirror
+        if self.mirror:
+            self.image = pygame.transform.flip(self.image, True, False)
 
         # rect для обработки столкновения со стенами
         self.second_rect = pygame.Rect((self.rect.x + self.rect.width // 2, self.rect.y),
@@ -33,10 +35,13 @@ class Weapon(pygame.sprite.Sprite):
         self.can_shot = True  # Возможность стрельбы
         self.bullet_count = kwargs.get("bullet_count", 10)  # Начальое количество пуль
         self.bullet_count_max = self.bullet_count  # Максимальное количество пуль
+        self.bullet_image = pygame.Surface(kwargs.get("bullet_size", (32, 2)))  # Изображение пули
         self.spawner = kwargs.get("spawner", None)  # Спавнер предметов
         self.scatter = kwargs.get("scatter", (-2, 2))  # Разброс
         self.distance = kwargs.get("distance", 1000)  # Дальность выстрела
         self.bullet_damage = kwargs.get("damage", 25)  # Урон
+        # Простреливает сквозь двери
+        self.shoots_through_doors = kwargs.get("shoots_through_doors", False)
 
         self.shift_bullets = kwargs.get("shift_bullets", 2)  # Смещение места появления пуль
         self.shift_weapon_x = kwargs.get("shift_weapon_x", 7)  # Смещение пушки в руках игрока (OX)
@@ -109,13 +114,16 @@ class Weapon(pygame.sprite.Sprite):
                        y=self.rect.y + self.shift_bullets, mirror=False,
                        speed=self.bullet_speed,
                        scatter=self.scatter, distance=self.distance,
-                       damage=self.bullet_damage)
+                       damage=self.bullet_damage, bullet_image=self.bullet_image,
+                       through_the_doors=self.shoots_through_doors)
                 self.user.recoil(-self.recoil)
             else:
-                Bullet(self.groups, x=self.rect.x, y=self.rect.y + self.shift_bullets,
+                Bullet(self.groups, x=self.rect.x - self.bullet_speed // 2,
+                       y=self.rect.y + self.shift_bullets,
                        mirror=True, speed=self.bullet_speed,
                        scatter=self.scatter, distance=self.distance,
-                       damage=self.bullet_damage)
+                       damage=self.bullet_damage, bullet_image=self.bullet_image,
+                       through_the_doors=self.shoots_through_doors)
                 self.user.recoil(self.recoil)
             self.shot_timer = self.shot_cool_down
             self.bullet_count -= 1
@@ -131,6 +139,8 @@ class SemiAutomaticSniperRifle(Weapon):
         self.rect.y = kwargs.get("y", 0)
         self.mirror = kwargs.get("mirror", False)
         self.old_value_mirror = self.mirror
+        if self.mirror:
+            self.image = pygame.transform.flip(self.image, True, False)
 
         # rect для обработки столкновения оружия со стенами
         self.second_rect = pygame.Rect((self.rect.x + self.rect.width // 2, self.rect.y),
@@ -147,10 +157,13 @@ class SemiAutomaticSniperRifle(Weapon):
         self.can_shot = True  # Возможность стрельбы
         self.bullet_count = 5  # Начальое количество пуль
         self.bullet_count_max = self.bullet_count  # Максимальное количество пуль
+        self.bullet_image = pygame.Surface((32, 2))  # Изображение пули
         self.spawner = kwargs.get("spawner", None)  # Спавнер предметов
         self.scatter = (0, 0)  # Разброс
         self.distance = 800  # Дальность вытсрела
-        self.bullet_damage = 30  # Урон
+        self.bullet_damage = 35  # Урон
+        # Простреливает сквозь двери
+        self.shoots_through_doors = False
 
         self.shift_bullets = 2  # Смещение места появления пуль
         self.shift_weapon_x = 7  # Смещение пушки в руках игрока (OX)
@@ -165,6 +178,9 @@ class SemiAutomaticSniperRifle(Weapon):
         self.shot_timer = 0
         self.shot_cool_down = 75
 
+        # Влияние на скорость игрока
+        self.impact_on_player_speed = 0
+
 
 # Пулемёт
 class MachineGun(Weapon):
@@ -176,6 +192,8 @@ class MachineGun(Weapon):
         self.rect.y = kwargs.get("y", 0)
         self.mirror = kwargs.get("mirror", False)
         self.old_value_mirror = self.mirror
+        if self.mirror:
+            self.image = pygame.transform.flip(self.image, True, False)
 
         # rect для обработки столкновения оружия со стенами
         self.second_rect = pygame.Rect((self.rect.x + self.rect.width // 2, self.rect.y),
@@ -192,10 +210,13 @@ class MachineGun(Weapon):
         self.can_shot = True  # Возможность стрельбы
         self.bullet_count = 40  # Начальое количество пуль
         self.bullet_count_max = self.bullet_count  # Максимальное количество пуль
+        self.bullet_image = pygame.Surface((32, 2))  # Изображение пули
         self.spawner = kwargs.get("spawner", None)  # Спавнер предметов
         self.scatter = (-2, 2)  # Разброс
         self.distance = 550  # Дальность вытсрела
         self.bullet_damage = 5  # Урон
+        # Простреливает сквозь двери
+        self.shoots_through_doors = False
 
         self.shift_bullets = 3  # Смещение места появления пуль
         self.shift_weapon_x = 6  # Смещение пушки в руках игрока (OX)
@@ -210,6 +231,62 @@ class MachineGun(Weapon):
         self.shot_timer = 0
         self.shot_cool_down = 10
 
+        # Влияние на скорость игрока
+        self.impact_on_player_speed = 1
+
+
+# Снайперская винтовка
+class SniperRifle(Weapon):
+    def __init__(self, groups, **kwargs):
+        super(Weapon, self).__init__(groups["weapons"])
+        self.image = pygame.image.load("Weapons/SniperRifle.png").convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)
+        self.mirror = kwargs.get("mirror", False)
+        self.old_value_mirror = self.mirror
+        if self.mirror:
+            self.image = pygame.transform.flip(self.image, True, False)
+
+        # rect для обработки столкновения оружия со стенами
+        self.second_rect = pygame.Rect((self.rect.x + self.rect.width // 2, self.rect.y),
+                                       (self.rect.width // 2, self.rect.height))
+
+        self.groups = groups
+
+        # Кем используется
+        self.user = kwargs.get("user", None)
+
+        # Основные характеристики
+        self.recoil = 4  # Отдача
+        self.bullet_speed = 64  # Скорость пуль
+        self.can_shot = True  # Возможность стрельбы
+        self.bullet_count = 3  # Начальое количество пуль
+        self.bullet_count_max = self.bullet_count  # Максимальное количество пуль
+        self.bullet_image = pygame.Surface((64, 2))  # Изображение пули
+        self.spawner = kwargs.get("spawner", None)  # Спавнер предметов
+        self.scatter = (0, 0)  # Разброс
+        self.distance = 2000  # Дальность вытсрела
+        self.bullet_damage = 100  # Урон
+        # Простреливает сквозь двери
+        self.shoots_through_doors = True
+
+        self.shift_bullets = 2  # Смещение места появления пуль
+        self.shift_weapon_x = 7  # Смещение пушки в руках игрока (OX)
+        self.shift_weapon_y = 18  # Смещение пушки в руках игрока (OY)
+
+        # Гравитация
+        self.gravity_force = kwargs.get("gravity", 8)  # Ускорение свободного падения
+        self.gravity_count = 0
+        self.gravity = 0  # Скорость падения
+
+        # Промежуток между выстрелами
+        self.shot_timer = 0
+        self.shot_cool_down = 100
+
+        # Влияние на скорость игрока
+        self.impact_on_player_speed = 1
+
 
 # Пистолет пулемёт
 class SubMachineGun(Weapon):
@@ -221,6 +298,8 @@ class SubMachineGun(Weapon):
         self.rect.y = kwargs.get("y", 0)
         self.mirror = kwargs.get("mirror", False)
         self.old_value_mirror = self.mirror
+        if self.mirror:
+            self.image = pygame.transform.flip(self.image, True, False)
 
         # rect для обработки столкновения оружия со стенами
         self.second_rect = pygame.Rect((self.rect.x + self.rect.width // 2, self.rect.y),
@@ -233,17 +312,20 @@ class SubMachineGun(Weapon):
 
         # Основные характеристики
         self.recoil = 0  # Отдача
-        self.bullet_speed = 32  # Скорость пуль
+        self.bullet_speed = 16  # Скорость пуль
         self.can_shot = True  # Возможность стрельбы
         self.bullet_count = 16  # Начальое количество пуль
         self.bullet_count_max = self.bullet_count  # Максимальное количество пуль
+        self.bullet_image = pygame.Surface((16, 2))  # Изображение пули
         self.spawner = kwargs.get("spawner", None)  # Спавнер предметов
         self.scatter = (-1, 1)  # Разброс
-        self.distance = 400  # Дальность вытсрела
-        self.bullet_damage = 10  # Урон
+        self.distance = 150  # Дальность вытсрела
+        self.bullet_damage = 16  # Урон
+        # Простреливает сквозь двери
+        self.shoots_through_doors = False
 
         self.shift_bullets = 3  # Смещение места появления пуль
-        self.shift_weapon_x = 6  # Смещение пушки в руках игрока (OX)
+        self.shift_weapon_x = 2  # Смещение пушки в руках игрока (OX)
         self.shift_weapon_y = 18  # Смещение пушки в руках игрока (OY)
 
         # Гравитация
@@ -255,12 +337,15 @@ class SubMachineGun(Weapon):
         self.shot_timer = 0
         self.shot_cool_down = 20
 
+        # Влияние на скорость игрока
+        self.impact_on_player_speed = 0
+
 
 # Пуля
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(Bullet, self).__init__(groups["bullets"])
-        self.image = pygame.Surface(kwargs.get("size", (32, 2)))
+        self.image = kwargs.get("bullet_image", None)
         self.image.fill(kwargs.get("color", (150, 150, 150)))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
@@ -416,18 +501,24 @@ class ItemsSpawner(pygame.sprite.Sprite):
         self.weapon_list = kwargs.get("weapon_list", [Weapon])  # Список пояляющихся предметов
         self.weapon = kwargs.get("weapon", None)  # Находящийся в спаунере предмет
 
+        self.mirror = kwargs.get("mirror", False)
+
         self.groups = groups
 
-        self.timer = 0
+        self.time = 0
+        TimeIndicator(self.groups["game_stuff"], size=(self.rect.width, self.rect.height),
+                      max_time=self.cool_down, shift_vertical=-self.rect.height - 6,
+                      color=(0, 150, 0), user=self)
 
     def update(self):
         if not self.weapon:
-            self.timer += 1
-        if self.timer >= self.cool_down:
-            self.timer = 0
+            self.time += 1
+        if self.time >= self.cool_down:
+            self.time = 1
             chosen_weapon = choice(self.weapon_list)
             chosen_weapon(self.groups, x=self.rect.x - self.rect.width // 2,
-                          y=self.rect.y - 24, gravity=0, spawner=self)
+                          y=self.rect.y - 24, gravity=0, spawner=self,
+                          mirror=self.mirror)
             self.weapon = chosen_weapon
 
 

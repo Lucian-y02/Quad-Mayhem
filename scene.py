@@ -139,10 +139,12 @@ if __name__ == '__main__':
     box(prototype.groups_data, 32 * 30, y=32 * 17)
     Beam(prototype.groups_data, x=32 * 8, y=32 * 6)
 
-    MachineGun(prototype.groups_data, x=32 * 10, y=32 * 5)
+    SniperRifle(prototype.groups_data, x=32 * 10, y=32 * 5)
     Ammo(prototype.groups_data, x=32 * 12, y=32 * 5)
     Spikes(prototype.groups_data["game_stuff"], x=32 * 22, y=32 * 18)
-    ItemsSpawner(prototype.groups_data, x=32 * 25, y=32 * 18)
+    ItemsSpawner(prototype.groups_data, x=32 * 25, y=32 * 18,
+                 weapon_list=[SniperRifle, SubMachineGun, MachineGun,
+                              SemiAutomaticSniperRifle], mirror=True)
 
     TeamFlag(prototype.groups_data, x=32 * 16, y=32 * 5, team="1",
              end_function=prototype.end_of_game_session)

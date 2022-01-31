@@ -48,6 +48,7 @@ class Player(pygame.sprite.Sprite):
         self.screen = kwargs.get("screen", None)
         self.team = kwargs.get("team", "0")  # В какой команде находится игрок
         self.speed = kwargs.get("speed", 4)  # Скорость персонажа
+        self.speed_right_now = self.speed  # Скорость в данный момент
         self.max_health_points = kwargs.get("max_health_points", 100)
         self.health_points = self.max_health_points
         self.groups = groups  # Словарь групп српайтов
@@ -82,6 +83,11 @@ class Player(pygame.sprite.Sprite):
         # Показатели смещения
         move_x = 0
         move_y = self.gravity - (self.jump_force if self.jump else 0)
+
+        if self.weapon and self.weapon.bullet_count != 0:
+            self.speed_right_now = self.speed - self.weapon.impact_on_player_speed
+        elif not self.weapon:
+            self.speed_right_now = self.speed
 
         self.stay = False
         # Столкновения
@@ -206,7 +212,7 @@ class Player(pygame.sprite.Sprite):
 
     def joystick_check_pressing(self, move_x, move_y):
         if abs(self.joystick.get_axis(0)) > 0.1:
-            move_x += self.speed * self.joystick.get_axis(0)
+            move_x += self.speed_right_now * self.joystick.get_axis(0)
         if self.joystick.get_button(0) and self.stay:
             move_y -= self.jump_force
             self.stay = False
@@ -236,9 +242,9 @@ class Player(pygame.sprite.Sprite):
     def keyboard_1_check_pressing(self, move_x, move_y):
         key = pygame.key.get_pressed()
         if key[pygame.K_a]:
-            move_x -= self.speed
+            move_x -= self.speed_right_now
         if key[pygame.K_d]:
-            move_x += self.speed
+            move_x += self.speed_right_now
         if key[pygame.K_w] and self.stay:
             move_y -= self.jump_force
             self.stay = False
@@ -268,9 +274,9 @@ class Player(pygame.sprite.Sprite):
     def keyboard_2_check_pressing(self, move_x, move_y):
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:
-            move_x -= self.speed
+            move_x -= self.speed_right_now
         if key[pygame.K_RIGHT]:
-            move_x += self.speed
+            move_x += self.speed_right_now
         if key[pygame.K_UP] and self.stay:
             move_y -= self.jump_force
             self.stay = False

@@ -427,16 +427,16 @@ def hero_choice_ctf():
                     (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 sys.exit(pygame.quit())
             if event.type == pygame.MOUSEBUTTONDOWN:
-                for i in range(0, 4):
-                    if pygame.sprite.collide_mask(mouse, not_in_buttons[i]):
-                        result[i] = '3'
-                        chosen_btns[i] = not_in_buttons[i]
-                    elif pygame.sprite.collide_mask(mouse, defence_buttons[i]):
-                        result[i] = '2'
-                        chosen_btns[i] = defence_buttons[i]
-                    if pygame.sprite.collide_mask(mouse, attack_buttons[i]):
-                        result[i] = '1'
-                        chosen_btns[i] = attack_buttons[i]
+                for u in range(0, 4):
+                    if pygame.sprite.collide_mask(mouse, not_in_buttons[u]):
+                        result[u] = '3'
+                        chosen_btns[u] = not_in_buttons[u]
+                    elif pygame.sprite.collide_mask(mouse, defence_buttons[u]):
+                        result[u] = '2'
+                        chosen_btns[u] = defence_buttons[u]
+                    if pygame.sprite.collide_mask(mouse, attack_buttons[u]):
+                        result[u] = '1'
+                        chosen_btns[u] = attack_buttons[u]
                 if start:
                     if pygame.sprite.collide_mask(mouse, start):
                         return result
@@ -445,21 +445,21 @@ def hero_choice_ctf():
         if all(result.values()) and flag:
             flag = False
             start = Button(continue_but, draw_group, x=534, y=585)
-        for i in not_in_buttons:
-            if i not in chosen_btns.values():
-                i.set_image(not_in_btn)
+        for u in not_in_buttons:
+            if u not in chosen_btns.values():
+                u.set_image(not_in_btn)
             else:
-                i.set_image(not_in_btn_light)
-        for i in defence_buttons:
-            if i not in chosen_btns.values():
-                i.set_image(def_btn)
+                u.set_image(not_in_btn_light)
+        for u in defence_buttons:
+            if u not in chosen_btns.values():
+                u.set_image(def_btn)
             else:
-                i.set_image(def_btn_light)
-        for i in attack_buttons:
-            if i not in chosen_btns.values():
-                i.set_image(attack_btn)
+                u.set_image(def_btn_light)
+        for u in attack_buttons:
+            if u not in chosen_btns.values():
+                u.set_image(attack_btn)
             else:
-                i.set_image(attack_btn_light)
+                u.set_image(attack_btn_light)
         screen.blit(hero_choicing, (184, 84))
         draw_group.draw(screen)
         pygame.display.flip()
@@ -504,13 +504,13 @@ def hero_choice_ffa():
                     (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 sys.exit(pygame.quit())
             if event.type == pygame.MOUSEBUTTONDOWN:
-                for i in range(0, 4):
-                    if pygame.sprite.collide_mask(mouse, notin_buttons[i]):
-                        result[i] = '3'
-                        chosen_btns[i] = notin_buttons[i]
-                    elif pygame.sprite.collide_mask(mouse, in_buttons[i]):
-                        result[i] = '1'
-                        chosen_btns[i] = in_buttons[i]
+                for t in range(0, 4):
+                    if pygame.sprite.collide_mask(mouse, notin_buttons[t]):
+                        result[t] = '3'
+                        chosen_btns[t] = notin_buttons[t]
+                    elif pygame.sprite.collide_mask(mouse, in_buttons[t]):
+                        result[t] = '1'
+                        chosen_btns[t] = in_buttons[t]
                 if start:
                     if pygame.sprite.collide_mask(mouse, start):
                         return result
@@ -519,16 +519,16 @@ def hero_choice_ffa():
         if all(result.values()) and flag:
             flag = False
             start = Button(continue_but, draw_group, x=534, y=585)
-        for i in notin_buttons:
-            if i not in chosen_btns.values():
-                i.set_image(not_in_btn)
+        for t in notin_buttons:
+            if t not in chosen_btns.values():
+                t.set_image(not_in_btn)
             else:
-                i.set_image(not_in_btn_light)
-        for i in in_buttons:
-            if i not in chosen_btns.values():
-                i.set_image(in_but)
+                t.set_image(not_in_btn_light)
+        for t in in_buttons:
+            if t not in chosen_btns.values():
+                t.set_image(in_but)
             else:
-                i.set_image(in_but_light)
+                t.set_image(in_but_light)
         screen.blit(hero_choicing2, (184, 84))
         draw_group.draw(screen)
         pygame.display.flip()
@@ -591,23 +591,23 @@ def controls_choice(result):
                     (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 sys.exit(pygame.quit())
             if event.type == pygame.MOUSEBUTTONDOWN:
-                for i in range(0, 4):
-                    if wasd_btns[i]:
-                        if pygame.sprite.collide_mask(mouse, wasd_btns[i]):
-                            ret[i] = 'keyboard_1'
-                            chosen_btns[i] = wasd_btns[i]
-                    if arrows_btns[i]:
-                        if pygame.sprite.collide_mask(mouse, arrows_btns[i]):
-                            ret[i] = 'keyboard_2'
-                            chosen_btns[i] = arrows_btns[i]
-                    if gp1_btns[i]:
-                        if pygame.sprite.collide_mask(mouse, gp1_btns[i]):
-                            ret[i] = 'joystick_1'
-                            chosen_btns[i] = gp1_btns[i]
-                    if gp2_btns[i]:
-                        if pygame.sprite.collide_mask(mouse, gp2_btns[i]):
-                            ret[i] = 'joystick_2'
-                            chosen_btns[i] = gp2_btns[i]
+                for e in range(0, 4):
+                    if wasd_btns[e]:
+                        if pygame.sprite.collide_mask(mouse, wasd_btns[e]):
+                            ret[e] = 'keyboard_1'
+                            chosen_btns[e] = wasd_btns[e]
+                    if arrows_btns[e]:
+                        if pygame.sprite.collide_mask(mouse, arrows_btns[e]):
+                            ret[e] = 'keyboard_2'
+                            chosen_btns[e] = arrows_btns[e]
+                    if gp1_btns[e]:
+                        if pygame.sprite.collide_mask(mouse, gp1_btns[e]):
+                            ret[e] = 'joystick'
+                            chosen_btns[e] = gp1_btns[e]
+                    if gp2_btns[e]:
+                        if pygame.sprite.collide_mask(mouse, gp2_btns[e]):
+                            ret[e] = 'joystick_2'
+                            chosen_btns[e] = gp2_btns[e]
                     if start:
                         if pygame.sprite.collide_mask(mouse, start):
                             return ret
@@ -616,30 +616,30 @@ def controls_choice(result):
         if all(result.values()) and flag:
             flag = False
             start = Button(start_btn, draw_group, x=534, y=585)
-        for i in wasd_btns:
-            if i:
-                if i not in chosen_btns.values():
-                    i.set_image(wasd)
+        for e in wasd_btns:
+            if e:
+                if e not in chosen_btns.values():
+                    e.set_image(wasd)
                 else:
-                    i.set_image(wasd_light)
-        for i in arrows_btns:
-            if i:
-                if i not in chosen_btns.values():
-                    i.set_image(arrows)
+                    e.set_image(wasd_light)
+        for e in arrows_btns:
+            if e:
+                if e not in chosen_btns.values():
+                    e.set_image(arrows)
                 else:
-                    i.set_image(arrows_light)
-        for i in gp1_btns:
-            if i:
-                if i not in chosen_btns.values():
-                    i.set_image(gamepad1)
+                    e.set_image(arrows_light)
+        for e in gp1_btns:
+            if e:
+                if e not in chosen_btns.values():
+                    e.set_image(gamepad1)
                 else:
-                    i.set_image(gamepad1_light)
-        for i in gp2_btns:
-            if i:
-                if i not in chosen_btns.values():
-                    i.set_image(gamepad2)
+                    e.set_image(gamepad1_light)
+        for e in gp2_btns:
+            if e:
+                if e not in chosen_btns.values():
+                    e.set_image(gamepad2)
                 else:
-                    i.set_image(gamepad2_light)
+                    e.set_image(gamepad2_light)
         screen.blit(control_choice, (184, 84))
         draw_group.draw(screen)
         pygame.display.flip()

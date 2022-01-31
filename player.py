@@ -1,5 +1,6 @@
 from random import choice
 
+from constants import *
 from game_stuff import HealthPointsIndicator, TimeIndicator, JasperProtect, \
     VincentPoisonRay, TurretOfGuido
 
@@ -14,12 +15,12 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(Player, self).__init__(groups["players"])
         self.pixel_font = pygame.font.Font("PixelFont.ttf", 26)
-        self.image = pygame.Surface(kwargs.get("size", (30, 42)))
-        self.image.fill(kwargs.get("color", (50, 50, 50)))
+        self.image = pygame.Surface((0, 0))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0) + 1
         self.rect.y = kwargs.get("y", 0) - self.rect.height + 33
         self.mirror = kwargs.get("mirror", False)
+        self.old_value_mirror = self.mirror
 
         # Защита игрока
         self.protect = kwargs.get("protect", None)
@@ -199,6 +200,11 @@ class Player(pygame.sprite.Sprite):
         # Таймеры
         self.grab_timer -= 1 if self.grab_timer > 0 else 0
 
+        # Отзеркаливание image игрока
+        if self.old_value_mirror != self.mirror:
+            self.image = pygame.transform.flip(self.image, True, False)
+        self.old_value_mirror = self.mirror
+
     def joystick_check_pressing(self, move_x, move_y):
         if abs(self.joystick.get_axis(0)) > 0.1:
             move_x += self.speed * self.joystick.get_axis(0)
@@ -315,11 +321,14 @@ class Player(pygame.sprite.Sprite):
 
 
 class Jasper(Player):
-    def __int__(self, groups: dict, **kwargs):
+    def __init__(self, groups: dict, **kwargs):
         super(Jasper, self).__init__(groups, **kwargs)
         self.name = "Джаспер"
-        self.mask = pygame.mask.from_surface(self.image)
+        self.image = jasper_animation[0]
         self.rect = self.image.get_rect()
+        self.change_direction = False
+        self.direction = 'right'
+        self.curr = 0
 
     def ability(self):
         self.immortal = True
@@ -327,39 +336,539 @@ class Jasper(Player):
         self.ability_recovery = 0
         self.protect = JasperProtect(self.groups, user=self)
 
+    def joystick_check_pressing(self, move_x, move_y):
+        if self.joystick.get_axis(0) > 0.1:
+            self.direction = 'left'
+        elif self.joystick.get_axis(0) < 0.1:
+            self.direction = 'right'
+        if abs(self.joystick.get_axis(0)) > 0.1:
+            self.curr += 1
+            move_x += self.speed * self.joystick.get_axis(0)
+        else:
+            self.curr = 0
+        if self.joystick.get_button(0) and self.stay:
+            move_y -= self.jump_force
+            self.stay = False
+            self.jump = True
+        if self.joystick.get_button(5) and self.weapon:
+            self.weapon.shot()
+        if self.joystick.get_button(1) and self.time == self.cool_down_of_ability:
+            self.ability()
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and self.joystick.get_button(4) and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    if self.weapon.bullet_count == 0:
+                        self.weapon.kill()
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
+                self.grab_timer = 20
+        return move_x, move_y
+
+    def update(self):
+        super(Jasper, self).update()
+        if self.curr > 4:
+            self.curr = 0
+        self.image = jasper_animation[self.curr]
+        if self.mirror:
+            self.image = pygame.transform.flip(self.image, True, False)
+
+    def keyboard_1_check_pressing(self, move_x, move_y):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_a]:
+            self.change_direction = True
+            move_x -= self.speed
+            self.curr += 1
+        elif key[pygame.K_d]:
+            self.change_direction = False
+            move_x += self.speed
+            self.curr += 1
+        else:
+            self.curr = 0
+        if key[pygame.K_w] and self.stay:
+            move_y -= self.jump_force
+            self.stay = False
+            self.jump = True
+        if key[pygame.K_v] and self.weapon:
+            self.weapon.shot()
+        if key[pygame.K_f] and self.time == self.cool_down_of_ability:
+            self.ability()
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and key[pygame.K_c] and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    if self.weapon.bullet_count == 0:
+                        self.weapon.kill()
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
+                self.grab_timer = 20
+        return move_x, move_y
+
+    def keyboard_2_check_pressing(self, move_x, move_y):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_LEFT]:
+            move_x -= self.speed
+            self.curr += 1
+            if self.curr > 4:
+                self.curr = 0
+            self.change_direction = True
+        elif key[pygame.K_RIGHT]:
+            move_x += self.speed
+            self.change_direction = False
+            self.curr += 1
+
+        else:
+            self.curr = 0
+        if key[pygame.K_UP] and self.stay:
+            move_y -= self.jump_force
+            self.stay = False
+            self.jump = True
+        if key[pygame.K_KP3] and self.weapon:
+            self.weapon.shot()
+        if key[pygame.K_KP0] and self.time == self.cool_down_of_ability:
+            self.ability()
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and key[pygame.K_KP2] and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    if self.weapon.bullet_count == 0:
+                        self.weapon.kill()
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
+                self.grab_timer = 20
+        return move_x, move_y
+
 
 class Adam(Player):
     def __init__(self, groups: dict, **kwargs):
         super(Adam, self).__init__(groups, **kwargs)
         self.name = "Адам"
-        self.mask = pygame.mask.from_surface(self.image)
+        self.image = adam_animation[0]
         self.rect = self.image.get_rect()
+        self.change_direction = False
+        self.curr = 0
+        self.direction = 'right'
 
     def ability(self):
         if self.weapon:
             self.time = 1
             self.weapon.bullet_count = self.weapon.bullet_count_max
 
+    def joystick_check_pressing(self, move_x, move_y):
+        if self.joystick.get_axis(0) > 0.1:
+            self.direction = 'left'
+        elif self.joystick.get_axis(0) < 0.1:
+            self.direction = 'right'
+        if abs(self.joystick.get_axis(0)) > 0.1:
+            self.curr += 1
+            move_x += self.speed * self.joystick.get_axis(0)
+        else:
+            self.curr = 0
+        if self.joystick.get_button(0) and self.stay:
+            move_y -= self.jump_force
+            self.stay = False
+            self.jump = True
+        if self.joystick.get_button(5) and self.weapon:
+            self.weapon.shot()
+        if self.joystick.get_button(1) and self.time == self.cool_down_of_ability:
+            self.ability()
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and self.joystick.get_button(4) and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    if self.weapon.bullet_count == 0:
+                        self.weapon.kill()
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
+                self.grab_timer = 20
+        return move_x, move_y
+
+    def update(self):
+        super(Adam, self).update()
+        if self.curr > 4:
+            self.curr = 0
+        self.image = adam_animation[self.curr]
+        if self.mirror:
+            self.image = pygame.transform.flip(self.image, True, False)
+
+    def keyboard_1_check_pressing(self, move_x, move_y):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_a]:
+            self.change_direction = True
+            move_x -= self.speed
+            self.curr += 1
+        elif key[pygame.K_d]:
+            self.change_direction = False
+            move_x += self.speed
+            self.curr += 1
+        else:
+            self.curr = 0
+        if key[pygame.K_w] and self.stay:
+            move_y -= self.jump_force
+            self.stay = False
+            self.jump = True
+        if key[pygame.K_v] and self.weapon:
+            self.weapon.shot()
+        if key[pygame.K_f] and self.time == self.cool_down_of_ability:
+            self.ability()
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and key[pygame.K_c] and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    if self.weapon.bullet_count == 0:
+                        self.weapon.kill()
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
+                self.grab_timer = 20
+        return move_x, move_y
+
+    def keyboard_2_check_pressing(self, move_x, move_y):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_LEFT]:
+            move_x -= self.speed
+            self.curr += 1
+            if self.curr > 4:
+                self.curr = 0
+            self.change_direction = True
+        elif key[pygame.K_RIGHT]:
+            move_x += self.speed
+            self.change_direction = False
+            self.curr += 1
+
+        else:
+            self.curr = 0
+        if key[pygame.K_UP] and self.stay:
+            move_y -= self.jump_force
+            self.stay = False
+            self.jump = True
+        if key[pygame.K_KP3] and self.weapon:
+            self.weapon.shot()
+        if key[pygame.K_KP0] and self.time == self.cool_down_of_ability:
+            self.ability()
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and key[pygame.K_KP2] and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    if self.weapon.bullet_count == 0:
+                        self.weapon.kill()
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
+                self.grab_timer = 20
+        return move_x, move_y
+
 
 class Vincent(Player):
     def __init__(self, groups: dict, **kwargs):
         super(Vincent, self).__init__(groups, **kwargs)
         self.name = "Винсенте"
-        self.mask = pygame.mask.from_surface(self.image)
+        self.image = vincent_animation[0]
         self.rect = self.image.get_rect()
+        self.curr = 0
+        self.change_direction = False
+        self.direction = 'right'
 
     def ability(self):
         self.time = 1
         VincentPoisonRay(self.groups, user=self)
+
+    def joystick_check_pressing(self, move_x, move_y):
+        if self.joystick.get_axis(0) > 0.1:
+            self.direction = 'left'
+        elif self.joystick.get_axis(0) < 0.1:
+            self.direction = 'right'
+        if abs(self.joystick.get_axis(0)) > 0.1:
+            self.curr += 1
+            move_x += self.speed * self.joystick.get_axis(0)
+        else:
+            self.curr = 0
+        if self.joystick.get_button(0) and self.stay:
+            move_y -= self.jump_force
+            self.stay = False
+            self.jump = True
+        if self.joystick.get_button(5) and self.weapon:
+            self.weapon.shot()
+        if self.joystick.get_button(1) and self.time == self.cool_down_of_ability:
+            self.ability()
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and self.joystick.get_button(4) and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    if self.weapon.bullet_count == 0:
+                        self.weapon.kill()
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
+                self.grab_timer = 20
+        return move_x, move_y
+
+    def update(self):
+        super(Vincent, self).update()
+        if self.curr > 4:
+            self.curr = 0
+        self.image = vincent_animation[self.curr]
+        if self.mirror:
+            self.image = pygame.transform.flip(self.image, True, False)
+
+    def keyboard_1_check_pressing(self, move_x, move_y):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_a]:
+            self.change_direction = True
+            move_x -= self.speed
+            self.curr += 1
+        elif key[pygame.K_d]:
+            self.change_direction = False
+            move_x += self.speed
+            self.curr += 1
+        else:
+            self.curr = 0
+        if key[pygame.K_w] and self.stay:
+            move_y -= self.jump_force
+            self.stay = False
+            self.jump = True
+        if key[pygame.K_v] and self.weapon:
+            self.weapon.shot()
+        if key[pygame.K_f] and self.time == self.cool_down_of_ability:
+            self.ability()
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and key[pygame.K_c] and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    if self.weapon.bullet_count == 0:
+                        self.weapon.kill()
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
+                self.grab_timer = 20
+        return move_x, move_y
+
+    def keyboard_2_check_pressing(self, move_x, move_y):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_LEFT]:
+            move_x -= self.speed
+            self.curr += 1
+            if self.curr > 4:
+                self.curr = 0
+            self.change_direction = True
+        elif key[pygame.K_RIGHT]:
+            move_x += self.speed
+            self.change_direction = False
+            self.curr += 1
+
+        else:
+            self.curr = 0
+        if key[pygame.K_UP] and self.stay:
+            move_y -= self.jump_force
+            self.stay = False
+            self.jump = True
+        if key[pygame.K_KP3] and self.weapon:
+            self.weapon.shot()
+        if key[pygame.K_KP0] and self.time == self.cool_down_of_ability:
+            self.ability()
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and key[pygame.K_KP2] and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    if self.weapon.bullet_count == 0:
+                        self.weapon.kill()
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
+                self.grab_timer = 20
+        return move_x, move_y
 
 
 class Guido(Player):
     def __init__(self, groups: dict, **kwargs):
         super(Guido, self).__init__(groups, **kwargs)
         self.name = "Гуидо"
-        self.mask = pygame.mask.from_surface(self.image)
+        self.image = guido_animation[0]
         self.rect = self.image.get_rect()
+        self.change_direction = False
+        self.direction = 'right'
+        self.curr = 0
 
     def ability(self):
         self.time = 1
         TurretOfGuido(self.groups, user=self)
+
+    def joystick_check_pressing(self, move_x, move_y):
+        if self.joystick.get_axis(0) > 0.1:
+            self.direction = 'left'
+        elif self.joystick.get_axis(0) < 0.1:
+            self.direction = 'right'
+        if abs(self.joystick.get_axis(0)) > 0.1:
+            self.curr += 1
+            move_x += self.speed * self.joystick.get_axis(0)
+        else:
+            self.curr = 0
+        if self.joystick.get_button(0) and self.stay:
+            move_y -= self.jump_force
+            self.stay = False
+            self.jump = True
+        if self.joystick.get_button(5) and self.weapon:
+            self.weapon.shot()
+        if self.joystick.get_button(1) and self.time == self.cool_down_of_ability:
+            self.ability()
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and self.joystick.get_button(4) and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    if self.weapon.bullet_count == 0:
+                        self.weapon.kill()
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
+                self.grab_timer = 20
+        return move_x, move_y
+
+    def update(self):
+        super(Guido, self).update()
+        if self.curr > 4:
+            self.curr = 0
+        self.image = guido_animation[self.curr]
+        if self.mirror:
+            self.image = pygame.transform.flip(self.image, True, False)
+
+    def keyboard_1_check_pressing(self, move_x, move_y):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_a]:
+            self.change_direction = True
+            move_x -= self.speed
+            self.curr += 1
+        elif key[pygame.K_d]:
+            self.change_direction = False
+            move_x += self.speed
+            self.curr += 1
+        else:
+            self.curr = 0
+        if key[pygame.K_w] and self.stay:
+            move_y -= self.jump_force
+            self.stay = False
+            self.jump = True
+        if key[pygame.K_v] and self.weapon:
+            self.weapon.shot()
+        if key[pygame.K_f] and self.time == self.cool_down_of_ability:
+            self.ability()
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and key[pygame.K_c] and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    if self.weapon.bullet_count == 0:
+                        self.weapon.kill()
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
+                self.grab_timer = 20
+        return move_x, move_y
+
+    def keyboard_2_check_pressing(self, move_x, move_y):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_LEFT]:
+            move_x -= self.speed
+            self.curr += 1
+            if self.curr > 4:
+                self.curr = 0
+            self.change_direction = True
+        elif key[pygame.K_RIGHT]:
+            move_x += self.speed
+            self.change_direction = False
+            self.curr += 1
+        else:
+            self.curr = 0
+        if key[pygame.K_UP] and self.stay:
+            move_y -= self.jump_force
+            self.stay = False
+            self.jump = True
+        if key[pygame.K_KP3] and self.weapon:
+            self.weapon.shot()
+        if key[pygame.K_KP0] and self.time == self.cool_down_of_ability:
+            self.ability()
+        for gun in self.groups["weapons"]:
+            if (self.rect.colliderect(gun.rect) and key[pygame.K_KP2] and
+                    not gun.user and self.grab_timer == 0):
+                gun.user = self
+                try:
+                    if self.weapon.bullet_count == 0:
+                        self.weapon.kill()
+                    self.weapon.user = None
+                except AttributeError:
+                    pass
+                self.weapon = gun
+                if self.weapon.spawner:
+                    self.weapon.gravity_force = self.gravity_force
+                    self.weapon.spawner.weapon = None
+                    self.weapon.spawner = None
+                self.grab_timer = 20
+        return move_x, move_y

@@ -101,6 +101,7 @@ class Weapon(pygame.sprite.Sprite):
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
         self.mirror = kwargs.get("mirror", False)
+        self.old_value_mirror = self.mirror
 
         # rect для обработки столкновения со стенами
         self.second_rect = pygame.Rect((self.rect.x + self.rect.width // 2, self.rect.y),
@@ -111,19 +112,32 @@ class Weapon(pygame.sprite.Sprite):
         # Кем используется
         self.user = kwargs.get("user", None)
 
+        # Основные характеристики
         self.recoil = kwargs.get("recoil", 1)  # Отдача
         self.bullet_speed = kwargs.get("bullet_speed", 32)  # Скорость пуль
         self.can_shot = True  # Возможность стрельбы
         self.bullet_count = kwargs.get("bullet_count", 10)  # Начальое количество пуль
         self.bullet_count_max = self.bullet_count  # Максимальное количество пуль
         self.spawner = kwargs.get("spawner", None)  # Спавнер предметов
+        self.scatter = kwargs.get("scatter", (-2, 2))  # Разброс
+        self.distance = kwargs.get("distance", 1000)  # Дальность выстрела
+        self.bullet_damage = kwargs.get("damage", 25)  # Урон
+
+        self.shift_bullets = kwargs.get("shift_bullets", 2)  # Смещение места появления пуль
+        self.shift_weapon_x = kwargs.get("shift_weapon_x", 7)  # Смещение пушки в руках игрока (OX)
+        self.shift_weapon_y = kwargs.get("shift_weapon_y", 16)  # Смещение пушки в руках игрока (OY)
 
         # Гравитация
         self.gravity_force = kwargs.get("gravity", 8)  # Ускорение свободного падения
         self.gravity_count = 0
         self.gravity = 0  # Скорость падения
 
+        # Промежуток между выстрелами
         self.shot_timer = 0
+        self.shot_cool_down = kwargs.get("cool_down", 20)
+
+        # Влияние на скорость игрока
+        self.impact_on_player_speed = kwargs.get("player_speed", 0)
 
     def update(self):
         if not self.user:
@@ -152,13 +166,17 @@ class Weapon(pygame.sprite.Sprite):
         else:
             self.shot_timer -= 1 if self.shot_timer > 0 else 0
             if not self.mirror:
-                self.rect.x = self.user.rect.x - 7
+                self.rect.x = self.user.rect.x - self.shift_weapon_x
                 self.second_rect.x = self.rect.x + self.rect.width // 2
             else:
-                self.rect.x = self.user.rect.x - (self.rect.width - 7 - self.user.rect.width)
+                self.rect.x = self.user.rect.x - (self.rect.width -
+                                                  self.shift_weapon_x - self.user.rect.width)
                 self.second_rect.x = self.rect.x
-            self.rect.y = self.user.rect.y + 20
+            if self.old_value_mirror != self.mirror:
+                self.image = pygame.transform.flip(self.image, True, False)
+            self.rect.y = self.user.rect.y + self.shift_weapon_y
             self.second_rect.y = self.rect.y
+            self.old_value_mirror = self.mirror
 
     def shot(self):
         self.can_shot = True
@@ -173,15 +191,154 @@ class Weapon(pygame.sprite.Sprite):
         if self.shot_timer == 0 and self.can_shot and self.bullet_count != 0:
             if not self.mirror:
                 Bullet(self.groups, x=self.rect.x + self.rect.width - self.bullet_speed,
-                       y=self.rect.y + self.rect.height // 2, mirror=False,
-                       speed=self.bullet_speed)
+                       y=self.rect.y + self.shift_bullets, mirror=False,
+                       speed=self.bullet_speed,
+                       scatter=self.scatter, distance=self.distance,
+                       damage=self.bullet_damage)
                 self.user.recoil(-self.recoil)
             else:
-                Bullet(self.groups, x=self.rect.x, y=self.rect.y + self.rect.height // 2,
-                       mirror=True, speed=self.bullet_speed)
+                Bullet(self.groups, x=self.rect.x, y=self.rect.y + self.shift_bullets,
+                       mirror=True, speed=self.bullet_speed,
+                       scatter=self.scatter, distance=self.distance,
+                       damage=self.bullet_damage)
                 self.user.recoil(self.recoil)
-            self.shot_timer = 20
+            self.shot_timer = self.shot_cool_down
             self.bullet_count -= 1
+
+
+# Полуавтоматическая снайперская винтовка
+class SemiAutomaticSniperRifle(Weapon):
+    def __init__(self, groups, **kwargs):
+        super(Weapon, self).__init__(groups["weapons"])
+        self.image = semi_automatic_sniper_rifle
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)
+        self.mirror = kwargs.get("mirror", False)
+        self.old_value_mirror = self.mirror
+
+        # rect для обработки столкновения оружия со стенами
+        self.second_rect = pygame.Rect((self.rect.x + self.rect.width // 2, self.rect.y),
+                                       (self.rect.width // 2, self.rect.height))
+
+        self.groups = groups
+
+        # Кем используется
+        self.user = kwargs.get("user", None)
+
+        # Основные характеристики
+        self.recoil = 2  # Отдача
+        self.bullet_speed = 32  # Скорость пуль
+        self.can_shot = True  # Возможность стрельбы
+        self.bullet_count = 5  # Начальое количество пуль
+        self.bullet_count_max = self.bullet_count  # Максимальное количество пуль
+        self.spawner = kwargs.get("spawner", None)  # Спавнер предметов
+        self.scatter = (0, 0)  # Разброс
+        self.distance = 800  # Дальность вытсрела
+        self.bullet_damage = 30  # Урон
+
+        self.shift_bullets = 2  # Смещение места появления пуль
+        self.shift_weapon_x = 7  # Смещение пушки в руках игрока (OX)
+        self.shift_weapon_y = 18  # Смещение пушки в руках игрока (OY)
+
+        # Гравитация
+        self.gravity_force = kwargs.get("gravity", 8)  # Ускорение свободного падения
+        self.gravity_count = 0
+        self.gravity = 0  # Скорость падения
+
+        # Промежуток между выстрелами
+        self.shot_timer = 0
+        self.shot_cool_down = 75
+
+
+# Пулемёт
+class MachineGun(Weapon):
+    def __init__(self, groups, **kwargs):
+        super(Weapon, self).__init__(groups["weapons"])
+        self.image = machine_gun
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)
+        self.mirror = kwargs.get("mirror", False)
+        self.old_value_mirror = self.mirror
+
+        # rect для обработки столкновения оружия со стенами
+        self.second_rect = pygame.Rect((self.rect.x + self.rect.width // 2, self.rect.y),
+                                       (self.rect.width // 2, self.rect.height))
+
+        self.groups = groups
+
+        # Кем используется
+        self.user = kwargs.get("user", None)
+
+        # Основные характеристики
+        self.recoil = 2  # Отдача
+        self.bullet_speed = 32  # Скорость пуль
+        self.can_shot = True  # Возможность стрельбы
+        self.bullet_count = 40  # Начальое количество пуль
+        self.bullet_count_max = self.bullet_count  # Максимальное количество пуль
+        self.spawner = kwargs.get("spawner", None)  # Спавнер предметов
+        self.scatter = (-2, 2)  # Разброс
+        self.distance = 550  # Дальность вытсрела
+        self.bullet_damage = 5  # Урон
+
+        self.shift_bullets = 3  # Смещение места появления пуль
+        self.shift_weapon_x = 6  # Смещение пушки в руках игрока (OX)
+        self.shift_weapon_y = 18  # Смещение пушки в руках игрока (OY)
+
+        # Гравитация
+        self.gravity_force = kwargs.get("gravity", 8)  # Ускорение свободного падения
+        self.gravity_count = 0
+        self.gravity = 0  # Скорость падения
+
+        # Промежуток между выстрелами
+        self.shot_timer = 0
+        self.shot_cool_down = 10
+
+
+# Пистолет пулемёт
+class SubMachineGun(Weapon):
+    def __init__(self, groups, **kwargs):
+        super(Weapon, self).__init__(groups["weapons"])
+        self.image = sub_machine_gun
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)
+        self.mirror = kwargs.get("mirror", False)
+        self.old_value_mirror = self.mirror
+
+        # rect для обработки столкновения оружия со стенами
+        self.second_rect = pygame.Rect((self.rect.x + self.rect.width // 2, self.rect.y),
+                                       (self.rect.width // 2, self.rect.height))
+
+        self.groups = groups
+
+        # Кем используется
+        self.user = kwargs.get("user", None)
+
+        # Основные характеристики
+        self.recoil = 0  # Отдача
+        self.bullet_speed = 32  # Скорость пуль
+        self.can_shot = True  # Возможность стрельбы
+        self.bullet_count = 16  # Начальое количество пуль
+        self.bullet_count_max = self.bullet_count  # Максимальное количество пуль
+        self.spawner = kwargs.get("spawner", None)  # Спавнер предметов
+        self.scatter = (-1, 1)  # Разброс
+        self.distance = 400  # Дальность вытсрела
+        self.bullet_damage = 10  # Урон
+
+        self.shift_bullets = 3  # Смещение места появления пуль
+        self.shift_weapon_x = 6  # Смещение пушки в руках игрока (OX)
+        self.shift_weapon_y = 18  # Смещение пушки в руках игрока (OY)
+
+        # Гравитация
+        self.gravity_force = kwargs.get("gravity", 8)  # Ускорение свободного падения
+        self.gravity_count = 0
+        self.gravity = 0  # Скорость падения
+
+        # Промежуток между выстрелами
+        self.shot_timer = 0
+        self.shot_cool_down = 20
 
 
 # Пуля

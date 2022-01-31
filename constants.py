@@ -39,9 +39,41 @@ continue_but = Table('images').get_image(27)[27].convert()
 hero_choicing2 = Table('images').get_image(28)[28].convert()
 in_but = Table('images').get_image(29)[29].convert()
 in_but_light = Table('images').get_image(30)[30].convert()
+machine_gun = Table('images').get_image(31)[31].convert()
+sub_machine_gun = Table('images').get_image(32)[32].convert()
+semi_automatic_sniper_rifle = Table('images').get_image(33)[33].convert()
+
+jasper_animation = list()
+adam_animation = list()
+vincent_animation = list()
+guido_animation = list()
+
+for i in range(35, 40):
+    a = Table('images').get_image(i)[i].convert()
+    a.set_colorkey('black')
+    jasper_animation.append(a)
+
+for i in range(41, 46):
+    a = Table('images').get_image(i)[i].convert()
+    a.set_colorkey('black')
+    adam_animation.append(a)
+
+for i in range(47, 52):
+    a = Table('images').get_image(i)[i].convert()
+    a.set_colorkey('black')
+    vincent_animation.append(a)
+
+for i in range(53, 58):
+    a = Table('images').get_image(i)[i].convert()
+    a.set_colorkey('black')
+    guido_animation.append(a)
+
 normal_gas.set_colorkey('white')
 toxic_gas.set_colorkey('white')
 pause_btn.set_colorkey('white')
+machine_gun.set_colorkey('black')
+sub_machine_gun.set_colorkey('black')
+semi_automatic_sniper_rifle.set_colorkey('black')
 images = [normal_gas, toxic_gas]
 
 btn1_coords = (418, 347)

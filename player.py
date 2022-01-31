@@ -14,12 +14,12 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(Player, self).__init__(groups["players"])
         self.pixel_font = pygame.font.Font("PixelFont.ttf", 26)
-        self.image = pygame.Surface(kwargs.get("size", (30, 42)))
-        self.image.fill(kwargs.get("color", (50, 50, 50)))
+        self.image = pygame.image.load("Player.png")
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0) + 1
         self.rect.y = kwargs.get("y", 0) - self.rect.height + 33
         self.mirror = kwargs.get("mirror", False)
+        self.old_value_mirror = self.mirror
 
         # Защита игрока
         self.protect = kwargs.get("protect", None)
@@ -198,6 +198,11 @@ class Player(pygame.sprite.Sprite):
 
         # Таймеры
         self.grab_timer -= 1 if self.grab_timer > 0 else 0
+
+        # Отзеркаливание image игрока
+        if self.old_value_mirror != self.mirror:
+            self.image = pygame.transform.flip(self.image, True, False)
+        self.old_value_mirror = self.mirror
 
     def joystick_check_pressing(self, move_x, move_y):
         if abs(self.joystick.get_axis(0)) > 0.1:

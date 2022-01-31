@@ -162,11 +162,14 @@ class Weapon(pygame.sprite.Sprite):
 
     def shot(self):
         self.can_shot = True
-        if pygame.sprite.spritecollideany(self, self.groups["walls_vertical"]):
-            for wall in self.groups["walls_vertical"]:
-                if self.second_rect.colliderect(wall.rect):
-                    self.can_shot = False
-                    break
+        for wall in self.groups["walls_vertical"]:
+            if self.second_rect.colliderect(wall.rect):
+                self.can_shot = False
+                break
+        for door in self.groups["doors"]:
+            if self.second_rect.colliderect(door.rect) and not door.is_open:
+                self.can_shot = False
+                break
         if self.shot_timer == 0 and self.can_shot and self.bullet_count != 0:
             if not self.mirror:
                 Bullet(self.groups, x=self.rect.x + self.rect.width - self.bullet_speed,
@@ -207,6 +210,9 @@ class Bullet(pygame.sprite.Sprite):
 
         # Урон
         self.damage = kwargs.get("damage", 25)
+
+        # Может ли пуля проходить сквозь двери
+        self.through_the_doors = kwargs.get("through_the_doors", False)
 
     def update(self):
         self.rect.move_ip(self.speed, self.scatter)
@@ -479,6 +485,33 @@ class Gas(pygame.sprite.Sprite):
         self.mode = mode
         self.size = 1
         self.image = pygame.transform.scale(self.image, self.max_size)
+
+
+class Door(pygame.sprite.Sprite):
+    def __init__(self, groups: dict, **kwargs):
+        super(Door, self).__init__(groups["doors"])
+        self.image = pygame.Surface(kwargs.get("size", (24, 64)))
+        self.image.fill(kwargs.get("color", (100, 100, 100)))
+        self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get("x", 0) + (32 - self.rect.width) // 2
+        self.rect.y = kwargs.get("y", 0)
+
+        # Игроки
+        self.players_data = groups["players"]
+
+        # Пули
+        self.bullets = groups["bullets"]
+
+        # Открыта или закрыта
+        self.is_open = kwargs.get("is_open", False)
+
+    def update(self):
+        self.is_open = True if pygame.sprite.spritecollideany(self, self.players_data) else False
+
+        for bullet in self.bullets:
+            if (self.rect.colliderect(bullet.rect) and not self.is_open and
+                    not bullet.through_the_doors):
+                bullet.kill()
 
 
 class HorizontalPlatform(pygame.sprite.Sprite):

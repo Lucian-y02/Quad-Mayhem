@@ -96,7 +96,9 @@ def create_field(level, prototype, name):  # Создание поля
             elif b == '5' and name == 'CTF':
                 team1.append((row * 32, col * 32))
             elif b == '6':
-                TeamFlag(prototype.groups_data, x=row*32, y=col*32, team='1')
+                TeamFlag(prototype.groups_data, x=row * 32, y=col * 32, team='1')
+            elif b == '7':
+                Door(prototype.groups_data, x=row * 32, y=col * 32)
 
     prototype.teleports1 = teleports1
     prototype.teleports2 = teleports2

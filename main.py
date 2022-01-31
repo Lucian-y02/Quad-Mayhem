@@ -49,7 +49,8 @@ class CTF:
             "bullets": pygame.sprite.Group(),
             "health_indicators": pygame.sprite.Group(),
             "healing_boxes": pygame.sprite.Group(),
-            "game_stuff": pygame.sprite.Group()
+            "game_stuff": pygame.sprite.Group(),
+            "doors": pygame.sprite.Group()
         }
         self.stop = False
         self.gas = list()
@@ -215,7 +216,8 @@ class FFA:
             "bullets": pygame.sprite.Group(),
             "health_indicators": pygame.sprite.Group(),
             "healing_boxes": pygame.sprite.Group(),
-            "game_stuff": pygame.sprite.Group()
+            "game_stuff": pygame.sprite.Group(),
+            "doors": pygame.sprite.Group()
         }
         self.stop = False
 

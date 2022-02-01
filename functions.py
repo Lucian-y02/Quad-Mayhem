@@ -5,14 +5,13 @@ import tools_for_creating_maps as t
 
 
 def create_field(level, prototype, name):  # Создание поля
-    players = list()
     teleports1 = list()
     teleports2 = list()
     spots = list()
     team1 = list()
     team2 = list()
-    for col, a in enumerate(level):
-        for row, b in enumerate(a):
+    for col, monkeytype in enumerate(level):
+        for row, b in enumerate(monkeytype):
             if b == '@' and name == 'FFA':
                 spots.append((32 * row, 32 * col))
             elif b == 'a':
@@ -86,7 +85,7 @@ def create_field(level, prototype, name):  # Создание поля
             elif b == 'х':
                 t.platform_bottom(prototype.groups_data, x=row * 32, y=col * 32)
             elif b == '1':
-                ItemsSpawner(prototype.groups_data, x=row * 32, y=col * 32,
+                ItemsSpawner(prototype.groups_data, x=row * 32, y=col * 32, cool_down=450,
                              weapon_list=[SniperRifle, SemiAutomaticSniperRifle, SemiAutomaticSniperRifle,
                                           MachineGun, MachineGun, SubMachineGun, SubMachineGun, SubMachineGun])
             elif b == '2':
@@ -102,20 +101,25 @@ def create_field(level, prototype, name):  # Создание поля
             elif b == '7':
                 Door(prototype.groups_data, x=row * 32, y=col * 32)
             elif b == '8':
-                ItemsSpawner(prototype.groups_data, x=row * 32, y=col * 32, weapon_list=[HealingBox])
+                ItemsSpawner(prototype.groups_data, x=row * 32, y=col * 32,
+                             weapon_list=[HealingBox], cool_down=700, shift=-5)
             elif b == '9':
-                ItemsSpawner(prototype.groups_data, x=row * 32, y=col * 32, weapon_list=[Ammo])
+                ItemsSpawner(prototype.groups_data, x=row * 32, y=col * 32,
+                             weapon_list=[Ammo], cool_down=450, shift=1)
     prototype.teleports1 = teleports1
     prototype.teleports2 = teleports2
     if name == 'FFA':
         HorizontalPlatform(prototype, prototype.screen, x=13 * 32, y=12 * 32, x2=17 * 32, speed=1)
+        HorizontalPlatform(prototype, prototype.screen, x=31 * 32, y=7 * 32, x2=34 * 32, speed=1)
         shuffle(spots)
+        Background(prototype.groups_data['background'], ffa_level)
         return spots
     elif name == 'CTF':
         HorizontalPlatform(prototype, prototype.screen, x=9 * 32, y=11 * 32, x2=13 * 32, speed=1)
         shuffle(team1)
         shuffle(team2)
-        TeamFlag(prototype.groups_data, x=32 * 26, y=32 * 8 + 18)
+        TeamFlag(prototype.groups_data, x=32 * 26, y=32 * 8 + 20)
+        Background(prototype.groups_data['background'], ctf_level)
         return team1, team2
 
 

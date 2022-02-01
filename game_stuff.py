@@ -24,6 +24,7 @@ class Background(pygame.sprite.Sprite):
     def __init__(self, group, image):
         super(Background, self).__init__(group)
         self.image = image
+        self.rect = self.image.get_rect()
 
 
 class Button(pygame.sprite.Sprite):
@@ -520,7 +521,6 @@ class HealingBox(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(HealingBox, self).__init__(groups["game_stuff"])
         self.image = healing_box
-        self.image.fill((0, 100, 0))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
@@ -562,6 +562,7 @@ class ItemsSpawner(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0) + (32 - self.rect.width) // 2
         self.rect.y = kwargs.get("y", 0) + 32 - self.rect.height
+        self.shift = kwargs.get("shift", self.rect.width // 2)
 
         self.cool_down = kwargs.get("cool_down", 200)  # Интервал появления предметов
         self.weapon_list = kwargs.get("weapon_list", [Weapon])  # Список пояляющихся предметов
@@ -577,7 +578,7 @@ class ItemsSpawner(pygame.sprite.Sprite):
         if self.timer >= self.cool_down:
             self.timer = 0
             chosen_weapon = choice(self.weapon_list)
-            chosen_weapon(self.groups, x=self.rect.x - self.rect.width // 2,
+            chosen_weapon(self.groups, x=self.rect.x - self.shift,
                           y=self.rect.y - 24, gravity=0, spawner=self)
             self.weapon = chosen_weapon
 
@@ -609,12 +610,38 @@ class Spikes(pygame.sprite.Sprite):
 
 
 # Боеприпасы
-class Ammo(HealingBox):
-    def __init__(self, group, **kwargs):
-        super(Ammo, self).__init__(group, **kwargs)
+class Ammo(pygame.sprite.Sprite):
+    def __init__(self, groups: dict, **kwargs):
+        super(Ammo, self).__init__(groups["game_stuff"])
         self.image = ammo
         self.rect = self.image.get_rect()
-        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.x = kwargs.get("x", 0)
+        self.rect.y = kwargs.get("y", 0)
+        self.walls = groups["walls_horizontal"]
+        # Гравитация
+        self.gravity_force = kwargs.get("gravity", 8)  # Ускорение свободного падения
+        self.gravity_count = 0
+        self.gravity = 0  # Скорость падения
+
+    def update(self):
+        move_y = self.gravity
+
+        # Столкновение
+        for wall in self.walls:
+            if self.rect.colliderect(wall.rect):
+                self.gravity = 0
+                self.gravity_count = 0
+                self.rect.y = wall.rect.y - self.rect.height + 1
+                move_y = 0
+
+        # Смещение
+        self.rect.move_ip(0, move_y)
+
+        # Влияния ускорения свободного падения
+        self.gravity_count += 1
+        if self.gravity_count % 6 == 0:
+            self.gravity += self.gravity_force if self.gravity <= self.gravity_force * 3 else 0
+            self.gravity_count = 0
 
 
 # Балка
@@ -738,7 +765,6 @@ class Door(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(Door, self).__init__(groups["doors"])
         self.image = door_closed
-        self.image.fill(kwargs.get("color", (100, 100, 100)))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0) + (32 - self.rect.width) // 2
         self.rect.y = kwargs.get("y", 0)
@@ -841,8 +867,7 @@ class JasperProtect(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(JasperProtect, self).__init__(groups["game_stuff"])
         self.user = kwargs.get("user", None)
-        self.image = pygame.Surface(kwargs.get("size", (32, 44)))
-        self.image.fill((250, 0, 250))
+        self.image = jasper_protect
         self.image.set_alpha(75)
         self.image.convert_alpha()
         self.rect = self.image.get_rect()
@@ -880,9 +905,7 @@ class VincentPoisonRay(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(VincentPoisonRay, self).__init__(groups["game_stuff"])
         self.user = kwargs.get("user", None)
-        self.image = pygame.Surface(kwargs.get("size", (96, 30)))
-        self.image.fill(kwargs.get("color", (0, 250, 0)))
-        self.image.set_alpha(45)
+        self.image = vincent_poison_ray
         self.image.convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.x = self.user.rect.x - 33
@@ -920,8 +943,7 @@ class TurretOfGuido(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(TurretOfGuido, self).__init__(groups["game_stuff"])
         self.user = kwargs.get("user", None)
-        self.image = pygame.Surface(kwargs.get("size", (24, 24)))
-        self.image.fill(kwargs.get("color", (0, 150, 0)))
+        self.image = turret_of_guido
         self.rect = self.image.get_rect()
         self.rect.x = self.user.rect.x
         self.rect.y = self.user.rect.y + self.user.rect.height - self.rect.height
@@ -948,12 +970,12 @@ class TurretOfGuido(pygame.sprite.Sprite):
             self.shot_time = 0
             if not self.mirror:
                 Bullet(self.groups, distance=170, scatter=(0, 0), damage=10,
-                       speed=4, size=(8, 6), color=(150, 0, 0), mirror=self.mirror,
+                       speed=4, bullet_image=turret_of_guido_bullet, mirror=self.mirror,
                        x=self.rect.x + (self.rect.width - 8),
                        y=self.rect.y + (self.rect.height // 2))
             elif self.mirror:
                 Bullet(self.groups, distance=170, scatter=(0, 0), damage=10,
-                       speed=4, size=(8, 6), color=(150, 0, 0), mirror=self.mirror,
+                       speed=4, bullet_image=turret_of_guido_bullet, mirror=self.mirror,
                        x=self.rect.x,
                        y=self.rect.y + (self.rect.height // 2))
 

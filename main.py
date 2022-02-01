@@ -38,9 +38,10 @@ class CTF:
         self.teleport_timer2 = self.teleport_timer = kwargs.get("teleport_cooldown", 120)
         # Игровые объекты
         self.groups_data = {
-            "players": pygame.sprite.Group(),
             "walls_horizontal": pygame.sprite.Group(),
             "walls_vertical": pygame.sprite.Group(),
+            "background": pygame.sprite.Group(),
+            "players": pygame.sprite.Group(),
             "barrels": pygame.sprite.Group(),
             "toxic_barrels": pygame.sprite.Group(),
             "gas": pygame.sprite.Group(),
@@ -117,15 +118,15 @@ class CTF:
                     self.teleports1.append(self.teleport1)
                     self.teleports2.remove(self.teleport2)
                     self.teleports2.append(self.teleport2)
-                for platform in self.horizontal_platforms:
-                    if pygame.sprite.collide_mask(gamer, platform):
-                        gamer.rect.x += platform.speed
+                for obama in self.horizontal_platforms:
+                    if pygame.sprite.collide_mask(gamer, obama):
+                        gamer.rect.x += obama.speed
 
     def render(self):
         if not self.stop:
             self.screen.fill(self.bg_color)
             for key in self.groups_data:
-                if key != 'platforms':
+                if key != 'walls_vertical' and key != 'walls_horizontal':
                     self.groups_data[key].draw(self.screen)
             if self.draw_teleport:
                 if self.teleport1 and self.teleport2:
@@ -205,9 +206,10 @@ class FFA:
         self.teleport_timer2 = self.teleport_timer = kwargs.get("teleport_cooldown", 120)
         # Игровые объекты
         self.groups_data = {
-            "players": pygame.sprite.Group(),
             "walls_horizontal": pygame.sprite.Group(),
             "walls_vertical": pygame.sprite.Group(),
+            "background": pygame.sprite.Group(),
+            "players": pygame.sprite.Group(),
             "barrels": pygame.sprite.Group(),
             "toxic_barrels": pygame.sprite.Group(),
             "gas": pygame.sprite.Group(),
@@ -285,15 +287,16 @@ class FFA:
                     self.teleports1.append(self.teleport1)
                     self.teleports2.remove(self.teleport2)
                     self.teleports2.append(self.teleport2)
-                for platform in self.horizontal_platforms:
-                    if pygame.sprite.collide_mask(gamer, platform):
-                        gamer.rect.x += platform.speed
+                for uno in self.horizontal_platforms:
+                    if pygame.sprite.collide_mask(gamer, uno):
+                        gamer.rect.x += uno.speed
 
     def render(self):
         if not self.stop:
             self.screen.fill(self.bg_color)
             for key in self.groups_data:
-                self.groups_data[key].draw(self.screen)
+                if key != 'walls_vertical' and key != 'walls_horizontal':
+                    self.groups_data[key].draw(self.screen)
             if self.draw_teleport:
                 if self.teleport1 and self.teleport2:
                     group = pygame.sprite.Group()

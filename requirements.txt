@@ -1,0 +1,12 @@
+certifi==2021.10.8
+charset-normalizer==2.0.10
+colorama==0.4.3
+idna==3.3
+Pillow==8.1.0
+pygame==2.1.0
+PyQt5==5.15.4
+PyQt5-Qt5==5.15.2
+PyQt5-sip==12.9.0
+pywin32==228
+requests==2.27.1
+urllib3==1.26.8

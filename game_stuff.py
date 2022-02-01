@@ -704,6 +704,9 @@ class TurretOfGuido(pygame.sprite.Sprite):
         self.rect.x = self.user.rect.x
         self.rect.y = self.user.rect.y + self.user.rect.height - self.rect.height
 
+        # Изображение пули
+        self.bullet_image = pygame.Surface((8, 6))
+
         # Исчезновение
         self.max_time = kwargs.get("time", 1750)
         self.time = self.max_time
@@ -726,14 +729,16 @@ class TurretOfGuido(pygame.sprite.Sprite):
             self.shot_time = 0
             if not self.mirror:
                 Bullet(self.groups, distance=170, scatter=(0, 0), damage=10,
-                       speed=4, size=(8, 6), color=(150, 0, 0), mirror=self.mirror,
+                       speed=4, color=(150, 0, 0), mirror=self.mirror,
                        x=self.rect.x + (self.rect.width - 8),
-                       y=self.rect.y + (self.rect.height // 2))
+                       y=self.rect.y + 2,
+                       bullet_image=self.bullet_image)
             elif self.mirror:
                 Bullet(self.groups, distance=170, scatter=(0, 0), damage=10,
-                       speed=4, size=(8, 6), color=(150, 0, 0), mirror=self.mirror,
+                       speed=4, color=(150, 0, 0), mirror=self.mirror,
                        x=self.rect.x,
-                       y=self.rect.y + (self.rect.height // 2))
+                       y=self.rect.y + 2,
+                       bullet_image=self.bullet_image)
 
         self.time -= self.decay_rate
         self.shot_time += 1

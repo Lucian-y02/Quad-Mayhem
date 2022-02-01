@@ -99,10 +99,10 @@ class Scene:
 
 if __name__ == '__main__':
     prototype = Scene(title="Prototype", FPS=60)
-    player2 = Guido(prototype.groups_data, x=32 * 25, y=32 * 11, controller="joystick", color="blue",
+    player2 = Guido(prototype.groups_data, x=32 * 25, y=32 * 11, controller="keyboard_2", color="blue",
                     team="2", screen=prototype.screen, lives=5, cool_down=4000)
-    player3 = Jasper(prototype.groups_data, x=32 * 7, y=32 * 5, controller="keyboard_1", color="red",
-                     team="1", screen=prototype.screen, lives=5, cool_down=2000)
+    player3 = Guido(prototype.groups_data, x=32 * 7, y=32 * 5, controller="keyboard_1", color="red",
+                    team="1", screen=prototype.screen, lives=5, cool_down=2000)
 
     platform_left(prototype.groups_data, x=32 * 17, y=32 * 15)
     for i in range(18, 27):

@@ -20,6 +20,8 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = kwargs.get("y", 0) - self.rect.height + 33
         self.mirror = kwargs.get("mirror", False)
         self.old_value_mirror = self.mirror
+        if self.mirror:
+            self.image = pygame.transform.flip(self.image, True, False)
 
         # Защита игрока
         self.protect = kwargs.get("protect", None)
@@ -326,7 +328,7 @@ class Player(pygame.sprite.Sprite):
 
 
 class Jasper(Player):
-    def __int__(self, groups: dict, **kwargs):
+    def __init__(self, groups: dict, **kwargs):
         super(Jasper, self).__init__(groups, **kwargs)
         self.name = "Джаспер"
 

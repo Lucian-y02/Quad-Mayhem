@@ -293,8 +293,7 @@ class FFA:
         if not self.stop:
             self.screen.fill(self.bg_color)
             for key in self.groups_data:
-                if key != 'platforms':
-                    self.groups_data[key].draw(self.screen)
+                self.groups_data[key].draw(self.screen)
             if self.draw_teleport:
                 if self.teleport1 and self.teleport2:
                     group = pygame.sprite.Group()

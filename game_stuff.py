@@ -20,6 +20,12 @@ class Mouse(pygame.sprite.Sprite):
         self.rect.y = y
 
 
+class Background(pygame.sprite.Sprite):
+    def __init__(self, group, image):
+        super(Background, self).__init__(group)
+        self.image = image
+
+
 class Button(pygame.sprite.Sprite):
     def __init__(self, image, group, **kwargs):
         super(Button, self).__init__(group)
@@ -68,8 +74,7 @@ class WallVertical(Wall):
 class Teleport1(pygame.sprite.Sprite):
     def __init__(self, **kwargs):
         super(Teleport1, self).__init__()
-        self.image = pygame.Surface(kwargs.get("teleport_size", (32, 64)))
-        self.image.fill('blue')
+        self.image = portal
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
@@ -81,8 +86,7 @@ class Teleport1(pygame.sprite.Sprite):
 class Teleport2(pygame.sprite.Sprite):
     def __init__(self, **kwargs):
         super(Teleport2, self).__init__()
-        self.image = pygame.Surface(kwargs.get("teleport_size", (32, 64)))
-        self.image.fill('blue')
+        self.image = portal
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)
@@ -242,7 +246,7 @@ class SemiAutomaticSniperRifle(Weapon):
         self.can_shot = True  # Возможность стрельбы
         self.bullet_count = 5  # Начальое количество пуль
         self.bullet_count_max = self.bullet_count  # Максимальное количество пуль
-        self.bullet_image = pygame.Surface((32, 2))  # Изображение пули
+        self.bullet_image = semiauto_machinegun_bullet
         self.spawner = kwargs.get("spawner", None)  # Спавнер предметов
         self.scatter = (0, 0)  # Разброс
         self.distance = 800  # Дальность вытсрела
@@ -295,7 +299,7 @@ class MachineGun(Weapon):
         self.can_shot = True  # Возможность стрельбы
         self.bullet_count = 40  # Начальое количество пуль
         self.bullet_count_max = self.bullet_count  # Максимальное количество пуль
-        self.bullet_image = pygame.Surface((32, 2))  # Изображение пули
+        self.bullet_image = semiauto_machinegun_bullet
         self.spawner = kwargs.get("spawner", None)  # Спавнер предметов
         self.scatter = (-2, 2)  # Разброс
         self.distance = 550  # Дальность вытсрела
@@ -348,7 +352,7 @@ class SniperRifle(Weapon):
         self.can_shot = True  # Возможность стрельбы
         self.bullet_count = 3  # Начальое количество пуль
         self.bullet_count_max = self.bullet_count  # Максимальное количество пуль
-        self.bullet_image = pygame.Surface((64, 2))  # Изображение пули
+        self.bullet_image = sniper_rifle_bullet
         self.spawner = kwargs.get("spawner", None)  # Спавнер предметов
         self.scatter = (0, 0)  # Разброс
         self.distance = 2000  # Дальность вытсрела
@@ -401,7 +405,7 @@ class SubMachineGun(Weapon):
         self.can_shot = True  # Возможность стрельбы
         self.bullet_count = 16  # Начальое количество пуль
         self.bullet_count_max = self.bullet_count  # Максимальное количество пуль
-        self.bullet_image = pygame.Surface((16, 2))  # Изображение пули
+        self.bullet_image = sub_machine_gun_bullet
         self.spawner = kwargs.get("spawner", None)  # Спавнер предметов
         self.scatter = (-1, 1)  # Разброс
         self.distance = 150  # Дальность вытсрела
@@ -515,7 +519,7 @@ class TimeIndicator(HealthPointsIndicator):
 class HealingBox(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(HealingBox, self).__init__(groups["game_stuff"])
-        self.image = pygame.Surface(kwargs.get("size", (25, 25)))
+        self.image = healing_box
         self.image.fill((0, 100, 0))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
@@ -554,7 +558,7 @@ class HealingBox(pygame.sprite.Sprite):
 class ItemsSpawner(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(ItemsSpawner, self).__init__(groups["game_stuff"])
-        self.image = pygame.Surface(kwargs.get("size", (28, 7)))
+        self.image = items_spawner
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0) + (32 - self.rect.width) // 2
         self.rect.y = kwargs.get("y", 0) + 32 - self.rect.height
@@ -608,7 +612,9 @@ class Spikes(pygame.sprite.Sprite):
 class Ammo(HealingBox):
     def __init__(self, group, **kwargs):
         super(Ammo, self).__init__(group, **kwargs)
-        self.image.fill((150, 150, 150))
+        self.image = ammo
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
 
 
 # Балка
@@ -626,8 +632,7 @@ class Beam(pygame.sprite.Sprite):
 class TeamFlag(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(TeamFlag, self).__init__(groups["game_stuff"])
-        self.image = pygame.Surface(kwargs.get("size", (6, 64)))
-        self.image.fill((150, 100, 150))
+        self.image = team_flag
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0) + 16 - self.image.get_width() // 2
         self.rect.y = kwargs.get("y", 0) + 32
@@ -732,7 +737,7 @@ class Gas(pygame.sprite.Sprite):
 class Door(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(Door, self).__init__(groups["doors"])
-        self.image = pygame.Surface(kwargs.get("size", (24, 64)))
+        self.image = door_closed
         self.image.fill(kwargs.get("color", (100, 100, 100)))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0) + (32 - self.rect.width) // 2
@@ -749,7 +754,10 @@ class Door(pygame.sprite.Sprite):
 
     def update(self):
         self.is_open = True if pygame.sprite.spritecollideany(self, self.players_data) else False
-
+        if self.is_open:
+            self.image = door_open
+        else:
+            self.image = door_closed
         for bullet in self.bullets:
             if (self.rect.colliderect(bullet.rect) and not self.is_open and
                     not bullet.through_the_doors):
@@ -759,19 +767,23 @@ class Door(pygame.sprite.Sprite):
 class HorizontalPlatform(pygame.sprite.Sprite):
     def __init__(self, prototype, class_screen: pygame.Surface, **kwargs):
         super(HorizontalPlatform, self).__init__(prototype.groups_data['platforms'])
+        self.image = platform
+        self.rect = self.image.get_rect()
         self.screen = class_screen
         self.going = True
         self.x = kwargs.get("x", 0)
         self.y = kwargs.get("y", 0)
+        self.rect.x = self.x
+        self.rect.y = self.y
         self.x2 = kwargs.get("x2", 100)
         self.speed = kwargs.get("speed", 0)
         if self.speed < 0:
             self.going = False
         self.list = list()
-        a = WallHorizontal(group=prototype.groups_data['walls_horizontal'], speed=self.speed,
-                           x=self.x + 1, y=self.y, size=(62, 1))
-        self.list.append(a)
-        prototype.horizontal_platforms.append(a)
+        skibidi_wapapa = WallHorizontal(group=prototype.groups_data['walls_horizontal'], speed=self.speed,
+                                        x=self.x + 1, y=self.y, size=(62, 1))
+        self.list.append(skibidi_wapapa)
+        prototype.horizontal_platforms.append(skibidi_wapapa)
         self.list.append(WallHorizontal(group=prototype.groups_data['walls_horizontal'],
                                         x=self.x + 1, y=self.y + 29, size=(62, 1)))
         self.list.append(WallVertical(group=prototype.groups_data['walls_vertical'],
@@ -781,8 +793,9 @@ class HorizontalPlatform(pygame.sprite.Sprite):
 
     def update(self):
         self.list[0].set_speed(self.speed)
-        for platform in self.list:
-            platform.rect.move_ip(self.speed, 0)
+        for amogus in self.list:
+            amogus.rect.move_ip(self.speed, 0)
+        self.rect.move_ip(self.speed, 0)
         if self.going and (self.x2 <= self.list[-1].rect.x):
             self.speed *= -1
             self.going = False
@@ -811,8 +824,8 @@ class VerticalPlatform(pygame.sprite.Sprite):
         self.list.append(WallVertical(group=groups['walls_vertical'], x=self.x + 64, y=self.y + 1, size=(1, 28)))
 
     def update(self):
-        for platform in self.list:
-            platform.rect.move_ip(0, self.speed)
+        for sus in self.list:
+            sus.rect.move_ip(0, self.speed)
         if self.going and (self.y2 <= self.list[-1].rect.y):
             self.speed *= -1
             self.going = False

@@ -63,42 +63,74 @@ class Table:
             sql = f'INSERT INTO {self.name} (id, data) VALUES (?, ?)'
             self.cur.execute(sql, (id, pickle.dumps(data)))
 
-    def put_image(self, id, image: pg.Surface):
-        data = (pg.image.tostring(image, 'RGB'), image.get_size())
+    def put_image(self, id, value: pg.Surface):
+        data = (pg.image.tostring(value, 'RGB'), value.get_size())
         self.put(id, data)
 
     def get_image(self, id):
         dic = self.get(id)
         for key, val in dic.items():
-            image = pg.image.fromstring(val[0], val[1], 'RGB')
-            dic[key] = image
+            value = pg.image.fromstring(val[0], val[1], 'RGB')
+            dic[key] = value
         return dic
 
 
 if __name__ == '__main__':
     DBase('images.db')
-    screen = pg.display.set_mode((400, 400))
-    image1 = pg.image.load("gas_normal.png")
-    image2 = pg.image.load("gas_toxic.png")
-    Table('images').put_image(1, image1)
-    Table('images').put_image(2, image2)
-    DBase().commit()
-    curr_image = image1 = Table('images').get_image(1)[1].convert()
-    image2 = Table('images').get_image(2)[2].convert()
-    image1.set_colorkey('white')
-    image2.set_colorkey('white')
+    screen = pg.display.set_mode((1000, 600))
+    image1 = pg.image.load("data2/SniperRifle bullet.png")
+    Table('images').put_image(59, image1)
+    image1 = pg.image.load("data2/SubMachineGun bullet.png")
+    Table('images').put_image(60, image1)
+    image1 = pg.image.load("data2/MachineGun and SemiAutomaticSniperRifle bullet.png")
+    Table('images').put_image(61, image1)
+    image1 = pg.image.load("data2/On.png")  # Портал
+    Table('images').put_image(62, image1)
+    image1 = pg.image.load("data2/Platform.png")
+    Table('images').put_image(63, image1)
+    image1 = pg.image.load("data2/TeamFlag.png")
+    Table('images').put_image(64, image1)
+    image1 = pg.image.load("data2/Ammo.png")
+    Table('images').put_image(65, image1)
+    image1 = pg.image.load("data2/HealingBox.png")
+    Table('images').put_image(66, image1)
+    image1 = pg.image.load("data2/JasperProtect.png")
+    Table('images').put_image(67, image1)
+    image1 = pg.image.load("data2/VincentPoisonRay.png")
+    Table('images').put_image(68, image1)
+    image1 = pg.image.load("data2/TurretOfGuido.png")
+    Table('images').put_image(69, image1)
+    image1 = pg.image.load("data2/TurretOfGuido bullet.png")
+    Table('images').put_image(70, image1)
+    image1 = pg.image.load("data2/Level Survival.png")
+    Table('images').put_image(71, image1)
+    image1 = pg.image.load("data2/Level TeamFlag.png")
+    Table('images').put_image(72, image1)
+    image1 = pg.image.load("data2/ItemsSpawner.png")
+    Table('images').put_image(73, image1)
+    image1 = pg.image.load("data2/Open.png")
+    Table('images').put_image(74, image1)
+    image1 = pg.image.load("data2/Close.png")
+    Table('images').put_image(75, image1)
+    image1 = pg.image.load("data2/Background factory.png")
+    Table('images').put_image(76, image1)
     flag = True
+    current = 73
+    DBase('images.db').commit()
     while flag:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 flag = False
                 break
             if event.type == pg.KEYDOWN:
-                if event.key == pg.K_RIGHT:
-                    curr_image = image2
-                if event.key == pg.K_LEFT:
-                    curr_image = image1
+                if event.key == pg.K_d or event.key == pg.K_RIGHT:
+                    current += 1
+                    print(current)
+                if event.key == pg.K_a or event.key == pg.K_LEFT:
+                    current -= 1
+                    print(current)
         screen.fill('blue')
-        screen.blit(curr_image, (100, 100))
+        image = Table('images').get_image(current)[current].convert()
+        screen.blit(image, (0, 0))
         pg.display.flip()
     pg.quit()

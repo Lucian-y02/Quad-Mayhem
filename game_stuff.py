@@ -669,11 +669,11 @@ class TeamFlag(pygame.sprite.Sprite):
         self.health_points = kwargs.get("health_points", 1000)
         HealthPointsIndicator(groups["game_stuff"], user=self, max_health_points=1000,
                               size=(96, 3), shift_horizontal=48 - self.rect.width // 2,
-                              shift_vertical=-67)
+                              shift_vertical=4)
         self.time = kwargs.get("time", 1000)
         TimeIndicator(groups["game_stuff"], user=self, max_time=1000,
                       size=(96, 3), shift_horizontal=48 - self.rect.width // 2,
-                      shift_vertical=-73, color=(0, 0, 150))
+                      shift_vertical=8, color=(0, 0, 150))
 
         self.team = kwargs.get("team", "1")  # Чьей команде принадлежит точка
         self.end_function = kwargs.get("end_function", None)  # Функция окончания игровой сессии

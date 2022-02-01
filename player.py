@@ -335,6 +335,8 @@ class Jasper(Player):
         self.name = "Джаспер"
         self.image = jasper_animation[0]
         self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get('x', 0)
+        self.rect.y = kwargs.get('y', 0)
         self.change_direction = False
         self.direction = 'right'
         self.curr = 0
@@ -474,6 +476,8 @@ class Adam(Player):
         self.name = "Адам"
         self.image = adam_animation[0]
         self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get('x', 0)
+        self.rect.y = kwargs.get('y', 0)
         self.change_direction = False
         self.curr = 0
         self.counter = 0
@@ -612,6 +616,8 @@ class Vincent(Player):
         self.name = "Винсенте"
         self.image = vincent_animation[0]
         self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get('x', 0)
+        self.rect.y = kwargs.get('y', 0)
         self.curr = 0
         self.counter = 0
         self.cd = 5
@@ -749,6 +755,8 @@ class Guido(Player):
         self.name = "Гуидо"
         self.image = guido_animation[0]
         self.rect = self.image.get_rect()
+        self.rect.x = kwargs.get('x', 0)
+        self.rect.y = kwargs.get('y', 0)
         self.change_direction = False
         self.cd = 5
         self.counter = 0

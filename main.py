@@ -649,10 +649,9 @@ def controls_choice(result):
 
 
 def add_players_ctf(players, controls, first_team, second_team):
-    print(first_team[0][0], first_team[0][1])
     players_list = list()
     if players[0] == '1':
-        players_list.append(Jasper(prototype.groups_data, x=100, y=100,
+        players_list.append(Jasper(prototype.groups_data, x=first_team[0][0], y=first_team[0][1],
                             controller=controls[0], color="red", team='2', screen=prototype.screen,
                             cool_down=2000, recovery_places=first_team))
     elif players[0] == '2':

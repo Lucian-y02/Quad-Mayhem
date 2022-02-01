@@ -942,8 +942,7 @@ class TurretOfGuido(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(TurretOfGuido, self).__init__(groups["game_stuff"])
         self.user = kwargs.get("user", None)
-        self.image = pygame.Surface(kwargs.get("size", (24, 24)))
-        self.image.fill(kwargs.get("color", (0, 150, 0)))
+        self.image = turret_of_guido
         self.rect = self.image.get_rect()
         self.rect.x = self.user.rect.x
         self.rect.y = self.user.rect.y + self.user.rect.height - self.rect.height

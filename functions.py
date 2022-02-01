@@ -108,6 +108,7 @@ def create_field(level, prototype, name):  # Создание поля
                              weapon_list=[Ammo], cool_down=450, shift=1)
     prototype.teleports1 = teleports1
     prototype.teleports2 = teleports2
+    Background(prototype.groups_data['background'], bg)
     if name == 'FFA':
         HorizontalPlatform(prototype, prototype.screen, x=13 * 32, y=12 * 32, x2=17 * 32, speed=1)
         HorizontalPlatform(prototype, prototype.screen, x=31 * 32, y=7 * 32, x2=34 * 32, speed=1)

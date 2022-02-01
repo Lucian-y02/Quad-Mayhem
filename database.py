@@ -112,6 +112,8 @@ if __name__ == '__main__':
     Table('images').put_image(74, image1)
     image1 = pg.image.load("data2/Close.png")
     Table('images').put_image(75, image1)
+    image1 = pg.image.load("data2/Background factory.png")
+    Table('images').put_image(76, image1)
     flag = True
     current = 73
     DBase('images.db').commit()

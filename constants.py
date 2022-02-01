@@ -60,6 +60,7 @@ ctf_level = Table('images').get_image(72)[72].convert()
 items_spawner = Table('images').get_image(73)[73].convert()
 door_open = Table('images').get_image(74)[74].convert()
 door_closed = Table('images').get_image(75)[75].convert()
+bg = Table('images').get_image(76)[76].convert()
 
 jasper_animation = list()
 adam_animation = list()

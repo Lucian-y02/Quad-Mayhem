@@ -42,6 +42,7 @@ in_but_light = Table('images').get_image(30)[30].convert()
 machine_gun = Table('images').get_image(31)[31].convert()
 sub_machine_gun = Table('images').get_image(32)[32].convert()
 semi_automatic_sniper_rifle = Table('images').get_image(33)[33].convert()
+sniper_rifle = Table('images').get_image(58)[58].convert()
 
 jasper_animation = list()
 adam_animation = list()
@@ -74,6 +75,8 @@ pause_btn.set_colorkey('white')
 machine_gun.set_colorkey('black')
 sub_machine_gun.set_colorkey('black')
 semi_automatic_sniper_rifle.set_colorkey('black')
+sniper_rifle.set_colorkey('black')
+
 images = [normal_gas, toxic_gas]
 
 btn1_coords = (418, 347)

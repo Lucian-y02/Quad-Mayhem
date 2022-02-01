@@ -49,6 +49,7 @@ class Player(pygame.sprite.Sprite):
         self.screen = kwargs.get("screen", None)
         self.team = kwargs.get("team", "0")  # В какой команде находится игрок
         self.speed = kwargs.get("speed", 4)  # Скорость персонажа
+        self.speed_right_now = self.speed  # Скорость в данный момент
         self.max_health_points = kwargs.get("max_health_points", 100)
         self.health_points = self.max_health_points
         self.groups = groups  # Словарь групп српайтов
@@ -83,6 +84,11 @@ class Player(pygame.sprite.Sprite):
         # Показатели смещения
         move_x = 0
         move_y = self.gravity - (self.jump_force if self.jump else 0)
+
+        if self.weapon and self.weapon.bullet_count != 0:
+            self.speed_right_now = self.speed - self.weapon.impact_on_player_speed
+        elif not self.weapon:
+            self.speed_right_now = self.speed
 
         self.stay = False
         # Столкновения
@@ -207,7 +213,7 @@ class Player(pygame.sprite.Sprite):
 
     def joystick_check_pressing(self, move_x, move_y):
         if abs(self.joystick.get_axis(0)) > 0.1:
-            move_x += self.speed * self.joystick.get_axis(0)
+            move_x += self.speed_right_now * self.joystick.get_axis(0)
         if self.joystick.get_button(0) and self.stay:
             move_y -= self.jump_force
             self.stay = False
@@ -237,9 +243,9 @@ class Player(pygame.sprite.Sprite):
     def keyboard_1_check_pressing(self, move_x, move_y):
         key = pygame.key.get_pressed()
         if key[pygame.K_a]:
-            move_x -= self.speed
+            move_x -= self.speed_right_now
         if key[pygame.K_d]:
-            move_x += self.speed
+            move_x += self.speed_right_now
         if key[pygame.K_w] and self.stay:
             move_y -= self.jump_force
             self.stay = False
@@ -269,9 +275,9 @@ class Player(pygame.sprite.Sprite):
     def keyboard_2_check_pressing(self, move_x, move_y):
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:
-            move_x -= self.speed
+            move_x -= self.speed_right_now
         if key[pygame.K_RIGHT]:
-            move_x += self.speed
+            move_x += self.speed_right_now
         if key[pygame.K_UP] and self.stay:
             move_y -= self.jump_force
             self.stay = False
@@ -298,7 +304,7 @@ class Player(pygame.sprite.Sprite):
                 self.grab_timer = 20
         return move_x, move_y
 
-    # Возрождение
+        # Возрождение
     def recovery(self):
         self.health_points = self.max_health_points
         chosen_place = choice(self.recovery_places)  # Выбранное место возраждения
@@ -310,12 +316,12 @@ class Player(pygame.sprite.Sprite):
         self.jump = False
         self.on_beam = False
 
-    # Способность
+        # Способность
     def ability(self):
         print("ABILITY!!!")
         self.time = 1
 
-    # Отдача от оружия
+        # Отдача от оружия
     def recoil(self, recoil_force):
         self.rect.move_ip(recoil_force, 0)
 
@@ -329,6 +335,8 @@ class Jasper(Player):
         self.change_direction = False
         self.direction = 'right'
         self.curr = 0
+        self.counter = 0
+        self.cd = 5
 
     def ability(self):
         self.immortal = True
@@ -336,14 +344,22 @@ class Jasper(Player):
         self.ability_recovery = 0
         self.protect = JasperProtect(self.groups, user=self)
 
+    def update(self):
+        super(Jasper, self).update()
+        if self.curr > 4:
+            self.curr = 0
+        self.counter += 1
+        if self.counter == 6:
+            self.counter = 0
+        self.image = jasper_animation[self.curr]
+        if self.mirror:
+            self.image = pygame.transform.flip(self.image, True, False)
+
     def joystick_check_pressing(self, move_x, move_y):
-        if self.joystick.get_axis(0) > 0.1:
-            self.direction = 'left'
-        elif self.joystick.get_axis(0) < 0.1:
-            self.direction = 'right'
         if abs(self.joystick.get_axis(0)) > 0.1:
-            self.curr += 1
-            move_x += self.speed * self.joystick.get_axis(0)
+            move_x += self.speed_right_now * self.joystick.get_axis(0)
+            if self.counter == self.cd:
+                self.curr += 1
         else:
             self.curr = 0
         if self.joystick.get_button(0) and self.stay:
@@ -372,24 +388,16 @@ class Jasper(Player):
                 self.grab_timer = 20
         return move_x, move_y
 
-    def update(self):
-        super(Jasper, self).update()
-        if self.curr > 4:
-            self.curr = 0
-        self.image = jasper_animation[self.curr]
-        if self.mirror:
-            self.image = pygame.transform.flip(self.image, True, False)
-
     def keyboard_1_check_pressing(self, move_x, move_y):
         key = pygame.key.get_pressed()
         if key[pygame.K_a]:
-            self.change_direction = True
-            move_x -= self.speed
-            self.curr += 1
+            move_x -= self.speed_right_now
+            if self.counter == self.cd:
+                self.curr += 1
         elif key[pygame.K_d]:
-            self.change_direction = False
-            move_x += self.speed
-            self.curr += 1
+            move_x += self.speed_right_now
+            if self.counter == self.cd:
+                self.curr += 1
         else:
             self.curr = 0
         if key[pygame.K_w] and self.stay:
@@ -421,16 +429,13 @@ class Jasper(Player):
     def keyboard_2_check_pressing(self, move_x, move_y):
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:
-            move_x -= self.speed
-            self.curr += 1
-            if self.curr > 4:
-                self.curr = 0
-            self.change_direction = True
+            move_x -= self.speed_right_now
+            if self.counter == self.cd:
+                self.curr += 1
         elif key[pygame.K_RIGHT]:
-            move_x += self.speed
-            self.change_direction = False
-            self.curr += 1
-
+            move_x += self.speed_right_now
+            if self.counter == self.cd:
+                self.curr += 1
         else:
             self.curr = 0
         if key[pygame.K_UP] and self.stay:
@@ -468,6 +473,8 @@ class Adam(Player):
         self.rect = self.image.get_rect()
         self.change_direction = False
         self.curr = 0
+        self.counter = 0
+        self.cd = 5
         self.direction = 'right'
 
     def ability(self):
@@ -475,14 +482,22 @@ class Adam(Player):
             self.time = 1
             self.weapon.bullet_count = self.weapon.bullet_count_max
 
+    def update(self):
+        super(Adam, self).update()
+        if self.curr > 4:
+            self.curr = 0
+        self.counter += 1
+        if self.counter == 6:
+            self.counter = 0
+        self.image = adam_animation[self.curr]
+        if self.mirror:
+            self.image = pygame.transform.flip(self.image, True, False)
+
     def joystick_check_pressing(self, move_x, move_y):
-        if self.joystick.get_axis(0) > 0.1:
-            self.direction = 'left'
-        elif self.joystick.get_axis(0) < 0.1:
-            self.direction = 'right'
         if abs(self.joystick.get_axis(0)) > 0.1:
-            self.curr += 1
-            move_x += self.speed * self.joystick.get_axis(0)
+            move_x += self.speed_right_now * self.joystick.get_axis(0)
+            if self.counter == self.cd:
+                self.curr += 1
         else:
             self.curr = 0
         if self.joystick.get_button(0) and self.stay:
@@ -511,24 +526,16 @@ class Adam(Player):
                 self.grab_timer = 20
         return move_x, move_y
 
-    def update(self):
-        super(Adam, self).update()
-        if self.curr > 4:
-            self.curr = 0
-        self.image = adam_animation[self.curr]
-        if self.mirror:
-            self.image = pygame.transform.flip(self.image, True, False)
-
     def keyboard_1_check_pressing(self, move_x, move_y):
         key = pygame.key.get_pressed()
         if key[pygame.K_a]:
-            self.change_direction = True
-            move_x -= self.speed
-            self.curr += 1
+            move_x -= self.speed_right_now
+            if self.counter == self.cd:
+                self.curr += 1
         elif key[pygame.K_d]:
-            self.change_direction = False
-            move_x += self.speed
-            self.curr += 1
+            move_x += self.speed_right_now
+            if self.counter == self.cd:
+                self.curr += 1
         else:
             self.curr = 0
         if key[pygame.K_w] and self.stay:
@@ -560,16 +567,13 @@ class Adam(Player):
     def keyboard_2_check_pressing(self, move_x, move_y):
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:
-            move_x -= self.speed
-            self.curr += 1
-            if self.curr > 4:
-                self.curr = 0
-            self.change_direction = True
+            move_x -= self.speed_right_now
+            if self.counter == self.cd:
+                self.curr += 1
         elif key[pygame.K_RIGHT]:
-            move_x += self.speed
-            self.change_direction = False
-            self.curr += 1
-
+            move_x += self.speed_right_now
+            if self.counter == self.cd:
+                self.curr += 1
         else:
             self.curr = 0
         if key[pygame.K_UP] and self.stay:
@@ -606,6 +610,8 @@ class Vincent(Player):
         self.image = vincent_animation[0]
         self.rect = self.image.get_rect()
         self.curr = 0
+        self.counter = 0
+        self.cd = 5
         self.change_direction = False
         self.direction = 'right'
 
@@ -613,14 +619,22 @@ class Vincent(Player):
         self.time = 1
         VincentPoisonRay(self.groups, user=self)
 
+    def update(self):
+        super(Vincent, self).update()
+        if self.curr > 4:
+            self.curr = 0
+        self.counter += 1
+        if self.counter == 6:
+            self.counter = 0
+        self.image = vincent_animation[self.curr]
+        if self.mirror:
+            self.image = pygame.transform.flip(self.image, True, False)
+
     def joystick_check_pressing(self, move_x, move_y):
-        if self.joystick.get_axis(0) > 0.1:
-            self.direction = 'left'
-        elif self.joystick.get_axis(0) < 0.1:
-            self.direction = 'right'
         if abs(self.joystick.get_axis(0)) > 0.1:
-            self.curr += 1
-            move_x += self.speed * self.joystick.get_axis(0)
+            move_x += self.speed_right_now * self.joystick.get_axis(0)
+            if self.counter == self.cd:
+                self.curr += 1
         else:
             self.curr = 0
         if self.joystick.get_button(0) and self.stay:
@@ -649,24 +663,16 @@ class Vincent(Player):
                 self.grab_timer = 20
         return move_x, move_y
 
-    def update(self):
-        super(Vincent, self).update()
-        if self.curr > 4:
-            self.curr = 0
-        self.image = vincent_animation[self.curr]
-        if self.mirror:
-            self.image = pygame.transform.flip(self.image, True, False)
-
     def keyboard_1_check_pressing(self, move_x, move_y):
         key = pygame.key.get_pressed()
         if key[pygame.K_a]:
-            self.change_direction = True
-            move_x -= self.speed
-            self.curr += 1
+            move_x -= self.speed_right_now
+            if self.counter == self.cd:
+                self.curr += 1
         elif key[pygame.K_d]:
-            self.change_direction = False
-            move_x += self.speed
-            self.curr += 1
+            move_x += self.speed_right_now
+            if self.counter == self.cd:
+                self.curr += 1
         else:
             self.curr = 0
         if key[pygame.K_w] and self.stay:
@@ -698,16 +704,13 @@ class Vincent(Player):
     def keyboard_2_check_pressing(self, move_x, move_y):
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:
-            move_x -= self.speed
-            self.curr += 1
-            if self.curr > 4:
-                self.curr = 0
-            self.change_direction = True
+            move_x -= self.speed_right_now
+            if self.counter == self.cd:
+                self.curr += 1
         elif key[pygame.K_RIGHT]:
-            move_x += self.speed
-            self.change_direction = False
-            self.curr += 1
-
+            move_x += self.speed_right_now
+            if self.counter == self.cd:
+                self.curr += 1
         else:
             self.curr = 0
         if key[pygame.K_UP] and self.stay:
@@ -744,6 +747,8 @@ class Guido(Player):
         self.image = guido_animation[0]
         self.rect = self.image.get_rect()
         self.change_direction = False
+        self.cd = 5
+        self.counter = 0
         self.direction = 'right'
         self.curr = 0
 
@@ -751,14 +756,22 @@ class Guido(Player):
         self.time = 1
         TurretOfGuido(self.groups, user=self)
 
+    def update(self):
+        super(Guido, self).update()
+        if self.curr > 4:
+            self.curr = 0
+        self.counter += 1
+        if self.counter == 6:
+            self.counter = 0
+        self.image = guido_animation[self.curr]
+        if self.mirror:
+            self.image = pygame.transform.flip(self.image, True, False)
+
     def joystick_check_pressing(self, move_x, move_y):
-        if self.joystick.get_axis(0) > 0.1:
-            self.direction = 'left'
-        elif self.joystick.get_axis(0) < 0.1:
-            self.direction = 'right'
         if abs(self.joystick.get_axis(0)) > 0.1:
-            self.curr += 1
-            move_x += self.speed * self.joystick.get_axis(0)
+            move_x += self.speed_right_now * self.joystick.get_axis(0)
+            if self.counter == self.cd:
+                self.curr += 1
         else:
             self.curr = 0
         if self.joystick.get_button(0) and self.stay:
@@ -787,24 +800,16 @@ class Guido(Player):
                 self.grab_timer = 20
         return move_x, move_y
 
-    def update(self):
-        super(Guido, self).update()
-        if self.curr > 4:
-            self.curr = 0
-        self.image = guido_animation[self.curr]
-        if self.mirror:
-            self.image = pygame.transform.flip(self.image, True, False)
-
     def keyboard_1_check_pressing(self, move_x, move_y):
         key = pygame.key.get_pressed()
         if key[pygame.K_a]:
-            self.change_direction = True
-            move_x -= self.speed
-            self.curr += 1
+            move_x -= self.speed_right_now
+            if self.counter == self.cd:
+                self.curr += 1
         elif key[pygame.K_d]:
-            self.change_direction = False
-            move_x += self.speed
-            self.curr += 1
+            move_x += self.speed_right_now
+            if self.counter == self.cd:
+                self.curr += 1
         else:
             self.curr = 0
         if key[pygame.K_w] and self.stay:
@@ -836,15 +841,13 @@ class Guido(Player):
     def keyboard_2_check_pressing(self, move_x, move_y):
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:
-            move_x -= self.speed
-            self.curr += 1
-            if self.curr > 4:
-                self.curr = 0
-            self.change_direction = True
+            move_x -= self.speed_right_now
+            if self.counter == self.cd:
+                self.curr += 1
         elif key[pygame.K_RIGHT]:
-            move_x += self.speed
-            self.change_direction = False
-            self.curr += 1
+            move_x += self.speed_right_now
+            if self.counter == self.cd:
+                self.curr += 1
         else:
             self.curr = 0
         if key[pygame.K_UP] and self.stay:

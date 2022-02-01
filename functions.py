@@ -86,7 +86,9 @@ def create_field(level, prototype, name):  # Создание поля
             elif b == 'х':
                 t.platform_bottom(prototype.groups_data, x=row * 32, y=col * 32)
             elif b == '1':
-                ItemsSpawner(prototype.groups_data, x=row * 32, y=col * 32)
+                ItemsSpawner(prototype.groups_data, x=row * 32, y=col * 32,
+                             weapon_list=[SniperRifle, SemiAutomaticSniperRifle, SemiAutomaticSniperRifle,
+                                          MachineGun, MachineGun, SubMachineGun, SubMachineGun, SubMachineGun])
             elif b == '2':
                 Ammo(prototype.groups_data, x=row * 32, y=col * 32)
             elif b == '3':
@@ -99,14 +101,14 @@ def create_field(level, prototype, name):  # Создание поля
                 TeamFlag(prototype.groups_data, x=row * 32, y=col * 32, team='1')
             elif b == '7':
                 Door(prototype.groups_data, x=row * 32, y=col * 32)
-
+            elif b == '8':
+                ItemsSpawner(prototype.groups_data, x=row * 32, y=col * 32, weapon_list=[HealingBox])
+            elif b == '9':
+                ItemsSpawner(prototype.groups_data, x=row * 32, y=col * 32, weapon_list=[Ammo])
     prototype.teleports1 = teleports1
     prototype.teleports2 = teleports2
     if name == 'FFA':
-        HorizontalPlatform(prototype, prototype.screen, x=11 * 32, y=6 * 32, x2=16 * 32, speed=1)
-        HorizontalPlatform(prototype, prototype.screen, x=35 * 32, y=6 * 32, x2=30 * 32, speed=-1)
-        HorizontalPlatform(prototype, prototype.screen, x=12 * 32, y=10 * 32, x2=17 * 32, speed=1)
-        HorizontalPlatform(prototype, prototype.screen, x=34 * 32, y=10 * 32, x2=29 * 32, speed=-1)
+        HorizontalPlatform(prototype, prototype.screen, x=13 * 32, y=12 * 32, x2=17 * 32, speed=1)
         shuffle(spots)
         return spots
     elif name == 'CTF':
@@ -120,6 +122,6 @@ def create_field(level, prototype, name):  # Создание поля
 def load_level(filename):
     with open(filename, 'r', encoding='utf8') as f:
         level = f.readlines()
-        for i in range(len(level)):
-            level[i] = ''.join(level[i].strip('\n ').split())
+        for h in range(len(level)):
+            level[h] = ''.join(level[h].strip('\n ').split())
     return level

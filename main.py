@@ -613,7 +613,7 @@ def controls_choice(result):
                             return ret
             if event.type == pygame.MOUSEMOTION:
                 mouse.update(event.pos[0], event.pos[1])
-        if all(result.values()) and flag:
+        if all(ret.values()) and flag:
             flag = False
             start = Button(start_btn, draw_group, x=534, y=585)
         for e in wasd_btns:
@@ -647,13 +647,14 @@ def controls_choice(result):
 
 
 def add_players_ctf(players, controls, first_team, second_team):
+    print(first_team[0][0], first_team[0][1])
     players_list = list()
     if players[0] == '1':
-        players_list.append(Jasper(prototype.groups_data, x=first_team[0][0], y=first_team[0][1],
+        players_list.append(Jasper(prototype.groups_data, x=100, y=100,
                             controller=controls[0], color="red", team='2', screen=prototype.screen,
                             cool_down=2000, recovery_places=first_team))
     elif players[0] == '2':
-        players_list.append(Jasper(prototype.groups_data, x=second_team[0][0], y=second_team[0][1],
+        players_list.append(Jasper(prototype.groups_data, x=100, y=100,
                             controller=controls[0], color="red", team='1', screen=prototype.screen,
                             cool_down=2000, recovery_places=second_team))
 

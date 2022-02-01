@@ -80,6 +80,9 @@ class Player(pygame.sprite.Sprite):
         self.time = 1
         self.ability_recovery = kwargs.get("ability_recovery", 1)  # Скорость восстановления
 
+        if self.mirror:
+            self.image = pygame.transform.flip(self.image, True, False)
+
     def update(self):
         # Показатели смещения
         move_x = 0

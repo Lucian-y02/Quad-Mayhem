@@ -51,7 +51,8 @@ class CTF:
             "health_indicators": pygame.sprite.Group(),
             "healing_boxes": pygame.sprite.Group(),
             "game_stuff": pygame.sprite.Group(),
-            "doors": pygame.sprite.Group()
+            "doors": pygame.sprite.Group(),
+            "teleports": pygame.sprite.Group()
         }
         self.stop = False
         self.gas = list()
@@ -190,6 +191,10 @@ class FFA:
         self.game_run = True
         self.gas = list()
 
+        self.pixel_font = pygame.font.Font("PixelFont.ttf", 56)
+        self.final_text = "The end"
+        self.draw_final_text = False
+
         self.grid = False
 
         self.game_run = True
@@ -219,7 +224,8 @@ class FFA:
             "health_indicators": pygame.sprite.Group(),
             "healing_boxes": pygame.sprite.Group(),
             "game_stuff": pygame.sprite.Group(),
-            "doors": pygame.sprite.Group()
+            "doors": pygame.sprite.Group(),
+            "teleports": pygame.sprite.Group()
         }
         self.stop = False
 
@@ -231,6 +237,9 @@ class FFA:
         self.groups_data[name] = pygame.sprite.Group()
 
     def check_event(self):
+        if len(self.groups_data["players"]) == 1:
+            for hero in self.groups_data["players"]:
+                self.end_of_game_session(f"{hero.__class__.__name__} win!")
         if not self.stop:
             for key in self.groups_data:
                 self.groups_data[key].update()
@@ -313,6 +322,9 @@ class FFA:
                 gas.duration -= 1
                 if gas.duration == 0:
                     gas.kill()
+            if self.draw_final_text:
+                self.screen.blit(self.pixel_font.render(self.final_text, False, (10, 10, 10)),
+                                 (self.width // 2 - 96, self.height // 2))
         elif self.stop:
             self.screen.blit(pause, (384, 184))
 
@@ -331,6 +343,17 @@ class FFA:
             pygame.draw.line(self.screen, (0, 0, 200), (32 * j, 0), (32 * j, self.height))
         for g in range(self.height // 32):
             pygame.draw.line(self.screen, (0, 0, 200), (0, 32 * g), (self.width + 64, 32 * g))
+
+    def end_of_game_session(self, final_text):
+        for key in self.groups_data:
+            for game_obj in self.groups_data[key]:
+                game_obj.kill()
+        for tt in self.teleports1:
+            tt.kill()
+        for kk in self.teleports2:
+            kk.kill()
+        self.final_text = final_text
+        self.draw_final_text = True
 
 
 def menu():
@@ -720,7 +743,7 @@ if __name__ == '__main__':
         if mode == 'FFA':
             heroes = hero_choice_ffa()
             control = controls_choice(heroes)
-            prototype = FFA()
+            prototype = FFA(size=(1280, 800))
             spots = create_field(load_level('levelffa.txt'), prototype, 'FFA')
             player = add_players_ffa(heroes, control, spots)
             prototype.add_players(player)
@@ -728,7 +751,7 @@ if __name__ == '__main__':
         else:
             heroes = hero_choice_ctf()
             control = controls_choice(heroes)
-            prototype = CTF()
+            prototype = CTF(size=(1280, 800))
             team1, team2 = create_field(load_level('levelctf.txt'), prototype, 'CTF')
             player = add_players_ctf(heroes, control, team1, team2)
             prototype.add_players(player)

@@ -436,7 +436,6 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self, groups: dict, **kwargs):
         super(Bullet, self).__init__(groups["bullets"])
         self.image = kwargs.get("bullet_image", None)
-        self.image.fill(kwargs.get("color", (150, 150, 150)))
         self.rect = self.image.get_rect()
         self.rect.x = kwargs.get("x", 0)
         self.rect.y = kwargs.get("y", 0)

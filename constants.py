@@ -8,6 +8,7 @@ FPS = 60
 bg_color = 200, 200, 200
 screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 pygame.display.set_caption("Quad Mayhem")
+
 DBase('images.db')
 normal_gas = Table('images').get_image(1)[1].convert()
 toxic_gas = Table('images').get_image(2)[2].convert()
@@ -61,6 +62,8 @@ items_spawner = Table('images').get_image(73)[73].convert()
 door_open = Table('images').get_image(74)[74].convert()
 door_closed = Table('images').get_image(75)[75].convert()
 bg = Table('images').get_image(76)[76].convert()
+menu_bg = Table('images').get_image(77)[77].convert()
+cur = Table('images').get_image(78)[78].convert()
 
 jasper_animation = list()
 adam_animation = list()
@@ -105,7 +108,7 @@ platform.set_colorkey('black')
 items_spawner.set_colorkey('black')
 door_open.set_colorkey('black')
 door_closed.set_colorkey('black')
-
+cur.set_colorkey('black')
 
 images = [normal_gas, toxic_gas]
 

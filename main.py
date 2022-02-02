@@ -11,7 +11,6 @@ import pygame
 
 class CTF:
     def __init__(self, **kwargs):
-        self.size = size
         self.width, self.height = width, height
         self.FPS = FPS
         self.bg_color = bg_color
@@ -358,12 +357,14 @@ class FFA:
 
 def menu():
     screen.fill((200, 200, 200))
-    play_btn_coords = (400, 200)
-    quit_btn_coords = (800, 200)
-    screen.blit(play_btn, play_btn_coords)
-    screen.blit(quit_btn, quit_btn_coords)
     clock = pygame.time.Clock()
     running = True
+    current = 1
+    cur.set_colorkey('black')
+    coord = (400, 245)
+    move_y = 65
+    move_x = 0
+    timer = 20
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT or \
@@ -371,12 +372,34 @@ def menu():
                 sys.exit(pygame.quit())
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 coords = event.pos
-                if play_btn_coords[0] < coords[0] < play_btn_coords[0] + 200 and \
-                        play_btn_coords[1] < coords[1] < play_btn_coords[1] + 60:
-                    return 0
-                elif quit_btn_coords[0] < coords[0] < quit_btn_coords[0] + 200 and \
-                        quit_btn_coords[1] < coords[1] < quit_btn_coords[1] + 60:
-                    sys.exit(pygame.quit())
+                print(coords)
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                    current += 1
+                elif event.key == pygame.K_UP or event.key == pygame.K_w:
+                    current -= 1
+
+                if current < 1:
+                    current = 3
+                elif current > 3:
+                    current = 1
+
+                if event.key == pygame.K_RETURN:
+                    if current == 1:
+                        return False
+                    elif current == 2:
+                        return True
+                    elif current == 3:
+                        sys.exit(pygame.quit())
+        screen.blit(menu_bg, (0, 0))
+        timer -= 1
+        if timer == 0:
+            timer = 20
+            if move_x == 0:
+                move_x = -10
+            elif move_x == -10:
+                move_x = 0
+        screen.blit(cur, (coord[0] + move_x, coord[1] + move_y * current))
         pygame.display.flip()
         clock.tick(60)
 

@@ -118,6 +118,12 @@ if __name__ == '__main__':
     Table('images').put_image(77, image1)
     image1 = pg.image.load("data/cursor.png")
     Table('images').put_image(78, image1)
+    image1 = pg.image.load("data/modechoice1.png")
+    Table('images').put_image(79, image1)
+    image1 = pg.image.load("data/modechoice2.png")
+    Table('images').put_image(80, image1)
+    image1 = pg.image.load("data/modechoice3.png")
+    Table('images').put_image(81, image1)
     flag = True
     current = 73
     DBase('images.db').commit()

@@ -406,12 +406,9 @@ def menu():
 
 def mode_choice():
     screen.fill((200, 200, 200))
-    ffa_btn_coords = (400, 200)
-    ctf_btn_coords = (800, 200)
-    screen.blit(ffa_btn, ffa_btn_coords)
-    screen.blit(ctf_btn, ctf_btn_coords)
     clock = pygame.time.Clock()
     running = True
+    curr_image = mch1
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT or \
@@ -419,12 +416,21 @@ def mode_choice():
                 sys.exit(pygame.quit())
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 coords = event.pos
-                if ffa_btn_coords[0] < coords[0] < ffa_btn_coords[0] + 200 and \
-                        ffa_btn_coords[1] < coords[1] < ffa_btn_coords[1] + 60:
-                    return 'FFA'
-                elif ctf_btn_coords[0] < coords[0] < ctf_btn_coords[0] + 200 and \
-                        ctf_btn_coords[1] < coords[1] < ctf_btn_coords[1] + 60:
+                if 0 < coords[0] < 640 and 0 < coords[1] < 800:
                     return 'CTF'
+                elif 640 < coords[0] < 1280 and 0 < coords[1] < 800:
+                    return 'FFA'
+                else:
+                    pass
+            elif event.type == pygame.MOUSEMOTION:
+                coords = event.pos
+                if 0 < coords[0] < 640 and 0 < coords[1] < 800:
+                    curr_image = mch2
+                elif 640 < coords[0] < 1280 and 0 < coords[1] < 800:
+                    curr_image = mch3
+                else:
+                    curr_image = mch1
+        screen.blit(curr_image, (0, 0))
         pygame.display.flip()
         clock.tick(60)
 

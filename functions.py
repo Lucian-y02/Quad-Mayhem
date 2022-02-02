@@ -119,7 +119,7 @@ def create_field(level, prototype, name):  # Создание поля
         HorizontalPlatform(prototype, prototype.screen, x=9 * 32, y=11 * 32, x2=13 * 32, speed=1)
         shuffle(team1)
         shuffle(team2)
-        TeamFlag(prototype.groups_data, x=32 * 26, y=32 * 8 + 20)
+        TeamFlag(prototype.groups_data, x=32 * 26, y=32 * 9 + 20)
         Background(prototype.groups_data['background'], ctf_level)
         return team1, team2
 
